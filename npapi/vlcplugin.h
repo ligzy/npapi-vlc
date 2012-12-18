@@ -34,6 +34,12 @@
 #endif
 
 #if defined(XP_UNIX)
+#   define WINDOWLESS
+#   include "vlcwindowless_X11.h"
+    typedef VlcWindowlessX11 VlcWindowless;
+#endif
+
+#if defined(XP_UNIX)
 #   if defined(USE_GTK)
 #       include "vlcplugin_gtk.h"
         typedef class VlcPluginGtk VlcPlugin;

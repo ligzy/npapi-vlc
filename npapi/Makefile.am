@@ -69,6 +69,10 @@ SOURCES_support = \
 	vlcplugin_xcb.h
 endif # !USE_GTK
 
+SOURCES_support += \
+	vlcwindowless_X11.cpp \
+	vlcwindowless_X11.h
+
 else # Win32
 
 # Under Win32|Mac, Mozilla plugins need to be named NP******.DLL, but under Unix
