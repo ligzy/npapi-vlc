@@ -97,6 +97,10 @@ public:
     int      b_stream;
     char *   psz_target;
 
+    void playlist_toggle_play_pause()
+    {
+        playlist_isplaying() ? playlist_pause() : playlist_play();
+    }
     void playlist_play()
     {
         get_player().play();
