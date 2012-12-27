@@ -23,6 +23,7 @@
 
 #include "vlcplugin_gtk.h"
 #include <gdk/gdkx.h>
+#include <gdk/gdkkeysyms.h>
 #include <cstring>
 
 static uint32_t get_xid(GtkWidget *widget)
@@ -358,6 +359,19 @@ static void fullscreen_win_visibility_handler(GtkWidget *widget, gpointer user_d
     plugin->do_set_fullscreen(gtk_widget_get_visible(widget));
 }
 
+static gboolean fullscreen_win_keypress_handler(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+    VlcPluginGtk *plugin = (VlcPluginGtk *) user_data;
+    switch (event->keyval)
+    {
+    case GDK_KEY_Escape:
+        plugin->set_fullscreen(false);
+        return True;
+    default:
+        return False;
+    }
+}
+
 void VlcPluginGtk::update_controls()
 {
     if (get_player().is_open()) {
@@ -445,6 +459,7 @@ bool VlcPluginGtk::create_windows()
     g_signal_connect(G_OBJECT(fullscreen_win), "delete-event", G_CALLBACK(gtk_widget_hide_on_delete), this);
     g_signal_connect(G_OBJECT(fullscreen_win), "show", G_CALLBACK(fullscreen_win_visibility_handler), this);
     g_signal_connect(G_OBJECT(fullscreen_win), "hide", G_CALLBACK(fullscreen_win_visibility_handler), this);
+    g_signal_connect(G_OBJECT(fullscreen_win), "key_press_event", G_CALLBACK(fullscreen_win_keypress_handler), this);
 
     /* actual video window */
     /* libvlc is handed this window's xid. A raw X window is used because
