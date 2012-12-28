@@ -195,6 +195,14 @@ bool vlc_player::play(unsigned int idx)
 void vlc_player::pause()
 {
     if( is_open() ) {
+        libvlc_media_player_set_pause(_mp, true);
+        on_player_action(pa_pause);
+    }
+}
+
+void vlc_player::togglePause()
+{
+    if( is_open() ) {
         libvlc_media_list_player_pause(_ml_p);
         on_player_action(pa_pause);
     }

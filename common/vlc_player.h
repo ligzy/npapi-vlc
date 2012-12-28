@@ -58,6 +58,7 @@ public:
     void play();
     bool play(unsigned int idx);
     void pause();
+    void togglePause();
     void stop();
 
     bool next();

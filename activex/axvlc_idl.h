@@ -1486,6 +1486,9 @@ interface IVLCPlaylist : public IDispatch
     virtual HRESULT STDMETHODCALLTYPE playItem(
         long itemId) = 0;
 
+    virtual HRESULT STDMETHODCALLTYPE pause(
+        ) = 0;
+
     virtual HRESULT STDMETHODCALLTYPE togglePause(
         ) = 0;
 
@@ -1577,6 +1580,9 @@ typedef struct IVLCPlaylistVtbl {
         IVLCPlaylist* This,
         long itemId);
 
+    HRESULT (STDMETHODCALLTYPE *pause(
+        IVLCPlaylist* This);
+
     HRESULT (STDMETHODCALLTYPE *togglePause)(
         IVLCPlaylist* This);
 
@@ -1622,6 +1628,7 @@ interface IVLCPlaylist {
 #define IVLCPlaylist_add(This,uri,name,options,itemId) (This)->lpVtbl->add(This,uri,name,options,itemId)
 #define IVLCPlaylist_play(This) (This)->lpVtbl->play(This)
 #define IVLCPlaylist_playItem(This,itemId) (This)->lpVtbl->playItem(This,itemId)
+#define IVLCPlaylist_pause(This) (This)->lpVtbl->pause(This)
 #define IVLCPlaylist_togglePause(This) (This)->lpVtbl->togglePause(This)
 #define IVLCPlaylist_stop(This) (This)->lpVtbl->stop(This)
 #define IVLCPlaylist_next(This) (This)->lpVtbl->next(This)
@@ -1671,6 +1678,13 @@ HRESULT STDMETHODCALLTYPE IVLCPlaylist_playItem_Proxy(
     IVLCPlaylist* This,
     long itemId);
 void __RPC_STUB IVLCPlaylist_playItem_Stub(
+    IRpcStubBuffer* This,
+    IRpcChannelBuffer* pRpcChannelBuffer,
+    PRPC_MESSAGE pRpcMessage,
+    DWORD* pdwStubPhase);
+HRESULT STDMETHODCALLTYPE IVLCPlaylist_pause_Proxy(
+    IVLCPlaylist* This);
+void __RPC_STUB IVLCPlaylist_pause_Stub(
     IRpcStubBuffer* This,
     IRpcChannelBuffer* pRpcChannelBuffer,
     PRPC_MESSAGE pRpcMessage,

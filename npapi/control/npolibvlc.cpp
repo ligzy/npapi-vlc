@@ -876,6 +876,7 @@ const NPUTF8 * const LibvlcPlaylistNPObject::methodNames[] =
     "add",
     "play",
     "playItem",
+    "pause",
     "togglePause",
     "stop",
     "next",
@@ -890,6 +891,7 @@ enum LibvlcPlaylistNPObjectMethodIds
     ID_playlist_add,
     ID_playlist_play,
     ID_playlist_playItem,
+    ID_playlist_pause,
     ID_playlist_togglepause,
     ID_playlist_stop,
     ID_playlist_next,
@@ -1013,10 +1015,18 @@ LibvlcPlaylistNPObject::invoke(int index, const NPVariant *args,
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
-            case ID_playlist_togglepause:
+            case ID_playlist_pause:
                 if( argCount == 0 )
                 {
                     p_plugin->playlist_pause();
+                    VOID_TO_NPVARIANT(result);
+                    return INVOKERESULT_NO_ERROR;
+                }
+                return INVOKERESULT_NO_SUCH_METHOD;
+            case ID_playlist_togglepause:
+                if( argCount == 0 )
+                {
+                    p_plugin->playlist_togglePause();
                     VOID_TO_NPVARIANT(result);
                     return INVOKERESULT_NO_ERROR;
                 }

@@ -267,6 +267,7 @@ public:
     STDMETHODIMP add(BSTR, VARIANT, VARIANT, long*);
     STDMETHODIMP play();
     STDMETHODIMP playItem(long);
+    STDMETHODIMP pause();
     STDMETHODIMP togglePause();
     STDMETHODIMP stop();
     STDMETHODIMP next();

@@ -365,7 +365,7 @@ static gboolean fullscreen_win_keypress_handler(GtkWidget *widget, GdkEventKey *
     switch (event->keyval)
     {
     case GDK_KEY_space:
-        plugin->playlist_toggle_play_pause();
+        plugin->playlist_togglePause();
         return True;
     case GDK_KEY_Escape:
         plugin->set_fullscreen(false);

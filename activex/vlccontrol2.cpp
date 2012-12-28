@@ -557,9 +557,15 @@ STDMETHODIMP VLCPlaylist::playItem(long item)
     return S_OK;
 };
 
-STDMETHODIMP VLCPlaylist::togglePause()
+STDMETHODIMP VLCPlaylist::pause()
 {
     Instance()->get_player().pause();
+    return S_OK;
+};
+
+STDMETHODIMP VLCPlaylist::togglePause()
+{
+    Instance()->get_player().togglePause();
     return S_OK;
 };
 
