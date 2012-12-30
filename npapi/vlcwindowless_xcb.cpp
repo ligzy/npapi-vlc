@@ -101,8 +101,9 @@ bool VlcWindowlessXCB::handle_event(void *event)
 
         drawBackground(xgeevent->drawable);
 
-        /* Validate video size */
-        if (m_media_width == 0 || m_media_height == 0)
+        /* Validate video buffer size */
+        if (m_frame_buf.empty() ||
+            m_frame_buf.size() < m_media_width * m_media_height * DEF_PIXEL_BYTES)
             break;
 
         /* Compute the position of the video */
