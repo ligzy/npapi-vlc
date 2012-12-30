@@ -847,7 +847,7 @@ NP_Initialize(NPNetscapeFuncs* nsTable, NPPluginFuncs* pluginFuncs)
             err = NPERR_INCOMPATIBLE_VERSION_ERROR;
         if (nsTable->size < ((char *)&nsTable->posturlnotify - (char *)nsTable))
             err = NPERR_INVALID_FUNCTABLE_ERROR;
-        if (pluginFuncs->size < sizeof(NPPluginFuncs))
+        if (pluginFuncs->size < (char *)&pluginFuncs->setvalue - (char *)pluginFuncs)
             err = NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
