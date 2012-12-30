@@ -209,7 +209,7 @@ AM_CONDITIONAL(FETCH_NPAPI, [ test "${have_headers}" != "true" ])
 
 dnl
 dnl check the const-ness of GetMIMEDesc, since it changed in latest npapi headers
-AC_MSG_CHECKING([if NPP_GetMIMEDescription() returns const])
+AC_MSG_CHECKING([if NP_GetMIMEDescription() returns const])
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([
    #ifdef WIN32
    # define XP_WIN 1
@@ -221,13 +221,14 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([
    #endif
    #include <stdint.h>
    #include <npapi.h>
-  char *NPP_GetMIMEDescription(void);
+   #include <npfunctions.h>
+  char *NP_GetMIMEDescription(void);
 ])],[
   AC_MSG_RESULT(no)
-  AC_DEFINE(NPP_GET_MIME_CONST, [], [Whether NPP_GetMIMEDescription returns const])
+  AC_DEFINE(NPP_GET_MIME_CONST, [], [Whether NP_GetMIMEDescription returns const])
 ],[
   AC_MSG_RESULT(yes)
-  AC_DEFINE(NPP_GET_MIME_CONST, [const], [Whether NPP_GetMIMEDescription returns const])
+  AC_DEFINE(NPP_GET_MIME_CONST, [const], [Whether NP_GetMIMEDescription returns const])
 ])
 
 CPPFLAGS="${CPPFLAGS_save}"
