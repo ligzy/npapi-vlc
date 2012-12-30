@@ -263,6 +263,7 @@ Insert VideoLAN.VLCPlugin.2
        width="640"
        height="480"
        toolbar="true"
+       loop="true"
        text="Waiting for video"
        windowless="true"
        name="vlc">
@@ -686,18 +687,7 @@ function doPlayOrPause()
     var vlc = getVLC("vlc");
     if( vlc )
     {
-        if( vlc.playlist.isPlaying && canPause )
-        {
             vlc.playlist.togglePause();
-        }
-        else if( vlc.playlist.items.count > 0 )
-        {
-            vlc.playlist.play();
-        }
-        else
-        {
-            alert('nothing to play !');
-        }
     }
 }
 
