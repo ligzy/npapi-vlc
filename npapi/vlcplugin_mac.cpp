@@ -155,12 +155,19 @@ bool VlcPluginMac::handle_event(void *event)
         CGContextSetGrayFillColor(cgContext, 0.5, 1.);
         CGContextDrawPath(cgContext, kCGPathFill);
 
-        // draw dummy text, needs improvement
-        CGContextSetRGBStrokeColor(cgContext, 0, 0, 0, .5 );
-        CGContextSetTextDrawingMode(cgContext, kCGTextFillStroke );
-        CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), NULL );
+        // draw info text
+        CGContextSetRGBStrokeColor(cgContext, 0, 0, 0, .5);
+        CGContextSetTextDrawingMode(cgContext, kCGTextFillStroke);
+        CFStringRef keys[] = { kCTFontAttributeName };
+        CFTypeRef values[] = { CTFontCreateWithName(CFSTR("Helvetica"),16,NULL) };
+        CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                                        (const void **)&keys,
+                                                        (const void **)&values,
+                                                        1, NULL, NULL);
+        CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
         CTLineRef textTine = CTLineCreateWithAttributedString(attRef);
-        CGContextSetTextPosition(cgContext, 200, 200 );
+        CGRect textRect = CTLineGetImageBounds(textTine, cgContext);
+        CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2));
         CTLineDraw(textTine, cgContext);
         CFRelease(textTine);
 
