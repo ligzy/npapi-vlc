@@ -74,8 +74,8 @@ void VlcWindowlessXCB::drawBackground(xcb_drawable_t drawable)
     uint32_t        values[2]  = {colorpixel, 0};
     xcb_create_gc(m_conn, background, drawable, mask, values);
     xcb_rectangle_t rect;
-    rect.x = 0;
-    rect.y = 0;
+    rect.x = npwindow.x;
+    rect.y = npwindow.y;
     rect.width = npwindow.width;
     rect.height = npwindow.height;
 
@@ -106,8 +106,8 @@ bool VlcWindowlessXCB::handle_event(void *event)
             break;
 
         /* Compute the position of the video */
-        int left = (npwindow.width  - m_media_width)  / 2;
-        int top  = (npwindow.height - m_media_height) / 2;
+        int left = npwindow.x + (npwindow.width  - m_media_width)  / 2;
+        int top  = npwindow.y + (npwindow.height - m_media_height) / 2;
 
         gc = xcb_generate_id(m_conn);
         xcb_create_gc(m_conn, gc, xgeevent->drawable, 0, NULL);
