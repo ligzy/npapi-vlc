@@ -200,7 +200,11 @@ private:
 
 
 #ifdef WINDOWLESS
+#ifdef XP_MACOSX
+const char DEF_CHROMA[] = "RGBA";
+#else
 const char DEF_CHROMA[] = "RV32";
+#endif
 enum{
     DEF_PIXEL_BYTES = 4
 };
