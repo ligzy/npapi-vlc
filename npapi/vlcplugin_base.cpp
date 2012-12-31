@@ -79,7 +79,7 @@ void VlcPluginBase::eventAsync(void *param)
 void VlcPluginBase::event_callback(const libvlc_event_t* event,
                 NPVariant *npparams, uint32_t npcount)
 {
-#if defined(XP_UNIX) || defined(XP_WIN)
+#if defined(XP_UNIX) || defined(XP_WIN) || defined (XP_MACOSX)
     events.callback(event, npparams, npcount);
     NPN_PluginThreadAsyncCall(getBrowser(), eventAsync, this);
 #else
@@ -100,7 +100,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 
     /* locate VLC module path */
 #ifdef XP_MACOSX
-    ppsz_argv[ppsz_argc++] = "--vout=vout_macosx";
+    ppsz_argv[ppsz_argc++] = "--vout=vmem"; //vout_macosx";
 #elif defined(XP_WIN)
     HKEY h_key;
     DWORD i_type, i_data = MAX_PATH + 1;

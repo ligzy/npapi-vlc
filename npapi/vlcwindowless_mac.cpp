@@ -55,7 +55,7 @@ void VlcWindowlessMac::drawBackground(NPCocoaEvent *cocoaEvent)
     unsigned r = 0, g = 0, b = 0;
     HTMLColor2RGB(get_options().get_bg_color().c_str(), &r, &g, &b);
 
-    // draw a gray background
+    // draw background
     CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
     CGContextSetRGBFillColor(cgContext,r/255.,g/255.,b/255.,1.);
     CGContextDrawPath(cgContext, kCGPathFill);
@@ -92,15 +92,65 @@ bool VlcWindowlessMac::handle_event(void *event)
     }
 
     if (eventType == NPCocoaEventDrawRect) {
-        if (VlcPluginBase::playlist_isplaying() && VlcPluginBase::player_has_vout())
-            return false;
-
         CGContextRef cgContext = cocoaEvent->data.draw.context;
         if (!cgContext) {
             return false;
         }
 
         drawBackground(cocoaEvent);
+
+        if(!VlcPluginBase::player_has_vout())
+            return true;
+
+        if (m_media_width == 0 || m_media_height == 0)
+            return true;
+
+        CGContextSaveGState(cgContext);
+
+        /* context is flipped */
+        CGContextTranslateCTM(cgContext, 0.0, npwindow.height);
+        CGContextScaleCTM(cgContext, 1., -1.);
+
+        /* Compute the position of the video */
+        float left = (npwindow.width  - m_media_width)  / 2.;
+        float top  = (npwindow.height - m_media_height) / 2.;
+        static const size_t kComponentsPerPixel = 4;
+        static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
+
+
+        /* render frame */
+        CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+                                                          (const uint8_t *)&m_frame_buf[0],
+                                                          sizeof(m_frame_buf[0]),
+                                                          kCFAllocatorNull);
+        CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
+        CGColorSpaceRef colorspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+        CGImageRef image = CGImageCreate(m_media_width,
+                                         m_media_height,
+                                         kBitsPerComponent,
+                                         kBitsPerComponent * kComponentsPerPixel,
+                                         kComponentsPerPixel * m_media_width,
+                                         colorspace,
+                                         kCGBitmapByteOrder16Big,
+                                         dataProvider,
+                                         NULL,
+                                         true,
+                                         kCGRenderingIntentPerceptual);
+        if (!image) {
+            CGColorSpaceRelease(colorspace);
+            CGImageRelease(image);
+            CGDataProviderRelease(dataProvider);
+            CGContextRestoreGState(cgContext);
+            return true;
+        }
+        CGRect rect = CGRectMake(left, top, m_media_width, m_media_height);
+        CGContextDrawImage(cgContext, rect, image);
+
+        CGColorSpaceRelease(colorspace);
+        CGImageRelease(image);
+        CGDataProviderRelease(dataProvider);
+
+        CGContextRestoreGState(cgContext);
 
         return true;
     }
