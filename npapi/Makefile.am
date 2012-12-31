@@ -131,7 +131,6 @@ endif
 lib_LTLIBRARIES = npvlc.la
 
 AM_CPPFLAGS += -I. -I$(top_builddir) -c \
-	-Wmost -Wno-four-char-constants -Wno-unknown-pragmas \
 	-DXP_UNIX -DXP_MACOSX=1 \
 	-DNO_X11=1 -DUSE_SYSTEM_CONSOLE=1 -pipe -fmessage-length=0
 
@@ -139,9 +138,8 @@ SOURCES_support = support/npmac.cpp \
                   vlcplugin_mac.cpp \
                   vlcplugin_mac.h
 libvlcplugin_la_LDFLAGS += \
-	-bundle -Wl,-read_only_relocs -Wl,suppress \
-	-Wl,-headerpad_max_install_names \
-	-Wl,-framework,Carbon -Wl,-framework,System \
+	-bundle -Wl,-headerpad_max_install_names \
+	-Wl,-framework,CoreFoundation -Wl,-framework,ApplicationServices \
 	-shrext .dylib
 
 noinst_DATA = VLC\ Plugin.plugin
