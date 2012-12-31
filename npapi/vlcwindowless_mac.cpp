@@ -63,6 +63,41 @@ void VlcWindowlessMac::drawBackground(NPCocoaEvent *cocoaEvent)
     CGContextRestoreGState(cgContext);
 }
 
+void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
+{
+    float windowWidth = npwindow.width;
+    float windowHeight = npwindow.height;
+
+    CGContextSaveGState(cgContext);
+
+    // this context is flipped..
+    CGContextTranslateCTM(cgContext, 0.0, windowHeight);
+    CGContextScaleCTM(cgContext, 1., -1.);
+
+    // draw a gray background
+    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
+    CGContextSetGrayFillColor(cgContext, 0.5, 1.);
+    CGContextDrawPath(cgContext, kCGPathFill);
+
+    // draw info text
+    CGContextSetRGBStrokeColor(cgContext, 0, 0, 0, .5);
+    CGContextSetTextDrawingMode(cgContext, kCGTextFillStroke);
+    CFStringRef keys[] = { kCTFontAttributeName };
+    CFTypeRef values[] = { CTFontCreateWithName(CFSTR("Helvetica"),16,NULL) };
+    CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                                    (const void **)&keys,
+                                                    (const void **)&values,
+                                                    1, NULL, NULL);
+    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
+    CTLineRef textTine = CTLineCreateWithAttributedString(attRef);
+    CGRect textRect = CTLineGetImageBounds(textTine, cgContext);
+    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2));
+    CTLineDraw(textTine, cgContext);
+    CFRelease(textTine);
+
+    CGContextRestoreGState(cgContext);
+}
+
 bool VlcWindowlessMac::handle_event(void *event)
 {
     NPCocoaEvent* cocoaEvent = (NPCocoaEvent*)event;
@@ -97,6 +132,11 @@ bool VlcWindowlessMac::handle_event(void *event)
             return false;
         }
 
+        if (!VlcPluginBase::playlist_isplaying()) {
+            drawNoPlayback(cgContext);
+            return true;
+        }
+
         drawBackground(cocoaEvent);
 
         if(!VlcPluginBase::player_has_vout())
@@ -124,7 +164,7 @@ bool VlcWindowlessMac::handle_event(void *event)
                                                           sizeof(m_frame_buf[0]),
                                                           kCFAllocatorNull);
         CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
-        CGColorSpaceRef colorspace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGBLinear);
+        CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
         CGImageRef image = CGImageCreate(m_media_width,
                                          m_media_height,
                                          kBitsPerComponent,

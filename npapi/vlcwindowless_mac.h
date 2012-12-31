@@ -37,6 +37,7 @@ public:
 
 protected:
     void drawBackground(NPCocoaEvent *cocoaEvent);
+    void drawNoPlayback(CGContextRef cgContext);
 };
 
 #endif /* __VLCWINDOWLESS_MAC_H__ */
