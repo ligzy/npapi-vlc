@@ -52,8 +52,13 @@
 #   include "vlcplugin_win.h"
     typedef class VlcPluginWin VlcPlugin;
 #elif defined(XP_MACOSX)
+#   define WINDOWLESS
+
 #   include "vlcplugin_mac.h"
     typedef class VlcPluginMac VlcPlugin;
+
+#   include "vlcwindowless_mac.h"
+    typedef class VlcWindowlessMac VlcWindowless;
 #endif
 
 

@@ -136,7 +136,9 @@ AM_CPPFLAGS += -I. -I$(top_builddir) -c \
 
 SOURCES_support = support/npmac.cpp \
                   vlcplugin_mac.cpp \
-                  vlcplugin_mac.h
+                  vlcplugin_mac.h \
+                  vlcwindowless_mac.cpp \
+                  vlcwindowless_mac.h
 libvlcplugin_la_LDFLAGS += \
 	-bundle -Wl,-headerpad_max_install_names \
 	-Wl,-framework,CoreFoundation -Wl,-framework,ApplicationServices \
