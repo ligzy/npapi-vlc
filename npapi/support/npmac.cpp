@@ -183,6 +183,11 @@ void NPN_ReloadPlugins(NPBool reloadPages)
     CALL_NPN(CallNPN_ReloadPluginsProc, gNetscapeFuncs.reloadplugins, reloadPages);
 }
 
+void NPN_PluginThreadAsyncCall(NPP plugin, void (*func)(void *), void *userData)
+{
+    CALL_NPN(CallNPN_PluginThreadAsyncCall, gNetscapeFuncs.pluginthreadasynccall, plugin, func, userData);
+}
+
 NPError NPN_GetValue(NPP instance, NPNVariable variable, void *value)
 {
     return CALL_NPN(CallNPN_GetValueProc, gNetscapeFuncs.getvalue, instance, variable, value);
