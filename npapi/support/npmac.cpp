@@ -183,9 +183,9 @@ void NPN_ReloadPlugins(NPBool reloadPages)
     CALL_NPN(CallNPN_ReloadPluginsProc, gNetscapeFuncs.reloadplugins, reloadPages);
 }
 
-void NPN_PluginThreadAsyncCall(NPP plugin, void (*func)(void *), void *userData)
+void NPN_PluginThreadAsyncCall(NPP instance, void (*func)(void *), void *userData)
 {
-    CALL_NPN(CallNPN_PluginThreadAsyncCall, gNetscapeFuncs.pluginthreadasynccall, plugin, func, userData);
+    CALL_NPN(CallNPN_PluginThreadAsyncCallProc, gNetscapeFuncs.pluginthreadasynccall, instance, func, userData);
 }
 
 NPError NPN_GetValue(NPP instance, NPNVariable variable, void *value)
@@ -622,25 +622,26 @@ DEFINE_API_C(main_return_t) main(NPNetscapeFuncs* nsTable, NPPluginFuncs* plugin
         gNetscapeFuncs.forceredraw      = HOST_TO_PLUGIN_GLUE(forceredraw, nsTable->forceredraw);
         if (navMinorVers >= 14) {
             // NPRuntime support
-            gNetscapeFuncs.getstringidentifier  = HOST_TO_PLUGIN_GLUE(getstringidentifier, nsTable->getstringidentifier);
-            gNetscapeFuncs.getstringidentifiers = HOST_TO_PLUGIN_GLUE(getstringidentifiers, nsTable->getstringidentifiers);
-            gNetscapeFuncs.getintidentifier     = HOST_TO_PLUGIN_GLUE(getintidentifier, nsTable->getintidentifier);
-            gNetscapeFuncs.identifierisstring   = HOST_TO_PLUGIN_GLUE(identifierisstring, nsTable->identifierisstring);
-            gNetscapeFuncs.utf8fromidentifier   = HOST_TO_PLUGIN_GLUE(utf8fromidentifier, nsTable->utf8fromidentifier);
-            gNetscapeFuncs.intfromidentifier    = HOST_TO_PLUGIN_GLUE(intfromidentifier, nsTable->intfromidentifier);
-            gNetscapeFuncs.createobject         = HOST_TO_PLUGIN_GLUE(createobject, nsTable->createobject);
-            gNetscapeFuncs.retainobject         = HOST_TO_PLUGIN_GLUE(retainobject, nsTable->retainobject);
-            gNetscapeFuncs.releaseobject        = HOST_TO_PLUGIN_GLUE(releaseobject, nsTable->releaseobject);
-            gNetscapeFuncs.invoke               = HOST_TO_PLUGIN_GLUE(invoke, nsTable->invoke);
-            gNetscapeFuncs.invokeDefault        = HOST_TO_PLUGIN_GLUE(invokeDefault, nsTable->invokeDefault);
-            gNetscapeFuncs.evaluate             = HOST_TO_PLUGIN_GLUE(evaluate, nsTable->evaluate);
-            gNetscapeFuncs.getproperty          = HOST_TO_PLUGIN_GLUE(getproperty, nsTable->getproperty);
-            gNetscapeFuncs.setproperty          = HOST_TO_PLUGIN_GLUE(setproperty, nsTable->setproperty);
-            gNetscapeFuncs.removeproperty       = HOST_TO_PLUGIN_GLUE(removeproperty, nsTable->removeproperty);
-            gNetscapeFuncs.hasproperty          = HOST_TO_PLUGIN_GLUE(hasproperty, nsTable->hasproperty);
-            gNetscapeFuncs.hasmethod            = HOST_TO_PLUGIN_GLUE(hasmethod, nsTable->hasmethod);
-            gNetscapeFuncs.releasevariantvalue  = HOST_TO_PLUGIN_GLUE(releasevariantvalue, nsTable->releasevariantvalue);
-            gNetscapeFuncs.setexception         = HOST_TO_PLUGIN_GLUE(setexception, nsTable->setexception);
+            gNetscapeFuncs.getstringidentifier   = HOST_TO_PLUGIN_GLUE(getstringidentifier, nsTable->getstringidentifier);
+            gNetscapeFuncs.getstringidentifiers  = HOST_TO_PLUGIN_GLUE(getstringidentifiers, nsTable->getstringidentifiers);
+            gNetscapeFuncs.getintidentifier      = HOST_TO_PLUGIN_GLUE(getintidentifier, nsTable->getintidentifier);
+            gNetscapeFuncs.identifierisstring    = HOST_TO_PLUGIN_GLUE(identifierisstring, nsTable->identifierisstring);
+            gNetscapeFuncs.utf8fromidentifier    = HOST_TO_PLUGIN_GLUE(utf8fromidentifier, nsTable->utf8fromidentifier);
+            gNetscapeFuncs.intfromidentifier     = HOST_TO_PLUGIN_GLUE(intfromidentifier, nsTable->intfromidentifier);
+            gNetscapeFuncs.createobject          = HOST_TO_PLUGIN_GLUE(createobject, nsTable->createobject);
+            gNetscapeFuncs.retainobject          = HOST_TO_PLUGIN_GLUE(retainobject, nsTable->retainobject);
+            gNetscapeFuncs.releaseobject         = HOST_TO_PLUGIN_GLUE(releaseobject, nsTable->releaseobject);
+            gNetscapeFuncs.invoke                = HOST_TO_PLUGIN_GLUE(invoke, nsTable->invoke);
+            gNetscapeFuncs.invokeDefault         = HOST_TO_PLUGIN_GLUE(invokeDefault, nsTable->invokeDefault);
+            gNetscapeFuncs.evaluate              = HOST_TO_PLUGIN_GLUE(evaluate, nsTable->evaluate);
+            gNetscapeFuncs.getproperty           = HOST_TO_PLUGIN_GLUE(getproperty, nsTable->getproperty);
+            gNetscapeFuncs.setproperty           = HOST_TO_PLUGIN_GLUE(setproperty, nsTable->setproperty);
+            gNetscapeFuncs.removeproperty        = HOST_TO_PLUGIN_GLUE(removeproperty, nsTable->removeproperty);
+            gNetscapeFuncs.hasproperty           = HOST_TO_PLUGIN_GLUE(hasproperty, nsTable->hasproperty);
+            gNetscapeFuncs.hasmethod             = HOST_TO_PLUGIN_GLUE(hasmethod, nsTable->hasmethod);
+            gNetscapeFuncs.releasevariantvalue   = HOST_TO_PLUGIN_GLUE(releasevariantvalue, nsTable->releasevariantvalue);
+            gNetscapeFuncs.setexception          = HOST_TO_PLUGIN_GLUE(setexception, nsTable->setexception);
+            gNetscapeFuncs.pluginthreadasynccall = HOST_TO_PLUGIN_GLUE(pluginthreadasynccall, nsTable->pluginthreadasynccall);
         }
 
         //
@@ -715,9 +716,9 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
     }
 
 
-    // We use all functions of the nsTable up to and including setexception. We therefore check that
+    // We use all functions of the nsTable up to and including pluginthreadasynccall. We therefore check that
     // reaches at least till that function.
-    if (nsTable->size < (offsetof(NPNetscapeFuncs, setexception) + sizeof(NPN_SetExceptionProcPtr))) {
+    if (nsTable->size < (offsetof(NPNetscapeFuncs, pluginthreadasynccall) + sizeof(NPN_PluginThreadAsyncCallProcPtr))) {
     	PLUGINDEBUGSTR("\pNP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table too small");
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
@@ -761,25 +762,26 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
     gNetscapeFuncs.forceredraw      = nsTable->forceredraw;
     if (navMinorVers >= 14) {
         // NPRuntime support
-        gNetscapeFuncs.getstringidentifier  = nsTable->getstringidentifier;
-        gNetscapeFuncs.getstringidentifiers = nsTable->getstringidentifiers;
-        gNetscapeFuncs.getintidentifier     = nsTable->getintidentifier;
-        gNetscapeFuncs.identifierisstring   = nsTable->identifierisstring;
-        gNetscapeFuncs.utf8fromidentifier   = nsTable->utf8fromidentifier;
-        gNetscapeFuncs.intfromidentifier    = nsTable->intfromidentifier;
-        gNetscapeFuncs.createobject         = nsTable->createobject;
-        gNetscapeFuncs.retainobject         = nsTable->retainobject;
-        gNetscapeFuncs.releaseobject        = nsTable->releaseobject;
-        gNetscapeFuncs.invoke               = nsTable->invoke;
-        gNetscapeFuncs.invokeDefault        = nsTable->invokeDefault;
-        gNetscapeFuncs.evaluate             = nsTable->evaluate;
-        gNetscapeFuncs.getproperty          = nsTable->getproperty;
-        gNetscapeFuncs.setproperty          = nsTable->setproperty;
-        gNetscapeFuncs.removeproperty       = nsTable->removeproperty;
-        gNetscapeFuncs.hasproperty          = nsTable->hasproperty;
-        gNetscapeFuncs.hasmethod            = nsTable->hasmethod;
-        gNetscapeFuncs.releasevariantvalue  = nsTable->releasevariantvalue;
-        gNetscapeFuncs.setexception         = nsTable->setexception;
+        gNetscapeFuncs.getstringidentifier   = nsTable->getstringidentifier;
+        gNetscapeFuncs.getstringidentifiers  = nsTable->getstringidentifiers;
+        gNetscapeFuncs.getintidentifier      = nsTable->getintidentifier;
+        gNetscapeFuncs.identifierisstring    = nsTable->identifierisstring;
+        gNetscapeFuncs.utf8fromidentifier    = nsTable->utf8fromidentifier;
+        gNetscapeFuncs.intfromidentifier     = nsTable->intfromidentifier;
+        gNetscapeFuncs.createobject          = nsTable->createobject;
+        gNetscapeFuncs.retainobject          = nsTable->retainobject;
+        gNetscapeFuncs.releaseobject         = nsTable->releaseobject;
+        gNetscapeFuncs.invoke                = nsTable->invoke;
+        gNetscapeFuncs.invokeDefault         = nsTable->invokeDefault;
+        gNetscapeFuncs.evaluate              = nsTable->evaluate;
+        gNetscapeFuncs.getproperty           = nsTable->getproperty;
+        gNetscapeFuncs.setproperty           = nsTable->setproperty;
+        gNetscapeFuncs.removeproperty        = nsTable->removeproperty;
+        gNetscapeFuncs.hasproperty           = nsTable->hasproperty;
+        gNetscapeFuncs.hasmethod             = nsTable->hasmethod;
+        gNetscapeFuncs.releasevariantvalue   = nsTable->releasevariantvalue;
+        gNetscapeFuncs.setexception          = nsTable->setexception;
+        gNetscapeFuncs.pluginthreadasynccall = nsTable->pluginthreadasynccall;
     }
     return NPP_Initialize();
 }
