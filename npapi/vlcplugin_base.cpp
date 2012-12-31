@@ -99,9 +99,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 #endif
 
     /* locate VLC module path */
-#ifdef XP_MACOSX
-    ppsz_argv[ppsz_argc++] = "--vout=vmem"; //vout_macosx";
-#elif defined(XP_WIN)
+#ifdef XP_WIN
     HKEY h_key;
     DWORD i_type, i_data = MAX_PATH + 1;
     char p_data[MAX_PATH + 1];
@@ -122,7 +120,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     }
     ppsz_argv[ppsz_argc++] = "--no-one-instance";
 
-#endif /* XP_MACOSX */
+#endif
 
     /* common settings */
     ppsz_argv[ppsz_argc++] = "-vv";
