@@ -24,8 +24,7 @@
 #ifndef __VLCWINDOWLESS_MAC_H__
 #define __VLCWINDOWLESS_MAC_H__
 
-#define WINDOWLESS
-#include "vlcplugin_base.h"
+#include "vlcwindowless_base.h"
 
 class VlcWindowlessMac : public VlcWindowlessBase
 {

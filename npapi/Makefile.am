@@ -83,7 +83,9 @@ AM_CPPFLAGS += $(XCB_CFLAGS)
 libvlcplugin_la_LIBADD += $(XCB_LIBS)
 SOURCES_support += \
 	vlcwindowless_xcb.cpp \
-	vlcwindowless_xcb.h
+	vlcwindowless_xcb.h \
+	vlcwindowless_base.cpp \
+	vlcwindowless_base.h
 endif # !HAVE_XCB
 
 else # Win32
@@ -137,6 +139,8 @@ AM_CPPFLAGS += -I. -I$(top_builddir) -c \
 SOURCES_support = support/npmac.cpp \
                   vlcplugin_mac.cpp \
                   vlcplugin_mac.h \
+                  vlcwindowless_base.cpp \
+                  vlcwindowless_base.h \
                   vlcwindowless_mac.cpp \
                   vlcwindowless_mac.h
 libvlcplugin_la_LDFLAGS += \
