@@ -105,6 +105,8 @@ SOURCES_support = \
 	support/npwin.cpp \
 	vlcplugin_win.cpp \
 	vlcplugin_win.h \
+	vlcwindowless_win.cpp \
+	vlcwindowless_win.h \
 	../common/win32_fullscreen.cpp \
 	../common/win32_fullscreen.h \
 	../common/win32_vlcwnd.cpp \
