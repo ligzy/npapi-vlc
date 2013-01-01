@@ -141,7 +141,7 @@ AM_CPPFLAGS += -I. -I$(top_builddir) -c \
 	-DNO_X11=1 -DUSE_SYSTEM_CONSOLE=1 -pipe -fmessage-length=0
 
 SOURCES_support = support/npmac.cpp \
-                  vlcplugin_mac.cpp \
+                  vlcplugin_mac.mm \
                   vlcplugin_mac.h \
                   vlcwindowless_base.cpp \
                   vlcwindowless_base.h \
@@ -150,7 +150,7 @@ SOURCES_support = support/npmac.cpp \
 libvlcplugin_la_LDFLAGS += \
 	-bundle -Wl,-headerpad_max_install_names \
 	-Wl,-framework,CoreFoundation -Wl,-framework,ApplicationServices \
-	-shrext .dylib
+	-Wl,-framework,QuartzCore -shrext .dylib
 
 noinst_DATA = VLC\ Plugin.plugin
 CLEANFILES += VLC\ Plugin.plugin
