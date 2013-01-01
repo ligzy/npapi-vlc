@@ -521,9 +521,15 @@ function doToggle3dTransform()
     if( vlc )
     {
         if (!vlc.style.transform)
+        {
             vlc.style.transform = transform;
+            vlc.style.webkitTransform = transform;
+        }
         else
+        {
             vlc.style.transform = '';
+            vlc.style.webkitTransform = '';
+        }
     }
 }
 
