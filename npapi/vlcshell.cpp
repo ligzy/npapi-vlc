@@ -243,7 +243,6 @@ NPError NPP_New( NPMIMEType, NPP instance,
         }
     }
 
-#ifdef WINDOWLESS
     if( windowless )
     {
         printf( "Using Windowless mode\n" );
@@ -264,7 +263,6 @@ NPError NPP_New( NPMIMEType, NPP instance,
         p_plugin = new VlcWindowless( instance, mode );
     }
     else
-#endif
     {
         p_plugin = new VlcPlugin( instance, mode );
     }
