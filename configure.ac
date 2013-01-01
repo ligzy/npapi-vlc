@@ -86,8 +86,9 @@ case "${host_os}" in
       ;;
     esac
 
-    CFLAGS="${CFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
+    CFLAGS="${CFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
     CXXFLAGS="${CXXFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
+    OBJCXXFLAGS=="${OBJCXXFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
     CPPFLAGS="${CPPFLAGS} ${ARCH_flag}"
     LDFLAGS="${LDFLAGS} -Wl,-headerpad_max_install_names ${ARCH_flag}"
     ;;
@@ -101,6 +102,9 @@ case "${host_os}" in
 esac
 AM_CONDITIONAL(HAVE_DARWIN, test "${SYS}" = "darwin")
 AM_CONDITIONAL(HAVE_WIN32, test "${SYS}" = "mingw32")
+AM_COND_IF([HAVE_DARWIN], [AC_PROG_OBJCXX])
+
+LT_INIT
 
 dnl
 dnl Check widl/midl tools for win32
