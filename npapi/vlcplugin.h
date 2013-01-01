@@ -37,7 +37,6 @@
 
 #if defined(XP_UNIX) && !defined(XP_MACOSX)
 #   if defined(USE_XCB)
-#       define WINDOWLESS
 #       include "vlcwindowless_xcb.h"
         typedef VlcWindowlessXCB VlcWindowless;
 #   endif
@@ -52,12 +51,9 @@
 #   include "vlcplugin_win.h"
     typedef class VlcPluginWin VlcPlugin;
 
-#   define WINDOWLESS
 #   include "vlcwindowless_win.h"
     typedef class VlcWindowlessWin VlcWindowless;
 #elif defined(XP_MACOSX)
-#   define WINDOWLESS
-
 #   include "vlcplugin_mac.h"
     typedef class VlcPluginMac VlcPlugin;
 
