@@ -29,9 +29,28 @@
 
 #include <npapi.h>
 
+#include <QuartzCore/QuartzCore.h>
+
+@interface VLCControllerLayer : CALayer {
+    BOOL b_nomedia;
+}
+@property (readwrite) BOOL noMedia;
+
+@end
+
+static CALayer * rootLayer;
+static VLCControllerLayer * controllerLayer;
+
 VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
     VlcPluginBase(instance, mode)
 {
+    rootLayer = [[CALayer alloc] init];
+}
+
+VlcPluginMac::~VlcPluginMac()
+{
+    [controllerLayer release];
+    [rootLayer release];
 }
 
 void VlcPluginMac::set_player_window()
@@ -70,29 +89,6 @@ bool VlcPluginMac::create_windows()
 
 bool VlcPluginMac::resize_windows()
 {
-    /* as MacOS X video output is windowless, set viewport */
-    libvlc_rectangle_t view, clip;
-
-    /* browser sets port origin to top-left location of plugin
-     * relative to GrafPort window origin is set relative to document,
-     * which of little use for drawing
-     */
-    view.top	= 0; // ((NP_Port*) (npwindow.window))->porty;
-    view.left	= 0; // ((NP_Port*) (npwindow.window))->portx;
-    view.bottom  = npwindow.height+view.top;
-    view.right   = npwindow.width+view.left;
-
-    /* clipRect coordinates are also relative to GrafPort */
-    clip.top     = npwindow.clipRect.top;
-    clip.left    = npwindow.clipRect.left;
-    clip.bottom  = npwindow.clipRect.bottom;
-    clip.right   = npwindow.clipRect.right;
-
-#ifdef NOT_WORKING
-    libvlc_video_set_viewport(p_vlc, p_plugin->getMD(), &view, &clip);
-#else
-#warning disabled code
-#endif
     return true;
 }
 
@@ -104,7 +100,15 @@ bool VlcPluginMac::destroy_windows()
 
 NPError VlcPluginMac::get_root_layer(void *value)
 {
-    return NPERR_GENERIC_ERROR;
+    controllerLayer = [[VLCControllerLayer alloc] init];
+    controllerLayer.opaque = 1.;
+    controllerLayer.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
+    [controllerLayer setNoMedia:YES];
+
+    [rootLayer addSublayer: controllerLayer];
+
+    *(CALayer **)value = rootLayer;
+    return NPERR_NO_ERROR;
 }
 
 bool VlcPluginMac::handle_event(void *event)
@@ -170,3 +174,96 @@ bool VlcPluginMac::handle_event(void *event)
 
     return VlcPluginBase::handle_event(event);
 }
+
+@implementation VLCControllerLayer
+@synthesize noMedia=b_nomedia;
+
+- (id)init
+{
+    if (self = [super init]) {
+        self.needsDisplayOnBoundsChange = YES;
+        self.frame = CGRectMake(0, 0, 0, 25);
+        self.autoresizingMask = kCALayerWidthSizable;
+    }
+
+    return self;
+}
+
+- (void)drawNoMedia:(CGContextRef)cgContext
+{
+    float windowWidth = self.visibleRect.size.width;
+    float windowHeight = self.visibleRect.size.height;
+
+    CGContextSaveGState(cgContext);
+
+    // draw a gray background
+    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
+    CGContextSetGrayFillColor(cgContext, .5, 1.);
+    CGContextDrawPath(cgContext, kCGPathFill);
+
+    // draw info text
+    CGContextSetGrayStrokeColor(cgContext, .7, 1.);
+    CGContextSetTextDrawingMode(cgContext, kCGTextFillStroke);
+    CGContextSetGrayFillColor(cgContext, 1., 1.);
+    CFStringRef keys[2];
+    keys[0] = kCTFontAttributeName;
+    keys[1] = kCTForegroundColorFromContextAttributeName;
+    CFTypeRef values[2];
+    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),18,NULL);
+    values[1] = kCFBooleanTrue;
+    CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                                    (const void **)&keys,
+                                                    (const void **)&values,
+                                                    2, NULL, NULL);
+    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Multimedia Plug-in"), stylesDict);
+    CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
+    CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
+    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2));
+    CTLineDraw(textLine, cgContext);
+    CFRelease(textLine);
+    CFRelease(attRef);
+
+    // print smaller text from here
+    CFRelease(stylesDict);
+    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),14,NULL);
+    stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                    (const void **)&keys,
+                                    (const void **)&values,
+                                    2, NULL, NULL);
+    CGContextSetGrayFillColor(cgContext, .8, 1.);
+
+    // draw version string
+    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, libvlc_get_version(), kCFStringEncodingUTF8), stylesDict);
+    textLine = CTLineCreateWithAttributedString(attRef);
+    textRect = CTLineGetImageBounds(textLine, cgContext);
+    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 25.);
+    CTLineDraw(textLine, cgContext);
+    CFRelease(textLine);
+    CFRelease(attRef);
+
+    // expose drawing model
+    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("windowed output mode using CoreAnimation"), stylesDict);
+    textLine = CTLineCreateWithAttributedString(attRef);
+    textRect = CTLineGetImageBounds(textLine, cgContext);
+    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 45.);
+    CTLineDraw(textLine, cgContext);
+    CFRelease(textLine);
+    CFRelease(attRef);
+    CFRelease(stylesDict);
+
+    CGContextRestoreGState(cgContext);
+}
+
+- (void)drawInContext:(CGContextRef)cgContext
+{
+    if (self.noMedia)
+        [self drawNoMedia:cgContext];
+    else {
+        CGContextSaveGState(cgContext);
+        CGContextSetFillColorWithColor(cgContext, CGColorGetConstantColor(kCGColorBlack));
+        CGContextFillRect(cgContext, self.bounds);
+        CGContextRestoreGState(cgContext);
+    }
+}
+
+@end

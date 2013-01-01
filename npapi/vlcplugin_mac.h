@@ -32,6 +32,7 @@ class VlcPluginMac : public VlcPluginBase
 {
 public:
     VlcPluginMac(NPP, NPuint16_t);
+    virtual ~VlcPluginMac();
 
     int                 setSize(unsigned width, unsigned height);
 

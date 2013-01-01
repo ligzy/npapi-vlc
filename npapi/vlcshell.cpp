@@ -176,7 +176,7 @@ NPError NPP_GetValue( NPP instance, NPPVariable variable, void *value )
         case NPPVpluginCoreAnimationLayer:
         {
             if( instance )
-                return p_plugin->get_root_layer(&value);;
+                return p_plugin->get_root_layer(value);
 
             break;
         }
