@@ -193,7 +193,7 @@ dnl we can't use the pkg-config macros.
   done
 
 CPPFLAGS_save="${CPPFLAGS}"
-CPPFLAGS="${CPPFLAGS} ${MOZILLA_CFLAGS} -Inpapi-sdk/"
+CPPFLAGS="${CPPFLAGS} ${MOZILLA_CFLAGS} -Inpapi/npapi-sdk/"
 
 AC_CHECK_HEADERS(npapi.h npruntime.h, [
     dnl if found
