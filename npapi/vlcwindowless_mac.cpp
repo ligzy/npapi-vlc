@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcwindowless_mac.cpp: VLC NPAPI windowless plugin for Mac
  *****************************************************************************
- * Copyright (C) 2012 VLC Authors and VideoLAN
+ * Copyright (C) 2012-2013 VLC Authors and VideoLAN
  * $Id$
  *
  * Authors: Felix Paul Kühne <fkuehne # videolan # org>
@@ -36,12 +36,8 @@ VlcWindowlessMac::~VlcWindowlessMac()
 
 }
 
-void VlcWindowlessMac::drawBackground(NPCocoaEvent *cocoaEvent)
+void VlcWindowlessMac::drawBackground(CGContextRef cgContext)
 {
-    CGContextRef cgContext = cocoaEvent->data.draw.context;
-    if (!cgContext)
-        return;
-
     float windowWidth = npwindow.width;
     float windowHeight = npwindow.height;
 
@@ -76,24 +72,58 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
 
     // draw a gray background
     CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetGrayFillColor(cgContext, 0.5, 1.);
+    CGContextSetGrayFillColor(cgContext, .5, 1.);
     CGContextDrawPath(cgContext, kCGPathFill);
 
     // draw info text
-    CGContextSetRGBStrokeColor(cgContext, 0, 0, 0, .5);
+    CGContextSetGrayStrokeColor(cgContext, .7, 1.);
     CGContextSetTextDrawingMode(cgContext, kCGTextFillStroke);
-    CFStringRef keys[] = { kCTFontAttributeName };
-    CFTypeRef values[] = { CTFontCreateWithName(CFSTR("Helvetica"),16,NULL) };
+    CGContextSetGrayFillColor(cgContext, 1., 1.);
+    CFStringRef keys[2];
+    keys[0] = kCTFontAttributeName;
+    keys[1] = kCTForegroundColorFromContextAttributeName;
+    CFTypeRef values[2];
+    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),18,NULL);
+    values[1] = kCFBooleanTrue;
     CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
                                                     (const void **)&keys,
                                                     (const void **)&values,
-                                                    1, NULL, NULL);
-    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
-    CTLineRef textTine = CTLineCreateWithAttributedString(attRef);
-    CGRect textRect = CTLineGetImageBounds(textTine, cgContext);
+                                                    2, NULL, NULL);
+    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Multimedia Plug-in"), stylesDict);
+    CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
+    CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
     CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2));
-    CTLineDraw(textTine, cgContext);
-    CFRelease(textTine);
+    CTLineDraw(textLine, cgContext);
+    CFRelease(textLine);
+    CFRelease(attRef);
+
+    // print smaller text from here
+    CFRelease(stylesDict);
+    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),14,NULL);
+    stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                    (const void **)&keys,
+                                    (const void **)&values,
+                                    2, NULL, NULL);
+    CGContextSetGrayFillColor(cgContext, .8, 1.);
+
+    // draw version string
+    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, libvlc_get_version(), kCFStringEncodingUTF8), stylesDict);
+    textLine = CTLineCreateWithAttributedString(attRef);
+    textRect = CTLineGetImageBounds(textLine, cgContext);
+    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 25.);
+    CTLineDraw(textLine, cgContext);
+    CFRelease(textLine);
+    CFRelease(attRef);
+
+    // expose drawing model
+    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("windowless output mode using CoreGraphics"), stylesDict);
+    textLine = CTLineCreateWithAttributedString(attRef);
+    textRect = CTLineGetImageBounds(textLine, cgContext);
+    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 45.);
+    CTLineDraw(textLine, cgContext);
+    CFRelease(textLine);
+    CFRelease(attRef);
+    CFRelease(stylesDict);
 
     CGContextRestoreGState(cgContext);
 }
@@ -137,7 +167,7 @@ bool VlcWindowlessMac::handle_event(void *event)
             return true;
         }
 
-        drawBackground(cocoaEvent);
+        drawBackground(cgContext);
 
         if(!VlcPluginBase::player_has_vout())
             return true;

@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcwindowsless_mac.h: VLC NPAPI windowless plugin for Mac
  *****************************************************************************
- * Copyright (C) 2012 VLC Authors and VideoLAN
+ * Copyright (C) 2012-2013 VLC Authors and VideoLAN
  * $Id$
  *
  * Authors: Felix Paul Kühne <fkuehne # videolan # org>
@@ -36,7 +36,7 @@ public:
     bool handle_event(void *event);
 
 protected:
-    void drawBackground(NPCocoaEvent *cocoaEvent);
+    void drawBackground(CGContextRef cgContext);
     void drawNoPlayback(CGContextRef cgContext);
 };
 
