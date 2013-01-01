@@ -1,14 +1,12 @@
 /*****************************************************************************
- * vlcplugin_base.cpp: a VLC plugin for Mozilla
+ * vlcwindowless_base.cpp: window-less base class for the VLC plugin
  *****************************************************************************
- * Copyright (C) 2002-2010 the VideoLAN team
+ * Copyright (C) 2012-2013 VLC Authors and VideoLAN
  * $Id$
  *
- * Authors: Samuel Hocevar <sam@zoy.org>
- *          Damien Fouilleul <damienf.fouilleul@laposte.net>
- *          Jean-Paul Saman <jpsaman@videolan.org>
- *          Sergey Radionov <rsatom@gmail.com>
+ * Authors: Sergey Radionov <rsatom@gmail.com>
  *          Cheng Sun <chengsun9@gmail.com>
+ *          Jean-Baptiste Kempf <jb@videolan.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
