@@ -2,7 +2,7 @@
  * npmac.cpp: Safari/Mozilla/Firefox plugin for VLC
  *****************************************************************************
  * Copyright (C) 2009, Jean-Paul Saman <jpsaman@videolan.org>
- * Copyright (C) 2012, Felix Paul Kühne <fkuehne # videolan # org>
+ * Copyright (C) 2012-2013 Felix Paul Kühne <fkuehne # videolan # org>
  * $Id:$
  *
  * Authors: Jean-Paul Saman <jpsaman@videolan.org>
@@ -410,25 +410,71 @@ void Private_Shutdown(void)
     NPP_Shutdown();
 }
 
+static bool boolValue(const char *value) {
+    return ( !strcmp(value, "1") ||
+            !strcasecmp(value, "true") ||
+            !strcasecmp(value, "yes") );
+}
+
 NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
 {
     PLUGINDEBUGSTR("\pNew;g;");
 
-    /*
-     *  We should negotiate and setup uniform event & drawing models, so the 32- and 64-bit plugins behave
-     * identically
-     */
-    NPBool supportsCoreGraphics = FALSE;
-    NPError err = NPN_GetValue(instance, NPNVsupportsCoreGraphicsBool, &supportsCoreGraphics);
-    if (err != NPERR_NO_ERROR || !supportsCoreGraphics) {
-    	PLUGINDEBUGSTR("\pNew: browser doesn't support CoreGraphics drawing model;g;");
-        return NPERR_INCOMPATIBLE_VERSION_ERROR;
+    /* find out, if the plugin should run in windowless mode.
+     * if yes, choose the CoreGraphics drawing model */
+    bool windowless = false;
+    for( int i = 0; i < argc; i++ )
+    {
+        if( !strcmp( argn[i], "windowless" ) )
+        {
+            windowless = boolValue(argv[i]);
+            break;
+        }
     }
 
-    err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreGraphics);
-    if (err != NPERR_NO_ERROR) {
-    	PLUGINDEBUGSTR("\pNew: couldn't activate CoreGraphics drawing model;g;");
-    	return NPERR_INCOMPATIBLE_VERSION_ERROR;
+    NPError err;
+    if (windowless) {
+        NPBool supportsCoreGraphics = FALSE;
+        err = NPN_GetValue(instance, NPNVsupportsCoreGraphicsBool, &supportsCoreGraphics);
+        if (err != NPERR_NO_ERROR || !supportsCoreGraphics) {
+            PLUGINDEBUGSTR("\pNew: browser doesn't support CoreGraphics drawing model;g;");
+            return NPERR_INCOMPATIBLE_VERSION_ERROR;
+        }
+
+        err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreGraphics);
+        if (err != NPERR_NO_ERROR) {
+            PLUGINDEBUGSTR("\pNew: couldn't activate CoreGraphics drawing model;g;");
+            return NPERR_INCOMPATIBLE_VERSION_ERROR;
+        }
+    } else {
+        NPBool supportsCoreAnimation = FALSE;
+        err = NPN_GetValue(instance, NPNVsupportsCoreAnimationBool, &supportsCoreAnimation);
+        if (err != NPERR_NO_ERROR || !supportsCoreAnimation) {
+            PLUGINDEBUGSTR("\pNew: browser doesn't support CoreAnimation drawing model;g;");
+            return NPERR_INCOMPATIBLE_VERSION_ERROR;
+        }
+
+        NPBool supportsInvalidatingCoreAnimation = FALSE;
+        err = NPN_GetValue(instance, NPNVsupportsInvalidatingCoreAnimationBool, &supportsInvalidatingCoreAnimation);
+        if (err != NPERR_NO_ERROR || !supportsInvalidatingCoreAnimation) {
+            PLUGINDEBUGSTR("\pNew: browser doesn't support the Invalidating CoreAnimation drawing model;g;");
+            return NPERR_INCOMPATIBLE_VERSION_ERROR;
+        }
+
+        if (supportsInvalidatingCoreAnimation) {
+            err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelInvalidatingCoreAnimation);
+            if (err != NPERR_NO_ERROR) {
+                PLUGINDEBUGSTR("\pNew: couldn't activate Invalidating CoreAnimation drawing model;g;");
+                return NPERR_INCOMPATIBLE_VERSION_ERROR;
+            }
+        } else {
+            PLUGINDEBUGSTR("\pNew: falling back to non-invalidating CoreAnimation drawing, since invalidation is not supported;g;");
+            err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreAnimation);
+            if (err != NPERR_NO_ERROR) {
+                PLUGINDEBUGSTR("\pNew: couldn't activate CoreAnimation drawing model;g;");
+                return NPERR_INCOMPATIBLE_VERSION_ERROR;
+            }
+        }
     }
 
     NPBool supportsCocoaEvents = FALSE;
