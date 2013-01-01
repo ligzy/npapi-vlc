@@ -456,10 +456,8 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
 
         NPBool supportsInvalidatingCoreAnimation = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsInvalidatingCoreAnimationBool, &supportsInvalidatingCoreAnimation);
-        if (err != NPERR_NO_ERROR || !supportsInvalidatingCoreAnimation) {
+        if (err != NPERR_NO_ERROR || !supportsInvalidatingCoreAnimation)
             PLUGINDEBUGSTR("\pNew: browser doesn't support the Invalidating CoreAnimation drawing model;g;");
-            return NPERR_INCOMPATIBLE_VERSION_ERROR;
-        }
 
         if (supportsInvalidatingCoreAnimation) {
             err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelInvalidatingCoreAnimation);
