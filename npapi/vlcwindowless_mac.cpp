@@ -27,13 +27,6 @@
 VlcWindowlessMac::VlcWindowlessMac(NPP instance, NPuint16_t mode) :
     VlcWindowlessBase(instance, mode)
 {
-    // get first screen
-    printf("should init\n");
-}
-
-VlcWindowlessMac::~VlcWindowlessMac()
-{
-
 }
 
 void VlcWindowlessMac::drawBackground(CGContextRef cgContext)

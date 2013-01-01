@@ -31,7 +31,6 @@ class VlcWindowlessMac : public VlcWindowlessBase
 {
 public:
     VlcWindowlessMac(NPP instance, NPuint16_t mode);
-    virtual ~VlcWindowlessMac();
 
     bool handle_event(void *event);
 
