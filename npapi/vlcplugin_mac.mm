@@ -31,14 +31,26 @@
 
 #include <QuartzCore/QuartzCore.h>
 
-@interface VLCControllerLayer : CALayer {
-    BOOL b_nomedia;
+@interface VLCNoMediaLayer : CALayer {
 }
-@property (readwrite) BOOL noMedia;
+
+@end
+
+@interface VLCControllerLayer : CALayer {
+    CGImageRef _playImage;
+    CGImageRef _pauseImage;
+
+    CGImageRef _sliderTrackLeft;
+    CGImageRef _sliderTrackRight;
+    CGImageRef _sliderTrackCenter;
+
+    CGImageRef _knob;
+}
 
 @end
 
 static CALayer * rootLayer;
+static VLCNoMediaLayer * noMediaLayer;
 static VLCControllerLayer * controllerLayer;
 
 VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
@@ -100,11 +112,12 @@ bool VlcPluginMac::destroy_windows()
 
 NPError VlcPluginMac::get_root_layer(void *value)
 {
+    noMediaLayer = [[VLCNoMediaLayer alloc] init];
+    noMediaLayer.opaque = 1.;
+    [rootLayer addSublayer: noMediaLayer];
+
     controllerLayer = [[VLCControllerLayer alloc] init];
     controllerLayer.opaque = 1.;
-    controllerLayer.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
-    [controllerLayer setNoMedia:YES];
-
     [rootLayer addSublayer: controllerLayer];
 
     *(CALayer **)value = rootLayer;
@@ -175,21 +188,19 @@ bool VlcPluginMac::handle_event(void *event)
     return VlcPluginBase::handle_event(event);
 }
 
-@implementation VLCControllerLayer
-@synthesize noMedia=b_nomedia;
+@implementation VLCNoMediaLayer
 
 - (id)init
 {
     if (self = [super init]) {
         self.needsDisplayOnBoundsChange = YES;
-        self.frame = CGRectMake(0, 0, 0, 25);
-        self.autoresizingMask = kCALayerWidthSizable;
+        self.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
     }
 
     return self;
 }
 
-- (void)drawNoMedia:(CGContextRef)cgContext
+- (void)drawInContext:(CGContextRef)cgContext
 {
     float windowWidth = self.visibleRect.size.width;
     float windowHeight = self.visibleRect.size.height;
@@ -254,16 +265,132 @@ bool VlcPluginMac::handle_event(void *event)
     CGContextRestoreGState(cgContext);
 }
 
+@end
+
+@implementation VLCControllerLayer
+
+static CGImageRef createImageNamed(NSString *name)
+{
+    CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("com.netscape.vlc")), (CFStringRef)name, CFSTR("png"), NULL);
+
+    if (!url)
+        return NULL;
+
+    CGImageSourceRef imageSource = CGImageSourceCreateWithURL(url, NULL);
+    if (!imageSource)
+        return NULL;
+
+    CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+    CFRelease(imageSource);
+
+    return image;
+}
+
+- (id)init
+{
+    if (self = [super init]) {
+        self.needsDisplayOnBoundsChange = YES;
+        self.frame = CGRectMake(0, 0, 0, 25);
+        self.autoresizingMask = kCALayerWidthSizable;
+
+        _playImage = createImageNamed(@"Play");
+        _pauseImage = createImageNamed(@"Pause");
+        _sliderTrackLeft = createImageNamed(@"SliderTrackLeft");
+        _sliderTrackRight = createImageNamed(@"SliderTrackRight");
+        _sliderTrackCenter = createImageNamed(@"SliderTrackCenter");
+
+        _knob = createImageNamed(@"Knob");
+    }
+
+    return self;
+}
+
+- (void)dealloc
+{
+    CGImageRelease(_playImage);
+    CGImageRelease(_pauseImage);
+
+    CGImageRelease(_sliderTrackLeft);
+    CGImageRelease(_sliderTrackRight);
+    CGImageRelease(_sliderTrackCenter);
+
+    CGImageRelease(_knob);
+
+    [super dealloc];
+}
+
+- (CGRect)_playPauseButtonRect
+{
+    return CGRectMake(0, 0, 25, 25);
+}
+
+- (CGRect)_sliderRect
+{
+    CGFloat sliderYPosition = (self.bounds.size.height - CGImageGetHeight(_sliderTrackLeft)) / 2.0;
+    CGFloat playPauseButtonWidth = [self _playPauseButtonRect].size.width;
+
+    return CGRectMake(playPauseButtonWidth, sliderYPosition,
+                      self.bounds.size.width - playPauseButtonWidth - 7, CGImageGetHeight(_sliderTrackLeft));
+}
+
+- (CGRect)_sliderThumbRect
+{
+    CGRect sliderRect = [self _sliderRect];
+
+    CGFloat fraction = 0.0;
+/*    if (_movie)
+        fraction = [self _currentTime] / [self _duration];*/
+
+    CGFloat x = fraction * (CGRectGetWidth(sliderRect) - CGImageGetWidth(_knob));
+
+    return CGRectMake(CGRectGetMinX(sliderRect) + x, CGRectGetMinY(sliderRect) - 1,
+                      CGImageGetWidth(_knob), CGImageGetHeight(_knob));
+}
+
+- (CGRect)_innerSliderRect
+{
+    return CGRectInset([self _sliderRect], CGRectGetWidth([self _sliderThumbRect]) / 2, 0);
+}
+
+- (void)_drawPlayPauseButtonInContext:(CGContextRef)context
+{
+    CGContextDrawImage(context, [self _playPauseButtonRect], _playImage); //playlist_isplaying() ? _pauseImage;
+}
+
+- (void)_drawSliderInContext:(CGContextRef)context
+{
+    // Draw the thumb
+    CGRect sliderThumbRect = [self _sliderThumbRect];
+    CGContextDrawImage(context, sliderThumbRect, _knob);
+
+    CGRect sliderRect = [self _sliderRect];
+
+    // Draw left part
+    CGRect sliderLeftTrackRect = CGRectMake(CGRectGetMinX(sliderRect), CGRectGetMinY(sliderRect),
+                                            CGImageGetWidth(_sliderTrackLeft), CGImageGetHeight(_sliderTrackLeft));
+    CGContextDrawImage(context, sliderLeftTrackRect, _sliderTrackLeft);
+
+    // Draw center part
+    CGRect sliderCenterTrackRect = CGRectInset(sliderRect, CGImageGetWidth(_sliderTrackLeft), 0);
+    CGContextDrawImage(context, sliderCenterTrackRect, _sliderTrackCenter);
+
+    // Draw right part
+    CGRect sliderRightTrackRect = CGRectMake(CGRectGetMaxX(sliderCenterTrackRect), CGRectGetMinY(sliderRect),
+                                             CGImageGetWidth(_sliderTrackRight), CGImageGetHeight(_sliderTrackRight));
+    CGContextDrawImage(context, sliderRightTrackRect, _sliderTrackRight);
+
+}
+
 - (void)drawInContext:(CGContextRef)cgContext
 {
-    if (self.noMedia)
-        [self drawNoMedia:cgContext];
-    else {
-        CGContextSaveGState(cgContext);
-        CGContextSetFillColorWithColor(cgContext, CGColorGetConstantColor(kCGColorBlack));
-        CGContextFillRect(cgContext, self.bounds);
-        CGContextRestoreGState(cgContext);
-    }
+    CGContextSaveGState(cgContext);
+    CGContextSetFillColorWithColor(cgContext, CGColorGetConstantColor(kCGColorBlack));
+    CGContextFillRect(cgContext, self.bounds);
+    CGContextRestoreGState(cgContext);
+
+    [self _drawPlayPauseButtonInContext:cgContext];
+    [self _drawSliderInContext:cgContext];
 }
 
 @end
+

@@ -175,6 +175,7 @@ VLC\ Plugin.plugin: $(lib_LTLIBRARIES)
 	rm -Rf "$@"
 	$(INSTALL) -d "VLC-Plugin.plugin/Contents/MacOS/lib"
 	$(INSTALL) -d "VLC-Plugin.plugin/Contents/Resources"
+	$(INSTALL) $(top_srcdir)/share/pixmaps/macosx/*.png "VLC-Plugin.plugin/Contents/Resources"
 	ACTION="release-makefile" PRODUCT="VLC-Plugin.plugin" libvlc_dir=$(LIBVLC_PREFIX) src_dir=$(srcdir) build_dir=$(top_builddir) sh "$(top_srcdir)/extras/macosx/build-package.sh"
 	$(INSTALL) "$(top_builddir)/extras/macosx/Info.plist" "VLC-Plugin.plugin/Contents/Info.plist"
 	mv "VLC-Plugin.plugin" "VLC Plugin.plugin"
