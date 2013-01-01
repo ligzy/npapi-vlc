@@ -121,6 +121,9 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     ppsz_argv[ppsz_argc++] = "--no-one-instance";
 
 #endif
+#ifdef XP_MACOSX
+    ppsz_argv[ppsz_argc++] = "--vout=vmem";
+#endif
 
     /* common settings */
     ppsz_argv[ppsz_argc++] = "-vv";
@@ -273,6 +276,13 @@ void VlcPluginBase::setWindow(const NPWindow &window)
 {
     npwindow = window;
 }
+
+#if defined(XP_MACOSX)
+NPError VlcPluginBase::get_root_layer(void *value)
+{
+    return NPERR_GENERIC_ERROR;
+}
+#endif
 
 bool VlcPluginBase::handle_event(void *event)
 {

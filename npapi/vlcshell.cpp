@@ -172,6 +172,15 @@ NPError NPP_GetValue( NPP instance, NPPVariable variable, void *value )
             }
             break;
         }
+#if defined(XP_MACOSX)
+        case NPPVpluginCoreAnimationLayer:
+        {
+            if( instance )
+                return p_plugin->get_root_layer(&value);;
+
+            break;
+        }
+#endif
 
         default:
             ;

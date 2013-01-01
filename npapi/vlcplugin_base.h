@@ -162,6 +162,10 @@ public:
 
     virtual bool handle_event(void *event);
 
+#if defined(XP_MACOSX)
+    virtual NPError get_root_layer(void *value);
+#endif
+
     virtual void toggle_fullscreen() = 0;
     virtual void set_fullscreen(int) = 0;
     virtual int get_fullscreen() = 0;

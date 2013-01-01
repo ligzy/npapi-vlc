@@ -102,6 +102,11 @@ bool VlcPluginMac::destroy_windows()
     return true;
 }
 
+NPError VlcPluginMac::get_root_layer(void *value)
+{
+    return NPERR_GENERIC_ERROR;
+}
+
 bool VlcPluginMac::handle_event(void *event)
 {
     NPCocoaEvent* cocoaEvent = (NPCocoaEvent*)event;

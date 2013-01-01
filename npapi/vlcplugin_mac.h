@@ -48,13 +48,13 @@ public:
     void update_controls()      {/* STUB */}
     void popup_menu()           {/* STUB */}
 
-    virtual bool handle_event(void *event);
+
+    bool handle_event(void *event);
+    NPError get_root_layer(void *value);
+
 private:
     void set_player_window();
 
-    unsigned int     i_width, i_height;
-
-    int i_last_position;
 };
 
 #endif /* __VLCPLUGIN_MAC_H__ */

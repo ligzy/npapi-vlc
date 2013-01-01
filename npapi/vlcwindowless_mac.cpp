@@ -121,6 +121,11 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
     CGContextRestoreGState(cgContext);
 }
 
+NPError VlcWindowlessMac::get_root_layer(void *value)
+{
+    return NPERR_GENERIC_ERROR;
+}
+
 bool VlcWindowlessMac::handle_event(void *event)
 {
     NPCocoaEvent* cocoaEvent = (NPCocoaEvent*)event;

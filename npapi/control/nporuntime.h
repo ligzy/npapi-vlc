@@ -33,7 +33,6 @@
 //from Microsoft SDK (rather then from Mozilla SDK),
 //#include it indirectly via <npfunctions.h>
 #include <npfunctions.h>
-
 #include <npruntime.h>
 
 static void RuntimeNPClassDeallocate(NPObject *npobj);

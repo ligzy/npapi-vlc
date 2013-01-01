@@ -32,6 +32,7 @@ public:
     VlcWindowlessMac(NPP instance, NPuint16_t mode);
 
     bool handle_event(void *event);
+    NPError get_root_layer(void *value);
 
 protected:
     void drawBackground(CGContextRef cgContext);
