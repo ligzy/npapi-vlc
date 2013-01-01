@@ -23,8 +23,6 @@
 #ifndef __OLEINPLACEACTIVEOBJECT_H__
 #define __OLEINPLACEACTIVEOBJECT_H__
 
-#include "oleidl.h"
-
 class VLCOleInPlaceActiveObject : public IOleInPlaceActiveObject
 {
 

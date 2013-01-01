@@ -24,16 +24,13 @@
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
 
-#include "config.h"
+#ifdef HAVE_CONFIG
+# include "config.h"
+#endif
 
-#include <ole2.h>
 #include <olectl.h>
 
-#include <vlc/vlc.h>
-
 #include "../common/win32_fullscreen.h"
-#include "../common/vlc_player_options.h"
-#include "../common/vlc_player.h"
 
 extern "C" const GUID CLSID_VLCPlugin;
 extern "C" const GUID CLSID_VLCPlugin2;

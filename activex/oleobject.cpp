@@ -23,8 +23,6 @@
 #include "plugin.h"
 #include "oleobject.h"
 
-#include "utils.h"
-
 #include <docobj.h>
 
 using namespace std;

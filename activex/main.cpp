@@ -31,8 +31,6 @@
 
 #include <tchar.h>
 
-#include <objsafe.h>
-
 #ifdef __MINGW32__
 # include <_mingw.h>
 # if defined(__MINGW32_MAJOR_VERSION) && !defined(__MINGW64_VERSION_MAJOR)

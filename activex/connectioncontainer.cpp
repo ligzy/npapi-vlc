@@ -24,13 +24,7 @@
 
 #include "plugin.h"
 #include "connectioncontainer.h"
-
 #include "utils.h"
-
-#include <assert.h>
-#include <rpc.h>
-#include <rpcndr.h>
-#include <objidl.h>
 
 using namespace std;
 

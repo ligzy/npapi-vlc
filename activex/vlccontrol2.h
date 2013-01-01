@@ -27,7 +27,6 @@
 
 #include "axvlc_idl.h"
 
-#include <vlc/libvlc.h>
 #include <ole2.h>
 
 class VLCInterfaceBase {

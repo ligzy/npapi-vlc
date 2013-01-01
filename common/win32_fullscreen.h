@@ -26,8 +26,6 @@
 
 #ifdef _WIN32
 
-#include <vlc/vlc.h>
-
 #include "win32_vlcwnd.h"
 #include "vlc_player_options.h"
 #include "vlc_player.h"
