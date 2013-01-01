@@ -4,11 +4,11 @@
  * Copyright (C) 2011-2013 VLC Authors and VideoLAN
  * $Id$
  *
- * Authors: Samuel Hocevar <sam@zoy.org>
- *          Damien Fouilleul <damienf@videolan.org>
- *          Jean-Paul Saman <jpsaman@videolan.org>
+ * Authors: Felix Paul Kühne <fkuehne # videolan # org>
  *          Cheng Sun <chengsun9@gmail.com>
- *          Felix Paul Kühne <fkuehne # videolan # org>
+ *          Jean-Baptiste Kempf <jb@videolan.org>
+ *          James Bates <james.h.bates@gmail.com>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
