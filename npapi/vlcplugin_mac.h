@@ -1,13 +1,14 @@
 /*****************************************************************************
  * vlcplugin_mac.h: a VLC plugin for Mozilla (Mac interface)
  *****************************************************************************
- * Copyright (C) 2011 the VideoLAN team
+ * Copyright (C) 2011-2013 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
  *          Damien Fouilleul <damienf@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
  *          Cheng Sun <chengsun9@gmail.com>
+ *          Felix Paul Kühne <fkuehne # videolan # org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +34,6 @@ class VlcPluginMac : public VlcPluginBase
 {
 public:
     VlcPluginMac(NPP, NPuint16_t);
-    virtual ~VlcPluginMac();
 
     int                 setSize(unsigned width, unsigned height);
 

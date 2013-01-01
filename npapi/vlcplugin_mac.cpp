@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcplugin_mac.cpp: a VLC plugin for Mozilla (Mac interface)
  *****************************************************************************
- * Copyright (C) 2011-2012 VLC Authors and VideoLAN
+ * Copyright (C) 2011-2013 VLC Authors and VideoLAN
  * $Id$
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
@@ -34,10 +34,6 @@ VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
 {
 }
 
-VlcPluginMac::~VlcPluginMac()
-{
-}
-
 void VlcPluginMac::set_player_window()
 {
     // XXX FIXME insert appropriate call here
@@ -45,14 +41,16 @@ void VlcPluginMac::set_player_window()
 
 void VlcPluginMac::toggle_fullscreen()
 {
-    if (!get_options().get_enable_fs()) return;
+    if (!get_options().get_enable_fs())
+        return;
     if (playlist_isplaying())
         libvlc_toggle_fullscreen(getMD());
 }
 
 void VlcPluginMac::set_fullscreen(int yes)
 {
-    if (!get_options().get_enable_fs()) return;
+    if (!get_options().get_enable_fs())
+        return;
     if (playlist_isplaying())
         libvlc_set_fullscreen(getMD(), yes);
 }
@@ -133,9 +131,14 @@ bool VlcPluginMac::handle_event(void *event)
     }
 
     if (eventType == NPCocoaEventDrawRect) {
-        if (VlcPluginBase::playlist_isplaying() && VlcPluginBase::player_has_vout())
-            return false;
-
+        /* even though we are using the CoreAnimation drawing model
+         * this can be called by the browser, especially when doing
+         * screenshots.
+         * Since speed isn't important in this case, we could fetch
+         * fetch the current frame from libvlc and render it as an
+         * image.
+         * However, for sakes of simplicity, just show a black
+         * rectancle for now. */
         CGContextRef cgContext = cocoaEvent->data.draw.context;
         if (!cgContext) {
             return false;
@@ -150,26 +153,10 @@ bool VlcPluginMac::handle_event(void *event)
         CGContextTranslateCTM(cgContext, 0.0, windowHeight);
         CGContextScaleCTM(cgContext, 1., -1.);
 
-        // draw a gray background
+        // draw black rectancle
         CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-        CGContextSetGrayFillColor(cgContext, 0.5, 1.);
+        CGContextSetGrayFillColor(cgContext, 0., 1.);
         CGContextDrawPath(cgContext, kCGPathFill);
-
-        // draw info text
-        CGContextSetRGBStrokeColor(cgContext, 0, 0, 0, .5);
-        CGContextSetTextDrawingMode(cgContext, kCGTextFillStroke);
-        CFStringRef keys[] = { kCTFontAttributeName };
-        CFTypeRef values[] = { CTFontCreateWithName(CFSTR("Helvetica"),16,NULL) };
-        CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
-                                                        (const void **)&keys,
-                                                        (const void **)&values,
-                                                        1, NULL, NULL);
-        CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
-        CTLineRef textTine = CTLineCreateWithAttributedString(attRef);
-        CGRect textRect = CTLineGetImageBounds(textTine, cgContext);
-        CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2));
-        CTLineDraw(textTine, cgContext);
-        CFRelease(textTine);
 
         CGContextRestoreGState(cgContext);
 
