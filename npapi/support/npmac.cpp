@@ -434,6 +434,7 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
 
     NPError err;
     if (windowless) {
+        printf("running in windowless\n");
         NPBool supportsCoreGraphics = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsCoreGraphicsBool, &supportsCoreGraphics);
         if (err != NPERR_NO_ERROR || !supportsCoreGraphics) {
@@ -447,6 +448,7 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
     } else {
+        printf("running windowed\n");
         NPBool supportsCoreAnimation = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsCoreAnimationBool, &supportsCoreAnimation);
         if (err != NPERR_NO_ERROR || !supportsCoreAnimation) {
