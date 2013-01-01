@@ -170,6 +170,7 @@ class VLCMarquee: public VLCInterface<VLCMarquee,IVLCMarquee>
 {
 public:
     VLCMarquee(VLCPlugin *p): VLCInterface<VLCMarquee,IVLCMarquee>(p) { }
+    virtual ~VLCMarquee() { }
 
     // IVLCMarquee methods
     STDMETHODIMP enable()  { return do_put_int(libvlc_marquee_Enable, true); }
@@ -203,6 +204,7 @@ class VLCLogo: public VLCInterface<VLCLogo,IVLCLogo>
 {
 public:
     VLCLogo(VLCPlugin *p): VLCInterface<VLCLogo,IVLCLogo>(p) { }
+    virtual ~VLCLogo() { }
 
     STDMETHODIMP enable()  { return do_put_int(libvlc_logo_enable, true); }
     STDMETHODIMP disable() { return do_put_int(libvlc_logo_enable, false); }
@@ -236,6 +238,7 @@ class VLCDeinterlace: public VLCInterface<VLCDeinterlace,IVLCDeinterlace>
 public:
     VLCDeinterlace(VLCPlugin *p):
         VLCInterface<VLCDeinterlace,IVLCDeinterlace>(p) { }
+    virtual ~VLCDeinterlace() { }
 
     STDMETHODIMP enable(BSTR val);
     STDMETHODIMP disable();
