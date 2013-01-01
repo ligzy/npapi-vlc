@@ -88,7 +88,7 @@ case "${host_os}" in
 
     CFLAGS="${CFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
     CXXFLAGS="${CXXFLAGS} -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
-    OBJCXXFLAGS=="${OBJCXXFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
+    OBJCXXFLAGS="${OBJCXXFLAGS} -fobjc-exceptions -D_INTL_REDIRECT_MACROS ${ARCH_flag}"
     CPPFLAGS="${CPPFLAGS} ${ARCH_flag}"
     LDFLAGS="${LDFLAGS} -Wl,-headerpad_max_install_names ${ARCH_flag}"
     ;;
