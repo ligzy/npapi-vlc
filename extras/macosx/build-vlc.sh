@@ -69,10 +69,6 @@ info $npapi_root_dir
 
 info "Preparing build dirs"
 
-if ! [ -e npapi-sdk ]; then
-svn export http://npapi-sdk.googlecode.com/svn/trunk/headers npapi-sdk -r HEAD
-fi
-
 spushd extras/macosx
 
 if ! [ -e vlc ]; then
