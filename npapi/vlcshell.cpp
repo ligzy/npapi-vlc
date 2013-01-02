@@ -57,7 +57,7 @@ static char mimetype[] =
     /* AVI */
     "video/x-msvideo:avi:AVI video;"
     /* QuickTime */
-    /* "video/quicktime:mov,qt:QuickTime video;" */
+    "video/quicktime:mov,qt:QuickTime video;"
     /* OGG */
     "application/ogg:ogg:Ogg stream;"
     "video/ogg:ogv:Ogg video;"
