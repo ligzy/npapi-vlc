@@ -61,7 +61,10 @@ static char mimetype[] =
     /* OGG */
     "application/ogg:ogg:Ogg stream;"
     "video/ogg:ogv:Ogg video;"
+    "audio/ogg:oga:Ogg audio;"
     "application/x-ogg:ogg:Ogg stream;"
+    /* Opus */
+    "audio/ogg;codecs=opus:opus:Opus audio;"
     /* VLC */
     "application/x-vlc-plugin::VLC plug-in;"
     /* Windows Media */
