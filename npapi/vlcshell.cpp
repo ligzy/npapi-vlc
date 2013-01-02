@@ -49,6 +49,7 @@ static char mimetype[] =
     /* MPEG-4 */
     "audio/mp4:aac,mp4,mpg4:MPEG-4 audio;"
     "audio/x-m4a:m4a:MPEG-4 audio;"
+    "audio/m4a:m4a:MPEG-4 audio;"
     /* MPEG-4 ASP */
     "video/mp4:mp4,mpg4:MPEG-4 video;"
     "application/mpeg4-iod:mp4,mpg4:MPEG-4 video;"
@@ -108,6 +109,7 @@ static char mimetype[] =
     "audio/amr:amr:AMR audio;"
     /* FLAC */
     "audio/x-flac:flac:FLAC audio;"
+    "audio/flac:flac:FLAC audio;"
     ;
 
 /******************************************************************************
