@@ -59,7 +59,8 @@ VlcPluginBase::VlcPluginBase( NPP instance, NPuint16_t mode ) :
 }
 
 static bool boolValue(const char *value) {
-    return ( !strcmp(value, "1") ||
+    return ( *value == NULL ||
+             !strcmp(value, "1") ||
              !strcasecmp(value, "true") ||
              !strcasecmp(value, "yes") );
 }
