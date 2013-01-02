@@ -45,8 +45,15 @@
     CGImageRef _sliderTrackCenter;
 
     CGImageRef _knob;
+
+    BOOL _wasPlayingBeforeMouseDown;
+    BOOL _isScrubbing;
+    CGFloat _mouseDownXDelta;
 }
 - (BOOL)_isPlaying;
+- (void)handleMouseDown:(CGPoint)point;
+- (void)handleMouseUp:(CGPoint)point;
+- (void)handleMouseDragged:(CGPoint)point;
 
 @end
 
@@ -155,9 +162,33 @@ bool VlcPluginMac::handle_event(void *event)
             if (cocoaEvent->data.mouse.clickCount >= 2)
                 VlcPluginMac::toggle_fullscreen();
 
+            CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
+                                        // Flip the y coordinate
+                                        npwindow.height - cocoaEvent->data.mouse.pluginY);
+            [controllerLayer handleMouseDown:[rootLayer convertPoint:point toLayer:controllerLayer]];
+
             return true;
         }
         case NPCocoaEventMouseUp:
+        {
+            CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
+                                        // Flip the y coordinate
+                                        npwindow.height - cocoaEvent->data.mouse.pluginY);
+
+            [controllerLayer handleMouseUp:[rootLayer convertPoint:point toLayer:controllerLayer]];
+
+            return true;
+        }
+        case NPCocoaEventMouseDragged:
+        {
+            CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
+                                        // Flip the y coordinate
+                                        npwindow.height - cocoaEvent->data.mouse.pluginY);
+
+            [controllerLayer handleMouseDragged:[rootLayer convertPoint:point toLayer:controllerLayer]];
+
+            return true;
+        }
         case NPCocoaEventKeyUp:
         case NPCocoaEventKeyDown:
         case NPCocoaEventFocusChanged:
@@ -413,6 +444,68 @@ static CGImageRef createImageNamed(NSString *name)
 
     [self _drawPlayPauseButtonInContext:cgContext];
     [self _drawSliderInContext:cgContext];
+}
+
+#pragma mark -
+#pragma mark event handling
+
+- (void)_setNewTimeForThumbCenterX:(CGFloat)centerX
+{
+    CGRect innerRect = [self _innerSliderRect];
+
+    CGFloat fraction = (centerX - CGRectGetMinX(innerRect)) / CGRectGetWidth(innerRect);
+    if (fraction > 1.0)
+        fraction = 1.0;
+    else if (fraction < 0.0)
+        fraction = 0.0;
+
+    printf("duration needed\n");
+
+    [self setNeedsDisplay];
+}
+
+- (void)handleMouseDown:(CGPoint)point
+{
+    if (CGRectContainsPoint([self _sliderRect], point)) {
+        _wasPlayingBeforeMouseDown = [self _isPlaying];
+        _isScrubbing = YES;
+
+        printf("should pause\n");
+
+        if (CGRectContainsPoint([self _sliderThumbRect], point))
+            _mouseDownXDelta = point.x - CGRectGetMidX([self _sliderThumbRect]);
+        else {
+            [self _setNewTimeForThumbCenterX:point.x];
+            _mouseDownXDelta = 0;
+        }
+    }
+}
+
+- (void)handleMouseUp:(CGPoint)point
+{
+    if (_isScrubbing) {
+        _isScrubbing = NO;
+        _mouseDownXDelta = 0;
+
+        if (_wasPlayingBeforeMouseDown)
+            printf("start to play\n");
+            return;
+    }
+
+    if (CGRectContainsPoint([self _playPauseButtonRect], point)) {
+        printf("toggle play/pause\n");
+        return;
+    }
+}
+
+- (void)handleMouseDragged:(CGPoint)point
+{
+    if (!_isScrubbing)
+        return;
+
+    point.x -= _mouseDownXDelta;
+
+    [self _setNewTimeForThumbCenterX:point.x];
 }
 
 @end
