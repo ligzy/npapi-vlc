@@ -416,44 +416,44 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
 
     NPError err;
     if (windowless) {
-        printf("running in windowless\n");
+        fprintf(stderr, "running in windowless\n");
         NPBool supportsCoreGraphics = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsCoreGraphicsBool, &supportsCoreGraphics);
         if (err != NPERR_NO_ERROR || !supportsCoreGraphics) {
-            printf("Error in New: browser doesn't support CoreGraphics drawing model\n");
+            fprintf(stderr, "Error in New: browser doesn't support CoreGraphics drawing model\n");
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
 
         err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreGraphics);
         if (err != NPERR_NO_ERROR) {
-            printf("Error in New: couldn't activate CoreGraphics drawing model\n");
+            fprintf(stderr, "Error in New: couldn't activate CoreGraphics drawing model\n");
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
     } else {
-        printf("running windowed\n");
+        fprintf(stderr, "running windowed\n");
         NPBool supportsCoreAnimation = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsCoreAnimationBool, &supportsCoreAnimation);
         if (err != NPERR_NO_ERROR || !supportsCoreAnimation) {
-            printf("Error in New: browser doesn't support CoreAnimation drawing model\n");
+            fprintf(stderr, "Error in New: browser doesn't support CoreAnimation drawing model\n");
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
 
         NPBool supportsInvalidatingCoreAnimation = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsInvalidatingCoreAnimationBool, &supportsInvalidatingCoreAnimation);
         if (err != NPERR_NO_ERROR || !supportsInvalidatingCoreAnimation)
-            printf("New: browser doesn't support the Invalidating CoreAnimation drawing model\n");
+            fprintf(stderr, "New: browser doesn't support the Invalidating CoreAnimation drawing model\n");
 
         if (supportsInvalidatingCoreAnimation) {
             err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelInvalidatingCoreAnimation);
             if (err != NPERR_NO_ERROR) {
-                printf("Error in New: couldn't activate Invalidating CoreAnimation drawing model\n");
+                fprintf(stderr, "Error in New: couldn't activate Invalidating CoreAnimation drawing model\n");
                 return NPERR_INCOMPATIBLE_VERSION_ERROR;
             }
         } else {
-            printf("New: falling back to non-invalidating CoreAnimation drawing, since invalidation is not supported\n");
+            fprintf(stderr, "New: falling back to non-invalidating CoreAnimation drawing, since invalidation is not supported\n");
             err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreAnimation);
             if (err != NPERR_NO_ERROR) {
-                printf("Error in New: couldn't activate CoreAnimation drawing model\n");
+                fprintf(stderr, "Error in New: couldn't activate CoreAnimation drawing model\n");
                 return NPERR_INCOMPATIBLE_VERSION_ERROR;
             }
         }
@@ -462,13 +462,13 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
     NPBool supportsCocoaEvents = FALSE;
     err = NPN_GetValue(instance, NPNVsupportsCocoaBool, &supportsCocoaEvents);
     if (err != NPERR_NO_ERROR || !supportsCocoaEvents) {
-        printf("Error in New: browser doesn't support Cocoa event model\n");
+        fprintf(stderr, "Error in New: browser doesn't support Cocoa event model\n");
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
     }
 
     err = NPN_SetValue(instance, NPPVpluginEventModel, (void*)NPEventModelCocoa);
     if (err != NPERR_NO_ERROR) {
-        printf("Error in New: couldn't activate Cocoa event model\n");
+        fprintf(stderr, "Error in New: couldn't activate Cocoa event model\n");
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
     }
 
@@ -709,7 +709,7 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
     /* validate input parameters */
 
     if (NULL == nsTable) {
-        printf("NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table is null\n");
+        fprintf(stderr, "NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table is null\n");
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
@@ -723,7 +723,7 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
      */
 
     if ((nsTable->version >> 8) > NP_VERSION_MAJOR) {
-        printf("NP_Initialize error: NPERR_INCOMPATIBLE_VERSION_ERROR\n");
+        fprintf(stderr, "NP_Initialize error: NPERR_INCOMPATIBLE_VERSION_ERROR\n");
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
     }
 
@@ -731,7 +731,7 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
     // We use all functions of the nsTable up to and including pluginthreadasynccall. We therefore check that
     // reaches at least till that function.
     if (nsTable->size < (offsetof(NPNetscapeFuncs, pluginthreadasynccall) + sizeof(NPN_PluginThreadAsyncCallProcPtr))) {
-        printf("NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table too small\n");
+        fprintf(stderr, "NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table too small\n");
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
