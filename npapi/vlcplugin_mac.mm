@@ -49,8 +49,16 @@
     BOOL _wasPlayingBeforeMouseDown;
     BOOL _isScrubbing;
     CGFloat _mouseDownXDelta;
+
+    double _position;
+    BOOL _isPlaying;
+
+    VlcPluginMac *_cppPlugin;
 }
-- (BOOL)_isPlaying;
+@property (readwrite) double mediaPosition;
+@property (readwrite) BOOL isPlaying;
+@property (readwrite) VlcPluginMac * cppPlugin;
+
 - (void)handleMouseDown:(CGPoint)point;
 - (void)handleMouseUp:(CGPoint)point;
 - (void)handleMouseDragged:(CGPoint)point;
@@ -114,6 +122,9 @@ bool VlcPluginMac::get_toolbar_visible()
 
 void VlcPluginMac::update_controls()
 {
+    [controllerLayer setMediaPosition: libvlc_media_player_get_position(getMD())];
+    [controllerLayer setIsPlaying: playlist_isplaying()];
+
     [controllerLayer setNeedsDisplay];
 }
 
@@ -142,6 +153,7 @@ NPError VlcPluginMac::get_root_layer(void *value)
     controllerLayer = [[VLCControllerLayer alloc] init];
     controllerLayer.opaque = 1.;
     [rootLayer addSublayer: controllerLayer];
+    [controllerLayer setCppPlugin: this];
 
     *(CALayer **)value = rootLayer;
     return NPERR_NO_ERROR;
@@ -316,6 +328,10 @@ bool VlcPluginMac::handle_event(void *event)
 
 @implementation VLCControllerLayer
 
+@synthesize mediaPosition = _position;
+@synthesize isPlaying = _isPlaying;
+@synthesize cppPlugin = _cppPlugin;
+
 static CGImageRef createImageNamed(NSString *name)
 {
     CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("com.netscape.vlc")), (CFStringRef)name, CFSTR("png"), NULL);
@@ -366,10 +382,6 @@ static CGImageRef createImageNamed(NSString *name)
     [super dealloc];
 }
 
-- (BOOL)_isPlaying {
-    return YES;
-}
-
 #pragma mark -
 #pragma mark drawing
 
@@ -391,11 +403,7 @@ static CGImageRef createImageNamed(NSString *name)
 {
     CGRect sliderRect = [self _sliderRect];
 
-    CGFloat fraction = 0.0;
-    /*    if (_movie)
-     fraction = [self _currentTime] / [self _duration];*/
-
-    CGFloat x = fraction * (CGRectGetWidth(sliderRect) - CGImageGetWidth(_knob));
+    CGFloat x = self.mediaPosition * (CGRectGetWidth(sliderRect) - CGImageGetWidth(_knob));
 
     return CGRectMake(CGRectGetMinX(sliderRect) + x, CGRectGetMinY(sliderRect) + 1,
                       CGImageGetWidth(_knob), CGImageGetHeight(_knob));
@@ -408,7 +416,7 @@ static CGImageRef createImageNamed(NSString *name)
 
 - (void)_drawPlayPauseButtonInContext:(CGContextRef)context
 {
-    CGContextDrawImage(context, [self _playPauseButtonRect], _playImage); //playlist_isplaying() ? _pauseImage;
+    CGContextDrawImage(context, [self _playPauseButtonRect], self.isPlaying ? _pauseImage : _playImage);
 }
 
 - (void)_drawSliderInContext:(CGContextRef)context
@@ -453,13 +461,13 @@ static CGImageRef createImageNamed(NSString *name)
 {
     CGRect innerRect = [self _innerSliderRect];
 
-    CGFloat fraction = (centerX - CGRectGetMinX(innerRect)) / CGRectGetWidth(innerRect);
+    double fraction = (centerX - CGRectGetMinX(innerRect)) / CGRectGetWidth(innerRect);
     if (fraction > 1.0)
         fraction = 1.0;
     else if (fraction < 0.0)
         fraction = 0.0;
 
-    printf("duration needed\n");
+    libvlc_media_player_set_position(self.cppPlugin->getMD(), fraction);
 
     [self setNeedsDisplay];
 }
@@ -467,10 +475,10 @@ static CGImageRef createImageNamed(NSString *name)
 - (void)handleMouseDown:(CGPoint)point
 {
     if (CGRectContainsPoint([self _sliderRect], point)) {
-        _wasPlayingBeforeMouseDown = [self _isPlaying];
+        _wasPlayingBeforeMouseDown = self.isPlaying;
         _isScrubbing = YES;
 
-        printf("should pause\n");
+        self.cppPlugin->playlist_pause();
 
         if (CGRectContainsPoint([self _sliderThumbRect], point))
             _mouseDownXDelta = point.x - CGRectGetMidX([self _sliderThumbRect]);
@@ -488,12 +496,12 @@ static CGImageRef createImageNamed(NSString *name)
         _mouseDownXDelta = 0;
 
         if (_wasPlayingBeforeMouseDown)
-            printf("start to play\n");
+            self.cppPlugin->playlist_play();
             return;
     }
 
     if (CGRectContainsPoint([self _playPauseButtonRect], point)) {
-        printf("toggle play/pause\n");
+        self.cppPlugin->playlist_togglePause();
         return;
     }
 }
