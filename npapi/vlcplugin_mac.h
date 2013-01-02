@@ -44,9 +44,9 @@ public:
     bool resize_windows();
     bool destroy_windows();
 
-    void set_toolbar_visible(bool)  { /* STUB */ }
-    bool get_toolbar_visible()  { return false; }
-    void update_controls()      {/* STUB */}
+    void set_toolbar_visible(bool);
+    bool get_toolbar_visible();
+    void update_controls();
     void popup_menu()           {/* STUB */}
 
 

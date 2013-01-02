@@ -95,6 +95,21 @@ int  VlcPluginMac::get_fullscreen()
     return r;
 }
 
+void VlcPluginMac::set_toolbar_visible(bool b_value)
+{
+    controllerLayer.opaque = (float)b_value;
+}
+
+bool VlcPluginMac::get_toolbar_visible()
+{
+    return (bool)controllerLayer.opaque;
+}
+
+void VlcPluginMac::update_controls()
+{
+    [controllerLayer setNeedsDisplay];
+}
+
 bool VlcPluginMac::create_windows()
 {
     return true;
@@ -346,8 +361,8 @@ static CGImageRef createImageNamed(NSString *name)
     CGRect sliderRect = [self _sliderRect];
 
     CGFloat fraction = 0.0;
-/*    if (_movie)
-        fraction = [self _currentTime] / [self _duration];*/
+    /*    if (_movie)
+     fraction = [self _currentTime] / [self _duration];*/
 
     CGFloat x = fraction * (CGRectGetWidth(sliderRect) - CGImageGetWidth(_knob));
 
