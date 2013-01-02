@@ -173,7 +173,8 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
         {
             b_autoloop = boolValue(argv[i]);
         }
-        else if( !strcmp( argn[i], "toolbar" ) )
+        else if( !strcmp( argn[i], "toolbar" )
+              || !strcmp( argn[i], "controls") )
         {
             set_show_toolbar( boolValue(argv[i]) );
         }
