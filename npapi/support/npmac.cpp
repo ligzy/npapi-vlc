@@ -35,22 +35,8 @@
 #include "../common.h"
 #include "../vlcshell.h"
 
-
-//
-// Define PLUGIN_TRACE to 1 to have the wrapper functions emit
-// DebugStr messages whenever they are called.
-//
-#define PLUGIN_TRACE 0
-
-#if PLUGIN_TRACE
-#define PLUGINDEBUGSTR(msg)     ::DebugStr(msg)
-#else
-#define PLUGINDEBUGSTR(msg) {}
-#endif
-
 #define PLUGIN_TO_HOST_GLUE(name, fp) (fp)
 #define HOST_TO_PLUGIN_GLUE(name, fp) (fp)
-
 
 
 #pragma mark -
@@ -399,14 +385,12 @@ void        Private_URLNotify(NPP instance, const char* url, NPReason reason, vo
 NPError Private_Initialize(void)
 {
     NPError err;
-    PLUGINDEBUGSTR("\pInitialize;g;");
     err = NPP_Initialize();
     return err;
 }
 
 void Private_Shutdown(void)
 {
-    PLUGINDEBUGSTR("\pShutdown;g;");
     NPP_Shutdown();
 }
 
@@ -418,8 +402,6 @@ static bool boolValue(const char *value) {
 
 NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
 {
-    PLUGINDEBUGSTR("\pNew;g;");
-
     /* find out, if the plugin should run in windowless mode.
      * if yes, choose the CoreGraphics drawing model */
     bool windowless = false;
@@ -438,13 +420,13 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
         NPBool supportsCoreGraphics = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsCoreGraphicsBool, &supportsCoreGraphics);
         if (err != NPERR_NO_ERROR || !supportsCoreGraphics) {
-            PLUGINDEBUGSTR("\pNew: browser doesn't support CoreGraphics drawing model;g;");
+            printf("Error in New: browser doesn't support CoreGraphics drawing model\n");
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
 
         err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreGraphics);
         if (err != NPERR_NO_ERROR) {
-            PLUGINDEBUGSTR("\pNew: couldn't activate CoreGraphics drawing model;g;");
+            printf("Error in New: couldn't activate CoreGraphics drawing model\n");
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
     } else {
@@ -452,26 +434,26 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
         NPBool supportsCoreAnimation = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsCoreAnimationBool, &supportsCoreAnimation);
         if (err != NPERR_NO_ERROR || !supportsCoreAnimation) {
-            PLUGINDEBUGSTR("\pNew: browser doesn't support CoreAnimation drawing model;g;");
+            printf("Error in New: browser doesn't support CoreAnimation drawing model\n");
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
 
         NPBool supportsInvalidatingCoreAnimation = FALSE;
         err = NPN_GetValue(instance, NPNVsupportsInvalidatingCoreAnimationBool, &supportsInvalidatingCoreAnimation);
         if (err != NPERR_NO_ERROR || !supportsInvalidatingCoreAnimation)
-            PLUGINDEBUGSTR("\pNew: browser doesn't support the Invalidating CoreAnimation drawing model;g;");
+            printf("New: browser doesn't support the Invalidating CoreAnimation drawing model\n");
 
         if (supportsInvalidatingCoreAnimation) {
             err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelInvalidatingCoreAnimation);
             if (err != NPERR_NO_ERROR) {
-                PLUGINDEBUGSTR("\pNew: couldn't activate Invalidating CoreAnimation drawing model;g;");
+                printf("Error in New: couldn't activate Invalidating CoreAnimation drawing model\n");
                 return NPERR_INCOMPATIBLE_VERSION_ERROR;
             }
         } else {
-            PLUGINDEBUGSTR("\pNew: falling back to non-invalidating CoreAnimation drawing, since invalidation is not supported;g;");
+            printf("New: falling back to non-invalidating CoreAnimation drawing, since invalidation is not supported\n");
             err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreAnimation);
             if (err != NPERR_NO_ERROR) {
-                PLUGINDEBUGSTR("\pNew: couldn't activate CoreAnimation drawing model;g;");
+                printf("Error in New: couldn't activate CoreAnimation drawing model\n");
                 return NPERR_INCOMPATIBLE_VERSION_ERROR;
             }
         }
@@ -480,14 +462,14 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
     NPBool supportsCocoaEvents = FALSE;
     err = NPN_GetValue(instance, NPNVsupportsCocoaBool, &supportsCocoaEvents);
     if (err != NPERR_NO_ERROR || !supportsCocoaEvents) {
-		PLUGINDEBUGSTR("\pNew: browser doesn't support Cocoa event model;g;");
-		return NPERR_INCOMPATIBLE_VERSION_ERROR;
-	}
+        printf("Error in New: browser doesn't support Cocoa event model\n");
+        return NPERR_INCOMPATIBLE_VERSION_ERROR;
+    }
 
     err = NPN_SetValue(instance, NPPVpluginEventModel, (void*)NPEventModelCocoa);
     if (err != NPERR_NO_ERROR) {
-    	PLUGINDEBUGSTR("\pNew: couldn't activate Cocoa event model;g;");
-    	return NPERR_INCOMPATIBLE_VERSION_ERROR;
+        printf("Error in New: couldn't activate Cocoa event model\n");
+        return NPERR_INCOMPATIBLE_VERSION_ERROR;
     }
 
     NPError ret = NPP_New(pluginType, instance, mode, argc, argn, argv, saved);
@@ -498,7 +480,6 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
 NPError Private_Destroy(NPP instance, NPSavedData** save)
 {
     NPError err;
-    PLUGINDEBUGSTR("\pDestroy;g;");
     err = NPP_Destroy(instance, save);
 
     return err;
@@ -507,7 +488,6 @@ NPError Private_Destroy(NPP instance, NPSavedData** save)
 NPError Private_SetWindow(NPP instance, NPWindow* window)
 {
     NPError err;
-    PLUGINDEBUGSTR("\pSetWindow;g;");
     err = NPP_SetWindow(instance, window);
 
     return err;
@@ -516,7 +496,6 @@ NPError Private_SetWindow(NPP instance, NPWindow* window)
 NPError Private_GetValue( NPP instance, NPPVariable variable, void *value)
 {
     NPError err;
-    PLUGINDEBUGSTR("\pGetValue;g;");
     err = NPP_GetValue(instance, variable, value);
 
     return err;
@@ -525,7 +504,6 @@ NPError Private_GetValue( NPP instance, NPPVariable variable, void *value)
 NPError Private_SetValue( NPP instance, NPNVariable variable, void *value)
 {
     NPError err;
-    PLUGINDEBUGSTR("\pSetValue;g;");
     err = NPP_SetValue(instance, variable, value);
 
     return err;
@@ -534,7 +512,6 @@ NPError Private_SetValue( NPP instance, NPNVariable variable, void *value)
 NPError Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
 {
     NPError err;
-    PLUGINDEBUGSTR("\pNewStream;g;");
     err = NPP_NewStream(instance, type, stream, seekable, stype);
 
     return err;
@@ -543,7 +520,6 @@ NPError Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBoo
 int32_t Private_WriteReady(NPP instance, NPStream* stream)
 {
     int32_t result;
-    PLUGINDEBUGSTR("\pWriteReady;g;");
     result = NPP_WriteReady(instance, stream);
 
     return result;
@@ -552,7 +528,6 @@ int32_t Private_WriteReady(NPP instance, NPStream* stream)
 int32_t Private_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer)
 {
     int32_t result;
-    PLUGINDEBUGSTR("\pWrite;g;");
     result = NPP_Write(instance, stream, offset, len, buffer);
 
     return result;
@@ -560,14 +535,12 @@ int32_t Private_Write(NPP instance, NPStream* stream, int32_t offset, int32_t le
 
 void Private_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
 {
-    PLUGINDEBUGSTR("\pStreamAsFile;g;");
     NPP_StreamAsFile(instance, stream, fname);
 }
 
 NPError Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 {
     NPError err;
-    PLUGINDEBUGSTR("\pDestroyStream;g;");
     err = NPP_DestroyStream(instance, stream, reason);
 
     return err;
@@ -576,7 +549,6 @@ NPError Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 int16_t Private_HandleEvent(NPP instance, void* event)
 {
     int16_t result;
-    PLUGINDEBUGSTR("\pHandleEvent;g;");
     result = NPP_HandleEvent(instance, event);
 
     return result;
@@ -584,13 +556,11 @@ int16_t Private_HandleEvent(NPP instance, void* event)
 
 void Private_Print(NPP instance, NPPrint* platformPrint)
 {
-    PLUGINDEBUGSTR("\pPrint;g;");
     NPP_Print(instance, platformPrint);
 }
 
 void Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
 {
-    PLUGINDEBUGSTR("\pURLNotify;g;");
     NPP_URLNotify(instance, url, reason, notifyData);
 }
 
@@ -606,8 +576,6 @@ main_return_t main(NPNetscapeFuncs* nsTable, NPPluginFuncs* pluginFuncs, unloadu
 
 DEFINE_API_C(main_return_t) main(NPNetscapeFuncs* nsTable, NPPluginFuncs* pluginFuncs, unloadupp_t* unloadUpp)
 {
-    PLUGINDEBUGSTR("\pmain");
-
     NPError err = NPERR_NO_ERROR;
 
     //
@@ -738,12 +706,10 @@ extern "C" {
 
 NPError NP_Initialize(NPNetscapeFuncs* nsTable)
 {
-    PLUGINDEBUGSTR("\pNP_Initialize");
-
     /* validate input parameters */
 
     if (NULL == nsTable) {
-    	PLUGINDEBUGSTR("\pNP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table is null");
+        printf("NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table is null\n");
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
@@ -757,7 +723,7 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
      */
 
     if ((nsTable->version >> 8) > NP_VERSION_MAJOR) {
-    	PLUGINDEBUGSTR("\pNP_Initialize error: NPERR_INCOMPATIBLE_VERSION_ERROR");
+        printf("NP_Initialize error: NPERR_INCOMPATIBLE_VERSION_ERROR\n");
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
     }
 
@@ -765,7 +731,7 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
     // We use all functions of the nsTable up to and including pluginthreadasynccall. We therefore check that
     // reaches at least till that function.
     if (nsTable->size < (offsetof(NPNetscapeFuncs, pluginthreadasynccall) + sizeof(NPN_PluginThreadAsyncCallProcPtr))) {
-    	PLUGINDEBUGSTR("\pNP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table too small");
+        printf("NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table too small\n");
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
@@ -836,8 +802,6 @@ NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
 {
     int navMinorVers = gNetscapeFuncs.version & 0xFF;
 
-    PLUGINDEBUGSTR("\pNP_GetEntryPoints");
-
     if (pluginFuncs == NULL)
         return NPERR_INVALID_FUNCTABLE_ERROR;
 
@@ -876,7 +840,6 @@ NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
 
 NPError NP_Shutdown(void)
 {
-    PLUGINDEBUGSTR("\pNP_Shutdown");
     NPP_Shutdown();
     return NPERR_NO_ERROR;
 }
