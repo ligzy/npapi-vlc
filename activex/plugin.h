@@ -74,7 +74,7 @@ private:
     LPPICTURE   _inplace_picture;
 };
 
-struct VLCPlugin
+class VLCPlugin
     : public IUnknown, private vlc_player_options, private vlc_player
 {
 public:
