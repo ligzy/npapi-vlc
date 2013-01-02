@@ -46,6 +46,7 @@
 
     CGImageRef _knob;
 }
+- (BOOL)_isPlaying;
 
 @end
 
@@ -319,9 +320,16 @@ static CGImageRef createImageNamed(NSString *name)
     [super dealloc];
 }
 
+- (BOOL)_isPlaying {
+    return YES;
+}
+
+#pragma mark -
+#pragma mark drawing
+
 - (CGRect)_playPauseButtonRect
 {
-    return CGRectMake(0, 0, 25, 25);
+    return CGRectMake(4, (25 - CGImageGetHeight(_playImage)) / 2, CGImageGetWidth(_playImage), CGImageGetHeight(_playImage));
 }
 
 - (CGRect)_sliderRect
@@ -329,8 +337,8 @@ static CGImageRef createImageNamed(NSString *name)
     CGFloat sliderYPosition = (self.bounds.size.height - CGImageGetHeight(_sliderTrackLeft)) / 2.0;
     CGFloat playPauseButtonWidth = [self _playPauseButtonRect].size.width;
 
-    return CGRectMake(playPauseButtonWidth, sliderYPosition,
-                      self.bounds.size.width - playPauseButtonWidth - 7, CGImageGetHeight(_sliderTrackLeft));
+    return CGRectMake(playPauseButtonWidth + 7, sliderYPosition,
+                      self.bounds.size.width - playPauseButtonWidth - 10, CGImageGetHeight(_sliderTrackLeft));
 }
 
 - (CGRect)_sliderThumbRect
@@ -343,7 +351,7 @@ static CGImageRef createImageNamed(NSString *name)
 
     CGFloat x = fraction * (CGRectGetWidth(sliderRect) - CGImageGetWidth(_knob));
 
-    return CGRectMake(CGRectGetMinX(sliderRect) + x, CGRectGetMinY(sliderRect) - 1,
+    return CGRectMake(CGRectGetMinX(sliderRect) + x, CGRectGetMinY(sliderRect) + 1,
                       CGImageGetWidth(_knob), CGImageGetHeight(_knob));
 }
 
