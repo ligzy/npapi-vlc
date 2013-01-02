@@ -27,7 +27,6 @@
 #include <map>
 #include <vector>
 
-#include <malloc.h>
 #include <wchar.h>
 
 using namespace std;
