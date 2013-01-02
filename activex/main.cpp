@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 
+#include <objsafe.h>
 #include <comcat.h>
 #include <windows.h>
 #include <shlwapi.h>
