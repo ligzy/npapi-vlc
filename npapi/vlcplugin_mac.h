@@ -34,8 +34,6 @@ public:
     VlcPluginMac(NPP, NPuint16_t);
     virtual ~VlcPluginMac();
 
-    int                 setSize(unsigned width, unsigned height);
-
     void toggle_fullscreen();
     void set_fullscreen( int );
     int  get_fullscreen();
@@ -48,7 +46,6 @@ public:
     bool get_toolbar_visible();
     void update_controls();
     void popup_menu()           {/* STUB */}
-
 
     bool handle_event(void *event);
     NPError get_root_layer(void *value);

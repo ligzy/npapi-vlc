@@ -44,6 +44,9 @@
     CGImageRef _sliderTrackRight;
     CGImageRef _sliderTrackCenter;
 
+    CGImageRef _enterFullscreen;
+    CGImageRef _leaveFullscreen;
+
     CGImageRef _knob;
 
     BOOL _wasPlayingBeforeMouseDown;
@@ -52,17 +55,25 @@
 
     double _position;
     BOOL _isPlaying;
+    BOOL _isFullscreen;
 
     VlcPluginMac *_cppPlugin;
 }
 @property (readwrite) double mediaPosition;
 @property (readwrite) BOOL isPlaying;
+@property (readwrite) BOOL isFullscreen;
 @property (readwrite) VlcPluginMac * cppPlugin;
 
 - (void)handleMouseDown:(CGPoint)point;
 - (void)handleMouseUp:(CGPoint)point;
 - (void)handleMouseDragged:(CGPoint)point;
 
+@end
+
+@interface VLCControllerLayer (Internal)
+- (CGRect)_playPauseButtonRect;
+- (CGRect)_fullscreenButtonRect;
+- (CGRect)_sliderRect;
 @end
 
 static CALayer * rootLayer;
@@ -92,14 +103,16 @@ void VlcPluginMac::toggle_fullscreen()
         return;
     if (playlist_isplaying())
         libvlc_toggle_fullscreen(getMD());
+    this->update_controls();
 }
 
-void VlcPluginMac::set_fullscreen(int yes)
+void VlcPluginMac::set_fullscreen(int i_value)
 {
     if (!get_options().get_enable_fs())
         return;
     if (playlist_isplaying())
-        libvlc_set_fullscreen(getMD(), yes);
+        libvlc_set_fullscreen(getMD(), i_value);
+    this->update_controls();
 }
 
 int  VlcPluginMac::get_fullscreen()
@@ -124,6 +137,7 @@ void VlcPluginMac::update_controls()
 {
     [controllerLayer setMediaPosition: libvlc_media_player_get_position(getMD())];
     [controllerLayer setIsPlaying: playlist_isplaying()];
+    [controllerLayer setIsFullscreen:this->get_fullscreen()];
 
     [controllerLayer setNeedsDisplay];
 }
@@ -330,6 +344,7 @@ bool VlcPluginMac::handle_event(void *event)
 
 @synthesize mediaPosition = _position;
 @synthesize isPlaying = _isPlaying;
+@synthesize isFullscreen = _isFullscreen;
 @synthesize cppPlugin = _cppPlugin;
 
 static CGImageRef createImageNamed(NSString *name)
@@ -362,6 +377,9 @@ static CGImageRef createImageNamed(NSString *name)
         _sliderTrackRight = createImageNamed(@"SliderTrackRight");
         _sliderTrackCenter = createImageNamed(@"SliderTrackCenter");
 
+        _enterFullscreen = createImageNamed(@"enter-fullscreen");
+        _leaveFullscreen = createImageNamed(@"leave-fullscreen");
+
         _knob = createImageNamed(@"Knob");
     }
 
@@ -377,6 +395,9 @@ static CGImageRef createImageNamed(NSString *name)
     CGImageRelease(_sliderTrackRight);
     CGImageRelease(_sliderTrackCenter);
 
+    CGImageRelease(_enterFullscreen);
+    CGImageRelease(_leaveFullscreen);
+
     CGImageRelease(_knob);
 
     [super dealloc];
@@ -387,16 +408,21 @@ static CGImageRef createImageNamed(NSString *name)
 
 - (CGRect)_playPauseButtonRect
 {
-    return CGRectMake(4, (25 - CGImageGetHeight(_playImage)) / 2, CGImageGetWidth(_playImage), CGImageGetHeight(_playImage));
+    return CGRectMake(4., (25. - CGImageGetHeight(_playImage)) / 2., CGImageGetWidth(_playImage), CGImageGetHeight(_playImage));
+}
+
+- (CGRect)_fullscreenButtonRect
+{
+    return CGRectMake( CGRectGetMaxX([self _sliderRect]), (25. - CGImageGetHeight(_enterFullscreen)) / 2., CGImageGetWidth(_enterFullscreen), CGImageGetHeight(_enterFullscreen));
 }
 
 - (CGRect)_sliderRect
 {
-    CGFloat sliderYPosition = (self.bounds.size.height - CGImageGetHeight(_sliderTrackLeft)) / 2.0;
+    CGFloat sliderYPosition = (self.bounds.size.height - CGImageGetHeight(_sliderTrackLeft)) / 2.;
     CGFloat playPauseButtonWidth = [self _playPauseButtonRect].size.width;
 
     return CGRectMake(playPauseButtonWidth + 7, sliderYPosition,
-                      self.bounds.size.width - playPauseButtonWidth - 10, CGImageGetHeight(_sliderTrackLeft));
+                      self.bounds.size.width - playPauseButtonWidth - 15 - CGImageGetWidth(_enterFullscreen), CGImageGetHeight(_sliderTrackLeft));
 }
 
 - (CGRect)_sliderThumbRect
@@ -441,6 +467,10 @@ static CGImageRef createImageNamed(NSString *name)
                                              CGImageGetWidth(_sliderTrackRight), CGImageGetHeight(_sliderTrackRight));
     CGContextDrawImage(context, sliderRightTrackRect, _sliderTrackRight);
 
+    // Draw fullscreen button
+    CGRect fullscreenButtonRect = [self _fullscreenButtonRect];
+    fullscreenButtonRect.origin.x = CGRectGetMaxX(sliderRightTrackRect) + 5;
+    CGContextDrawImage(context, fullscreenButtonRect, self.isFullscreen ? _leaveFullscreen : _enterFullscreen);
 }
 
 - (void)drawInContext:(CGContextRef)cgContext
@@ -502,6 +532,10 @@ static CGImageRef createImageNamed(NSString *name)
 
     if (CGRectContainsPoint([self _playPauseButtonRect], point)) {
         self.cppPlugin->playlist_togglePause();
+        return;
+    }
+    if (CGRectContainsPoint([self _fullscreenButtonRect], point)) {
+        self.cppPlugin->toggle_fullscreen();
         return;
     }
 }
