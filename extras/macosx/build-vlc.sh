@@ -1,5 +1,8 @@
 #!/bin/sh
 
+OSX_VERSION="10.7"
+SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_VERSION.sdk
+
 set -e
 
 usage()
@@ -59,6 +62,9 @@ if [ "x$1" != "x" ]; then
     usage
     exit 1
 fi
+
+export OSX_VERSION
+export SDKROOT
 
 # Get root dir
 spushd .
@@ -127,7 +133,6 @@ cd 64build
         --disable-macosx \
         --enable-merge-ffmpeg \
         --disable-growl \
-        --enable-minimal-macosx \
         --enable-faad \
         --enable-flac \
         --enable-theora \
@@ -152,7 +157,7 @@ cd 64build
         --disable-sdl \
         --disable-sdl-image \
         --disable-macosx-vlc-app \
-	--with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk \
+	    --with-macosx-sdk=$SDKROOT \
         --with-macosx-version-min=10.6 \
         --prefix=${PREFIX} > ${out}
 
