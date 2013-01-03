@@ -245,6 +245,10 @@ NPError NPP_New( NPMIMEType, NPP instance,
         return NPERR_INVALID_INSTANCE_ERROR;
     }
 
+#if defined(XP_MACOSX)
+    bool windowless = true;
+#warning BAD, please FIX
+#else
     /* we need to tell whether the plugin will be windowless
      * before it is instantiated */
     bool windowless = false;
@@ -256,6 +260,7 @@ NPError NPP_New( NPMIMEType, NPP instance,
             break;
         }
     }
+#endif
 
     if( windowless )
     {
