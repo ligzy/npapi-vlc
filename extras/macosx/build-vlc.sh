@@ -72,7 +72,7 @@ info "Preparing build dirs"
 spushd extras/macosx
 
 if ! [ -e vlc ]; then
-git clone git://git.videolan.org/vlc.git
+git clone git://git.videolan.org/vlc/vlc-2.0.git vlc
 fi
 
 spopd #extras/macosx
@@ -152,6 +152,8 @@ cd 64build
         --disable-sdl \
         --disable-sdl-image \
         --disable-macosx-vlc-app \
+	--with-macosx-sdk=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk \
+        --with-macosx-version-min=10.6 \
         --prefix=${PREFIX} > ${out}
 
 info "Compiling VLC"
