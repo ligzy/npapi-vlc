@@ -93,7 +93,7 @@ void VlcPluginBase::event_callback(const libvlc_event_t* event,
 NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 {
     /* prepare VLC command line */
-    const char *ppsz_argv[32];
+    const char *ppsz_argv[MAX_PARAMS];
     int ppsz_argc = 0;
 
 #ifndef NDEBUG
@@ -138,7 +138,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     bool b_autoloop = false;
 
     /* parse plugin arguments */
-    for( int i = 0; (i < argc) && (ppsz_argc < 32); i++ )
+    for( int i = 0; (i < argc) && (ppsz_argc < MAX_PARAMS); i++ )
     {
        /* fprintf(stderr, "argn=%s, argv=%s\n", argn[i], argv[i]); */
 

@@ -40,6 +40,8 @@
 #include "../common/vlc_player_options.h"
 #include "../common/vlc_player.h"
 
+#define MAX_PARAMS 32
+
 typedef enum vlc_toolbar_clicked_e {
     clicked_Unknown = 0,
     clicked_Play,
