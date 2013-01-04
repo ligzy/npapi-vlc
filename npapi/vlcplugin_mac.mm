@@ -36,6 +36,13 @@
 
 @end
 
+@interface VLCPlaybackLayer : CALayer {
+    VlcPluginMac *_cppPlugin;
+}
+@property (readwrite) VlcPluginMac * cppPlugin;
+
+@end
+
 @interface VLCControllerLayer : CALayer {
     CGImageRef _playImage;
     CGImageRef _pauseImage;
@@ -77,6 +84,7 @@
 @end
 
 static CALayer * rootLayer;
+static VLCPlaybackLayer * playbackLayer;
 static VLCNoMediaLayer * noMediaLayer;
 static VLCControllerLayer * controllerLayer;
 
@@ -88,13 +96,79 @@ VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
 
 VlcPluginMac::~VlcPluginMac()
 {
+    [playbackLayer release];
+    [noMediaLayer release];
     [controllerLayer release];
     [rootLayer release];
 }
 
 void VlcPluginMac::set_player_window()
 {
-    // XXX FIXME insert appropriate call here
+    libvlc_video_set_format_callbacks(getMD(),
+                                      video_format_proxy,
+                                      video_cleanup_proxy);
+    libvlc_video_set_callbacks(getMD(),
+                               video_lock_proxy,
+                               video_unlock_proxy,
+                               video_display_proxy,
+                               this);
+}
+
+unsigned VlcPluginMac::video_format_cb(char *chroma,
+                                       unsigned *width, unsigned *height,
+                                       unsigned *pitches, unsigned *lines)
+{
+    if ( p_browser ) {
+        float src_aspect = (float)(*width) / (*height);
+        float dst_aspect = (float)npwindow.width/npwindow.height;
+        if ( src_aspect > dst_aspect ) {
+            if( npwindow.width != (*width) ) { //don't scale if size equal
+                (*width) = npwindow.width;
+                (*height) = static_cast<unsigned>( (*width) / src_aspect + 0.5);
+            }
+        }
+        else {
+            if( npwindow.height != (*height) ) { //don't scale if size equal
+                (*height) = npwindow.height;
+                (*width) = static_cast<unsigned>( (*height) * src_aspect + 0.5);
+            }
+        }
+    }
+
+    m_media_width = (*width);
+    m_media_height = (*height);
+
+    memcpy(chroma, "RGBA", sizeof("RGBA")-1);
+    (*pitches) = m_media_width * 4;
+    (*lines) = m_media_height;
+
+    //+1 for vlc 2.0.3/2.1 bug workaround.
+    //They writes after buffer end boundary by some reason unknown to me...
+    m_frame_buf.resize( (*pitches) * ((*lines)+1) );
+
+    return 1;
+}
+
+void VlcPluginMac::video_cleanup_cb()
+{
+    m_frame_buf.resize(0);
+    m_media_width = 0;
+    m_media_height = 0;
+}
+
+void* VlcPluginMac::video_lock_cb(void **planes)
+{
+    (*planes) = m_frame_buf.empty()? 0 : &m_frame_buf[0];
+    return 0;
+}
+
+void VlcPluginMac::video_unlock_cb(void* /*picture*/, void *const * /*planes*/)
+{
+}
+
+void VlcPluginMac::video_display_cb(void * /*picture*/)
+{
+    [playbackLayer performSelectorOnMainThread:@selector(setNeedsDisplay) withObject: nil waitUntilDone:NO];
 }
 
 void VlcPluginMac::toggle_fullscreen()
@@ -139,6 +213,14 @@ void VlcPluginMac::update_controls()
     [controllerLayer setIsPlaying: playlist_isplaying()];
     [controllerLayer setIsFullscreen:this->get_fullscreen()];
 
+    if (player_has_vout()) {
+        [noMediaLayer setHidden: YES];
+        [playbackLayer setHidden: NO];
+    } else {
+        [noMediaLayer setHidden: NO];
+        [playbackLayer setHidden: YES];
+    }
+
     [controllerLayer setNeedsDisplay];
 }
 
@@ -163,6 +245,12 @@ NPError VlcPluginMac::get_root_layer(void *value)
     noMediaLayer = [[VLCNoMediaLayer alloc] init];
     noMediaLayer.opaque = 1.;
     [rootLayer addSublayer: noMediaLayer];
+
+    playbackLayer = [[VLCPlaybackLayer alloc] init];
+    playbackLayer.opaque = 1.;
+    [rootLayer addSublayer: playbackLayer];
+    [playbackLayer setCppPlugin: this];
+    [playbackLayer setHidden: YES];
 
     controllerLayer = [[VLCControllerLayer alloc] init];
     controllerLayer.opaque = 1.;
@@ -260,6 +348,79 @@ bool VlcPluginMac::handle_event(void *event)
 
     return VlcPluginBase::handle_event(event);
 }
+
+@implementation VLCPlaybackLayer
+@synthesize cppPlugin = _cppPlugin;
+
+- (id)init
+{
+    if (self = [super init]) {
+        self.needsDisplayOnBoundsChange = YES;
+        self.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
+    }
+
+    return self;
+}
+
+- (void)drawInContext:(CGContextRef)cgContext
+{
+    if (!cgContext)
+        return;
+
+    if (![self cppPlugin]->playlist_isplaying() || ![self cppPlugin]->player_has_vout())
+        return;
+
+    unsigned int media_width = [self cppPlugin]->m_media_width;
+    unsigned int media_height = [self cppPlugin]->m_media_height;
+
+    if (media_width == 0 || media_height == 0)
+        return;
+
+    CGContextSaveGState(cgContext);
+
+    /* Compute the position of the video */
+    CGSize layerSize = [self preferredFrameSize];
+    float left = (layerSize.width  - media_width)  / 2.;
+    float top  = (layerSize.height - media_height) / 2.;
+    static const size_t kComponentsPerPixel = 4;
+    static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
+
+    /* render frame */
+    CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+                                                    (const uint8_t *)&[self cppPlugin]->m_frame_buf[0],
+                                                    sizeof([self cppPlugin]->m_frame_buf[0]),
+                                                    kCFAllocatorNull);
+    CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
+    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
+    CGImageRef image = CGImageCreate(media_width,
+                                     media_height,
+                                     kBitsPerComponent,
+                                     kBitsPerComponent * kComponentsPerPixel,
+                                     kComponentsPerPixel * media_width,
+                                     colorspace,
+                                     kCGBitmapByteOrder16Big,
+                                     dataProvider,
+                                     NULL,
+                                     true,
+                                     kCGRenderingIntentPerceptual);
+    if (!image) {
+        CGColorSpaceRelease(colorspace);
+        CGImageRelease(image);
+        CGDataProviderRelease(dataProvider);
+        CGContextRestoreGState(cgContext);
+        return;
+    }
+    CGRect rect = CGRectMake(left, top, media_width, media_height);
+    CGContextDrawImage(cgContext, rect, image);
+
+    CGColorSpaceRelease(colorspace);
+    CGImageRelease(image);
+    CGDataProviderRelease(dataProvider);
+
+    CGContextRestoreGState(cgContext);
+}
+
+@end
 
 @implementation VLCNoMediaLayer
 
@@ -508,8 +669,6 @@ static CGImageRef createImageNamed(NSString *name)
         _wasPlayingBeforeMouseDown = self.isPlaying;
         _isScrubbing = YES;
 
-        self.cppPlugin->playlist_pause();
-
         if (CGRectContainsPoint([self _sliderThumbRect], point))
             _mouseDownXDelta = point.x - CGRectGetMidX([self _sliderThumbRect]);
         else {
@@ -525,9 +684,7 @@ static CGImageRef createImageNamed(NSString *name)
         _isScrubbing = NO;
         _mouseDownXDelta = 0;
 
-        if (_wasPlayingBeforeMouseDown)
-            self.cppPlugin->playlist_play();
-            return;
+        return;
     }
 
     if (CGRectContainsPoint([self _playPauseButtonRect], point)) {
