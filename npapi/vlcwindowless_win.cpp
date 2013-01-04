@@ -45,7 +45,7 @@ bool VlcWindowlessWin::handle_event(void *event)
     switch (npevent->event) {
     case WM_PAINT:
         BOOL ret;
-        HDC hDC = reinterpret_cast<HDC> (npwindow.window);
+        HDC hDC = reinterpret_cast<HDC> (npevent->wParam);
         if (!hDC) {
             fprintf(stderr, "NULL HDC given by browser\n");
             return false;
