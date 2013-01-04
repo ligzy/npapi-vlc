@@ -43,6 +43,7 @@ AC_PROG_CC_C99
 AC_USE_SYSTEM_EXTENSIONS
 AC_DEFINE([_FORTIFY_SOURCE], 2, [Define to '2' to get glibc warnings.])
 AC_PROG_CXX
+AC_PROG_OBJCXX
 
 dnl override platform specific check for dependent libraries
 dnl otherwise libtool linking of shared libraries will
@@ -102,7 +103,6 @@ case "${host_os}" in
 esac
 AM_CONDITIONAL(HAVE_DARWIN, test "${SYS}" = "darwin")
 AM_CONDITIONAL(HAVE_WIN32, test "${SYS}" = "mingw32")
-AM_COND_IF([HAVE_DARWIN], [AC_PROG_OBJCXX])
 
 LT_INIT
 
