@@ -37,11 +37,12 @@ public:
     bool handle_event(void *event);
 
 protected:
+    bool initXCB();
     void drawBackground(xcb_drawable_t drawable);
 
 private:
     xcb_connection_t *m_conn;
-    xcb_screen_t *m_screen;
+    xcb_colormap_t m_colormap;
 };
 
 

@@ -23,45 +23,44 @@
 
 #include "vlcwindowless_xcb.h"
 
+#include <X11/Xlib-xcb.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 #include <cstring>
 #include <cstdlib>
 
 VlcWindowlessXCB::VlcWindowlessXCB(NPP instance, NPuint16_t mode) :
-    VlcWindowlessBase(instance, mode), m_conn(0), m_screen(0)
+    VlcWindowlessBase(instance, mode), m_conn(0), m_colormap(0)
 {
-    if (!(m_conn = xcb_connect(NULL, NULL)))
-    {
-        fprintf(stderr, "Can't connect to XCB\n");
-        return;
-    }
-
-    /* Retrieve the setup */
-    const xcb_setup_t *setup;
-    if (!(setup = xcb_get_setup(m_conn)))
-    {
-        fprintf(stderr, "Can't get the XCB setup\n");
-        return;
-    }
-
-    /* Get the first screen */
-    m_screen = xcb_setup_roots_iterator(setup).data;
 }
 
 VlcWindowlessXCB::~VlcWindowlessXCB()
 {
-    xcb_disconnect(m_conn);
+}
+
+bool VlcWindowlessXCB::initXCB()
+{
+    NPSetWindowCallbackStruct *info =
+            static_cast<NPSetWindowCallbackStruct *>(npwindow.ws_info);
+
+    if (!info) {
+        /* NPP_SetWindow has not been called yet */
+        return false;
+    }
+
+    m_conn = XGetXCBConnection(info->display);
+    m_colormap = info->colormap;
+
+    return true;
 }
 
 void VlcWindowlessXCB::drawBackground(xcb_drawable_t drawable)
 {
     /* Obtain the background color */
-    xcb_colormap_t colormap = m_screen->default_colormap;
     unsigned r = 0, g = 0, b = 0;
     HTMLColor2RGB(get_options().get_bg_color().c_str(), &r, &g, &b);
     xcb_alloc_color_reply_t *reply = xcb_alloc_color_reply(m_conn,
-            xcb_alloc_color(m_conn, colormap,
+            xcb_alloc_color(m_conn, m_colormap,
                             (uint16_t) r << 8,
                             (uint16_t) g << 8,
                             (uint16_t) b << 8), NULL);
@@ -95,9 +94,9 @@ bool VlcWindowlessXCB::handle_event(void *event)
         xcb_generic_error_t *err;
         XGraphicsExposeEvent *xgeevent = reinterpret_cast<XGraphicsExposeEvent *>(xevent);
 
-        /* Something went wrong during initialization */
-        if (!m_conn || !m_screen)
-            break;
+        /* Initialize xcb connection if necessary */
+        if (!m_conn)
+            if (!initXCB()) break;
 
         drawBackground(xgeevent->drawable);
 

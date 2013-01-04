@@ -58,35 +58,27 @@ if FETCH_NPAPI
 $(libvlcplugin_la_OBJECTS): npapi-sdk
 endif
 
-AM_CPPFLAGS += -DXP_UNIX -DDATA_PATH=\"$(pkgdatadir)\"
-libvlcplugin_la_LIBADD += $(MOZILLA_LIBS)
+AM_CPPFLAGS += -DXP_UNIX -DDATA_PATH=\"$(pkgdatadir)\" $(XCB_CFLAGS)
+libvlcplugin_la_LIBADD += $(MOZILLA_LIBS) $(XCB_LIBS)
 
 SOURCES_support = \
-	support/npunix.cpp
-
-if WITH_GTK
-AM_CPPFLAGS += $(GTK_CFLAGS)
-libvlcplugin_la_LIBADD += $(GTK_LIBS) $(X_LIBS) $(X_PRE_LIBS) -lX11
-SOURCES_support += \
-	vlcplugin_gtk.cpp \
-	vlcplugin_gtk.h
-else # !WITH_GTK
-AM_CPPFLAGS += $(XCB_CFLAGS)
-libvlcplugin_la_LIBADD += $(XCB_LIBS)
-SOURCES_support += \
-	vlcplugin_xcb.cpp \
-	vlcplugin_xcb.h
-endif # !USE_GTK
-
-if HAVE_XCB
-AM_CPPFLAGS += $(XCB_CFLAGS)
-libvlcplugin_la_LIBADD += $(XCB_LIBS)
-SOURCES_support += \
+	support/npunix.cpp \
 	vlcwindowless_xcb.cpp \
 	vlcwindowless_xcb.h \
 	vlcwindowless_base.cpp \
 	vlcwindowless_base.h
-endif # !HAVE_XCB
+
+if WITH_GTK
+AM_CPPFLAGS += $(GTK_CFLAGS)
+libvlcplugin_la_LIBADD += $(GTK_LIBS)
+SOURCES_support += \
+	vlcplugin_gtk.cpp \
+	vlcplugin_gtk.h
+else # !WITH_GTK
+SOURCES_support += \
+	vlcplugin_xcb.cpp \
+	vlcplugin_xcb.h
+endif # !USE_GTK
 
 else # Win32
 

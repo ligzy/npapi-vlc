@@ -36,10 +36,6 @@
 #include "common.h"
 
 #if defined(XP_UNIX) && !defined(XP_MACOSX)
-#   if defined(USE_XCB)
-#       include "vlcwindowless_xcb.h"
-        typedef VlcWindowlessXCB VlcWindowless;
-#   endif
 #   if defined(USE_GTK)
 #       include "vlcplugin_gtk.h"
         typedef class VlcPluginGtk VlcPlugin;
@@ -47,6 +43,9 @@
 #       include "vlcplugin_xcb.h"
         typedef class VlcPluginXcb VlcPlugin;
 #   endif
+
+#   include "vlcwindowless_xcb.h"
+    typedef VlcWindowlessXCB VlcWindowless;
 #elif defined(XP_WIN)
 #   include "vlcplugin_win.h"
     typedef class VlcPluginWin VlcPlugin;
