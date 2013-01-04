@@ -137,13 +137,13 @@ cd 64build
         --enable-flac \
         --enable-theora \
         --enable-shout \
-        --enable-ncurses \
-        --enable-twolame \
+        --disable-ncurses \
+        --disable-twolame \
         --enable-realrtsp \
         --enable-libass \
         --enable-macosx-audio \
         --disable-macosx-eyetv \
-        --disable-macosx-qtkit \
+        --enable-macosx-qtkit \
         --enable-macosx-vout \
         --disable-skins2 \
         --disable-xcb \
@@ -157,7 +157,8 @@ cd 64build
         --disable-sdl \
         --disable-sdl-image \
         --disable-macosx-vlc-app \
-	    --with-macosx-sdk=$SDKROOT \
+        --disable-dirac \
+	--with-macosx-sdk=$SDKROOT \
         --with-macosx-version-min=10.6 \
         --prefix=${PREFIX} > ${out}
 
@@ -244,6 +245,7 @@ antiflicker
 anaglyph
 remap
 bluray
+x264
 "
 
 for i in ${blacklist}
