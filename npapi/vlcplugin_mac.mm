@@ -199,7 +199,7 @@ int  VlcPluginMac::get_fullscreen()
 
 void VlcPluginMac::set_toolbar_visible(bool b_value)
 {
-    controllerLayer.opaque = (float)b_value;
+    [controllerLayer setHidden: !b_value];
 }
 
 bool VlcPluginMac::get_toolbar_visible()
@@ -301,6 +301,16 @@ bool VlcPluginMac::handle_event(void *event)
 
             [controllerLayer handleMouseDragged:[rootLayer convertPoint:point toLayer:controllerLayer]];
 
+            return true;
+        }
+        case NPCocoaEventMouseEntered:
+        {
+            set_toolbar_visible(true);
+            return true;
+        }
+        case NPCocoaEventMouseExited:
+        {
+            set_toolbar_visible(false);
             return true;
         }
         case NPCocoaEventKeyUp:
