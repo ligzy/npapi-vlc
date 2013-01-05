@@ -4,7 +4,12 @@
 
 EXTRA_DIST = package/npvlc_rc.rc.in package/npvlc.dll.manifest
 MOSTLYCLEANFILES =
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) \
+	npapi-sdk/npapi.h \
+	npapi-sdk/npfunctions.h \
+	npapi-sdk/npruntime.h \
+	npapi-sdk/nptypes.h
+
 npvlcdir = $(libdir)/mozilla/plugins
 
 AM_CPPFLAGS = $(LIBVLC_CFLAGS) -Inpapi-sdk $(MOZILLA_CFLAGS)

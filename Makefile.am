@@ -15,12 +15,23 @@ if BUILD_ACTIVEX
 SUBDIRS += activex
 endif
 
+DISTCHECK_CONFIGURE_FLAGS=--without-gtk
+
 EXTRA_DIST = \
 	autogen.sh \
 	extras/macosx/Info.plist.in \
 	extras/macosx/InstallerInfo.plist.in \
 	extras/macosx/InstallerDescription.plist \
-	extras/macosx/pbdevelopment.plist
+	extras/macosx/pbdevelopment.plist \
+	share/pixmaps/win32/fullscreen.bmp \
+	share/pixmaps/win32/defullscreen.bmp \
+	share/pixmaps/win32/play.bmp \
+	share/pixmaps/win32/pause.bmp \
+	share/pixmaps/win32/volume.bmp \
+	share/pixmaps/win32/volume-muted.bmp \
+	share/test/test.html \
+	share/test/windowless.html \
+	share/test/resize.html
 
 package-macosx-plugin:
 # Create Installer
