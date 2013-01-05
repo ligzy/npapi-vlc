@@ -18,6 +18,7 @@ DIST_misc = \
     axvlc.tlb \
     inplace.bmp \
     vlc16x16.bmp \
+    README.TXT \
     $(NULL)
 
 

@@ -23,15 +23,9 @@ EXTRA_DIST = \
 	extras/macosx/InstallerInfo.plist.in \
 	extras/macosx/InstallerDescription.plist \
 	extras/macosx/pbdevelopment.plist \
-	share/pixmaps/win32/fullscreen.bmp \
-	share/pixmaps/win32/defullscreen.bmp \
-	share/pixmaps/win32/play.bmp \
-	share/pixmaps/win32/pause.bmp \
-	share/pixmaps/win32/volume.bmp \
-	share/pixmaps/win32/volume-muted.bmp \
-	share/test/test.html \
-	share/test/windowless.html \
-	share/test/resize.html
+	extras/macosx/build-package.sh \
+	extras/macosx/build-vlc-32.sh \
+	extras/macosx/build-vlc.sh
 
 package-macosx-plugin:
 # Create Installer
