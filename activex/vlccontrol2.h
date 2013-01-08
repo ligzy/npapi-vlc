@@ -66,6 +66,8 @@ public:
     VLCInterface(VLCPlugin *p): Base(p) { }
     VLCPlugin *Instance() const { return Base::Instance(); }
 
+    virtual ~VLCInterface() { }
+
     HRESULT getVLC(libvlc_instance_t **pp) const { return Base::getVLC(pp); }
     HRESULT getMD(libvlc_media_player_t **pp) const { return Base::getMD(pp); }
 
