@@ -52,7 +52,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 		//vlc_controls.options.set("directx-wallpaper");
 		
 		vlc_controls.onready = function () {
-			//vlc_controls.play("http://images.apple.com/movies/wb/i_am_legend/i_am_legend-tlr1_h.480.mov");
+			//vlc_controls.play("http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4");
 			var version = vlc_controls.target.versionInfo;
 			if(typeof(version)=="function") version = vlc_controls.target.versionInfo();
 			document.getElementById("vlc_version").innerHTML = version;
@@ -190,7 +190,7 @@ This is an improved version than can use local or external subtitles, transcodin
         <tr>
             <td>file to play (file or uri) : </td>
             <td>
-                <input type="text" id="filename" value="http://www.revolunet.com/static/download/labo/VLCcontrols/bunny.mp4" size="60"/>
+                <input type="text" id="filename" value="http://streams.videolan.org/streams/mp4/Mr_MrsSmith-h264_aac.mp4" size="60"/>
             </td>
         </tr>
         <tr>
