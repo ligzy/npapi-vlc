@@ -289,7 +289,10 @@ VLCPlugin::~VLCPlugin()
         if( isPlaying() )
             playlist_stop();
 
+#warning FIXME
+#if 0
         player_unregister_events();
+#endif
     }
 
     delete vlcSupportErrorInfo;
