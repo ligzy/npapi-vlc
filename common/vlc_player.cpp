@@ -22,7 +22,7 @@
 #include "vlc_player.h"
 
 vlc_player::vlc_player()
-    :_libvlc_instance(0), _ml(0), _mp(0), _ml_p(0)
+    :_libvlc_instance(0), _mp(0), _ml(0), _ml_p(0)
 {
 }
 

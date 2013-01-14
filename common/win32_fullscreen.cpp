@@ -511,7 +511,7 @@ void VLCControlsWnd::SyncVolumeSliderWithVLCVolume()
         vlc_player& vp = *VP();
         unsigned int vol = vp.get_volume();
         const LRESULT SliderPos = SendMessage(hVolumeSlider, (UINT) TBM_GETPOS, 0, 0);
-        if(SliderPos!=vol)
+        if((UINT)SliderPos!=vol)
             SendMessage(hVolumeSlider, (UINT) TBM_SETPOS, (WPARAM) TRUE, (LPARAM) vol);
 
         bool muted = vp.is_muted();
