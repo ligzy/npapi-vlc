@@ -303,9 +303,9 @@ public:
         _p_vlcmarquee(new VLCMarquee(p)), _p_vlclogo(new VLCLogo(p)),
         _p_vlcdeint(new VLCDeinterlace(p)) { }
     virtual ~VLCVideo() {
-        delete _p_vlcmarquee;
-        delete _p_vlclogo;
-        delete _p_vlcdeint;
+        _p_vlcmarquee->Release();
+        _p_vlclogo->Release();
+        _p_vlcdeint->Release();
     }
 
     // IVLCVideo methods
