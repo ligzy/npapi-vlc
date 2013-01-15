@@ -461,9 +461,10 @@ bool VlcPluginMac::handle_event(void *event)
     CGContextSaveGState(cgContext);
 
     /* Compute the position of the video */
-    CGSize layerSize = [self preferredFrameSize];
-    float left = (layerSize.width  - media_width)  / 2.;
-    float top  = (layerSize.height - media_height) / 2.;
+    NSRect layerRect = self.bounds;
+    float left = (layerRect.size.width  - media_width)  / 2.;
+    float top  = (layerRect.size.height - media_height) / 2.;
+
     static const size_t kComponentsPerPixel = 4;
     static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
 
@@ -835,7 +836,7 @@ static CGImageRef createImageNamed(NSString *name)
         [self center];
 
         _customContentView = [[VLCFullscreenContentView alloc] initWithFrame:_initialFrame];
-        [[self contentView] setAutoresizesSubviews:YES];
+        [_customContentView setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
         [[self contentView] addSubview: _customContentView];
         [self setInitialFirstResponder:_customContentView];
     }
