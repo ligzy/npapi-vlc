@@ -147,7 +147,7 @@ SOURCES_support = support/npmac.cpp \
 libvlcplugin_la_LDFLAGS += \
 	-bundle -Wl,-headerpad_max_install_names \
 	-Wl,-framework,CoreFoundation -Wl,-framework,ApplicationServices \
-	-Wl,-framework,QuartzCore -shrext .dylib
+	-Wl,-framework,QuartzCore, -Wl,-framework,AppKit, -shrext .dylib
 
 noinst_DATA = VLC\ Plugin.plugin
 CLEANFILES += VLC\ Plugin.plugin

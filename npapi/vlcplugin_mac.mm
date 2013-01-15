@@ -32,6 +32,7 @@
 #include <npapi.h>
 
 #include <QuartzCore/QuartzCore.h>
+#include <AppKit/AppKit.h>
 
 @interface VLCNoMediaLayer : CALayer {
 }
