@@ -8,6 +8,7 @@
  *          Cheng Sun <chengsun9@gmail.com>
  *          Jean-Baptiste Kempf <jb@videolan.org>
  *          James Bates <james.h.bates@gmail.com>
+ *          Pierre d'Herbemont <pdherbemont # videolan.org>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -83,10 +84,26 @@
 - (CGRect)_sliderRect;
 @end
 
+@interface VLCFullscreenContentView : NSView
+
+@end
+
+@interface VLCFullscreenWindow : NSWindow {
+    NSRect initialFrame;
+}
+
+- (id)initWithContentRect:(NSRect)contentRect;
+
+- (void)enterFullscreen;
+- (void)leaveFullscreen;
+
+@end
+
 static CALayer * rootLayer;
 static VLCPlaybackLayer * playbackLayer;
 static VLCNoMediaLayer * noMediaLayer;
 static VLCControllerLayer * controllerLayer;
+static VLCFullscreenWindow * fullscreenWindow;
 
 VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
     VlcPluginBase(instance, mode)
@@ -715,6 +732,43 @@ static CGImageRef createImageNamed(NSString *name)
     point.x -= _mouseDownXDelta;
 
     [self _setNewTimeForThumbCenterX:point.x];
+}
+
+@end
+
+@implementation VLCFullscreenWindow
+
+- (id)initWithContentRect:(NSRect)contentRect
+{
+    if( self = [super initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO]) {
+        initialFrame = contentRect;
+        [self setBackgroundColor:[NSColor blackColor]];
+        [self setHasShadow:YES];
+        [self setMovableByWindowBackground: YES];
+        [self center];
+    }
+    return self;
+}
+
+- (void)enterFullscreen
+{
+    NSScreen *screen = [self screen];
+
+    initialFrame = [self frame];
+    [self setFrame:[[self screen] frame] display:YES animate:YES];
+
+    NSApplicationPresentationOptions presentationOpts = [NSApp presentationOptions];
+    if ([screen hasMenuBar])
+        presentationOpts |= NSApplicationPresentationAutoHideMenuBar;
+    if ([screen hasMenuBar] || [screen hasDock])
+        presentationOpts |= NSApplicationPresentationAutoHideDock;
+    [NSApp setPresentationOptions:presentationOpts];
+}
+
+- (void)leaveFullscreen
+{
+    [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+    [self setFrame:initialFrame display:YES animate:YES];
 }
 
 @end
