@@ -898,6 +898,11 @@ LRESULT CALLBACK VLCFullScreenWnd::FSWndWindowProc(HWND hWnd, UINT uMsg, WPARAM 
             }
             break;
         }
+        case WM_KEYDOWN: {
+            if (fs_data)
+                fs_data->_WindowsManager->OnKeyDownEvent(wParam);
+            break;
+        }
         default:
             return DefWindowProc(hWnd, uMsg, wParam, lParam);
     }
@@ -1062,6 +1067,16 @@ void VLCWindowsManager::ToggleFullScreen()
 bool VLCWindowsManager::IsFullScreen()
 {
     return 0!=_FSWnd && 0!=_HolderWnd && GetParent(_HolderWnd->hWnd())==_FSWnd->getHWND();
+}
+
+void VLCWindowsManager::OnKeyDownEvent(UINT uKeyMsg)
+{
+    switch(uKeyMsg){
+        case VK_ESCAPE:
+        case 'F':
+            EndFullScreen();
+            break;
+    }
 }
 
 void VLCWindowsManager::OnMouseEvent(UINT uMouseMsg)

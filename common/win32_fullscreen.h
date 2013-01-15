@@ -285,6 +285,7 @@ public:
     bool getNewMessageFlag() const
         {return _b_new_messages_flag;};
 public:
+    void OnKeyDownEvent(UINT uKeyMsg);
     void OnMouseEvent(UINT uMouseMsg);
 
 private:
