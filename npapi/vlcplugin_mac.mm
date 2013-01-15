@@ -85,7 +85,10 @@
 - (CGRect)_sliderRect;
 @end
 
-@interface VLCFullscreenContentView : NSView
+@interface VLCFullscreenContentView : NSView {
+    VlcPluginMac *_cppPlugin;
+}
+@property (readwrite) VlcPluginMac * cppPlugin;
 
 @end
 
@@ -204,8 +207,7 @@ void VlcPluginMac::toggle_fullscreen()
 {
     if (!get_options().get_enable_fs())
         return;
-    if (playlist_isplaying())
-        libvlc_toggle_fullscreen(getMD());
+    libvlc_toggle_fullscreen(getMD());
     this->update_controls();
 
     if (get_fullscreen() == 0) {
@@ -218,6 +220,7 @@ void VlcPluginMac::toggle_fullscreen()
              * a layer-backed view, which you'd get if you do it the other way around */
             [fullscreenView setLayer: [CALayer layer]];
             [fullscreenView setWantsLayer:YES];
+            [fullscreenView setCppPlugin: this];
         }
 
         [noMediaLayer removeFromSuperlayer];
@@ -249,17 +252,13 @@ void VlcPluginMac::set_fullscreen(int i_value)
 {
     if (!get_options().get_enable_fs())
         return;
-    if (playlist_isplaying())
-        libvlc_set_fullscreen(getMD(), i_value);
+    libvlc_set_fullscreen(getMD(), i_value);
     this->update_controls();
 }
 
 int  VlcPluginMac::get_fullscreen()
 {
-    int r = 0;
-    if (playlist_isplaying())
-        r = libvlc_get_fullscreen(getMD());
-    return r;
+    return libvlc_get_fullscreen(getMD());
 }
 
 void VlcPluginMac::set_toolbar_visible(bool b_value)
@@ -380,8 +379,14 @@ bool VlcPluginMac::handle_event(void *event)
             set_toolbar_visible(false);
             return true;
         }
-        case NPCocoaEventKeyUp:
         case NPCocoaEventKeyDown:
+        {
+            if (cocoaEvent->data.key.keyCode == 53) {
+                toggle_fullscreen();
+                return true;
+            }
+        }
+        case NPCocoaEventKeyUp:
         case NPCocoaEventFocusChanged:
         case NPCocoaEventScrollWheel:
             return true;
@@ -826,11 +831,13 @@ static CGImageRef createImageNamed(NSString *name)
         [self setBackgroundColor:[NSColor blackColor]];
         [self setHasShadow:YES];
         [self setMovableByWindowBackground: YES];
+        [self setAcceptsMouseMovedEvents: YES];
         [self center];
 
         _customContentView = [[VLCFullscreenContentView alloc] initWithFrame:_initialFrame];
         [[self contentView] setAutoresizesSubviews:YES];
         [[self contentView] addSubview: _customContentView];
+        [self setInitialFirstResponder:_customContentView];
     }
     return self;
 }
@@ -862,9 +869,43 @@ static CGImageRef createImageNamed(NSString *name)
     [self setFrame:_initialFrame display:YES animate:YES];
 }
 
+- (BOOL)canBecomeKeyWindow
+{
+    return YES;
+}
+
+- (BOOL)canBecomeMainWindow
+{
+    return YES;
+}
+
 @end
 
 @implementation VLCFullscreenContentView
+@synthesize cppPlugin = _cppPlugin;
+
+- (BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
+- (void)keyDown:(NSEvent *)theEvent
+{
+    NSString * characters = [theEvent charactersIgnoringModifiers];
+    unichar key = 0;
+
+    if ([characters length] > 0) {
+        key = [[characters lowercaseString] characterAtIndex: 0];
+        if (key) {
+            /* Escape should always get you out of fullscreen */
+            if (key == (unichar) 0x1b) {
+                self.cppPlugin->toggle_fullscreen();
+                return;
+            }
+        }
+    }
+    [super keyDown: theEvent];
+}
 
 @end
 
