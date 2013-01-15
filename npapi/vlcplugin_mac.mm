@@ -9,6 +9,7 @@
  *          Jean-Baptiste Kempf <jb@videolan.org>
  *          James Bates <james.h.bates@gmail.com>
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
+ *          David Fuhrmann <david dot fuhrmann at googlemail dot com>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -97,6 +98,12 @@
 - (void)enterFullscreen;
 - (void)leaveFullscreen;
 
+@end
+
+@interface NSScreen (VLCAdditions)
+- (BOOL)hasMenuBar;
+- (BOOL)hasDock;
+- (CGDirectDisplayID)displayID;
 @end
 
 static CALayer * rootLayer;
@@ -732,6 +739,35 @@ static CGImageRef createImageNamed(NSString *name)
     point.x -= _mouseDownXDelta;
 
     [self _setNewTimeForThumbCenterX:point.x];
+}
+
+@end
+
+@implementation NSScreen (VLCAdditions)
+
+- (BOOL)hasMenuBar
+{
+    return ([self displayID] == [[[NSScreen screens] objectAtIndex:0] displayID]);
+}
+
+- (BOOL)hasDock
+{
+    NSRect screen_frame = [self frame];
+    NSRect screen_visible_frame = [self visibleFrame];
+    CGFloat f_menu_bar_thickness = [self hasMenuBar] ? [[NSStatusBar systemStatusBar] thickness] : 0.0;
+
+    BOOL b_found_dock = NO;
+    if (screen_visible_frame.size.width < screen_frame.size.width)
+        b_found_dock = YES;
+    else if (screen_visible_frame.size.height + f_menu_bar_thickness < screen_frame.size.height)
+        b_found_dock = YES;
+
+    return b_found_dock;
+}
+
+- (CGDirectDisplayID)displayID
+{
+    return (CGDirectDisplayID)[[[self deviceDescription] objectForKey: @"NSScreenNumber"] intValue];
 }
 
 @end
