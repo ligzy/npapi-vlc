@@ -34,8 +34,7 @@
 #include <QuartzCore/QuartzCore.h>
 #include <AppKit/AppKit.h>
 
-@interface VLCNoMediaLayer : CALayer {
-}
+@interface VLCNoMediaLayer : CALayer
 
 @end
 
@@ -91,8 +90,10 @@
 @end
 
 @interface VLCFullscreenWindow : NSWindow {
-    NSRect initialFrame;
+    NSRect _initialFrame;
+    VLCFullscreenContentView *_customContentView;
 }
+@property (readonly) VLCFullscreenContentView* customContentView;
 
 - (id)initWithContentRect:(NSRect)contentRect;
 
@@ -107,24 +108,26 @@
 - (CGDirectDisplayID)displayID;
 @end
 
-static CALayer * rootLayer;
+static CALayer * browserRootLayer;
 static VLCPlaybackLayer * playbackLayer;
 static VLCNoMediaLayer * noMediaLayer;
 static VLCControllerLayer * controllerLayer;
 static VLCFullscreenWindow * fullscreenWindow;
+static VLCFullscreenContentView * fullscreenView;
 
 VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
     VlcPluginBase(instance, mode)
 {
-    rootLayer = [[CALayer alloc] init];
+    browserRootLayer = [[CALayer alloc] init];
 }
 
 VlcPluginMac::~VlcPluginMac()
 {
+    [fullscreenWindow release];
     [playbackLayer release];
     [noMediaLayer release];
     [controllerLayer release];
-    [rootLayer release];
+    [browserRootLayer release];
 }
 
 void VlcPluginMac::set_player_window()
@@ -179,6 +182,7 @@ void VlcPluginMac::video_cleanup_cb()
     m_frame_buf.resize(0);
     m_media_width = 0;
     m_media_height = 0;
+    [fullscreenWindow orderOut: nil];
 }
 
 void* VlcPluginMac::video_lock_cb(void **planes)
@@ -203,6 +207,42 @@ void VlcPluginMac::toggle_fullscreen()
     if (playlist_isplaying())
         libvlc_toggle_fullscreen(getMD());
     this->update_controls();
+
+    if (get_fullscreen() == 0) {
+        if (!fullscreenWindow) {
+            fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(npwindow.x, npwindow.y, npwindow.width, npwindow.height)];
+            [fullscreenWindow setLevel: kCGFloatingWindowLevel];
+            fullscreenView = [fullscreenWindow customContentView];
+
+            /* CAVE: the order of these methods is important, since we want a layer-hosting view instead of
+             * a layer-backed view, which you'd get if you do it the other way around */
+            [fullscreenView setLayer: [CALayer layer]];
+            [fullscreenView setWantsLayer:YES];
+        }
+
+        [noMediaLayer removeFromSuperlayer];
+        [playbackLayer removeFromSuperlayer];
+        [controllerLayer removeFromSuperlayer];
+
+        [[fullscreenView layer] addSublayer: noMediaLayer];
+        [[fullscreenView layer] addSublayer: playbackLayer];
+        [[fullscreenView layer] addSublayer: controllerLayer];
+
+        [[fullscreenView layer] setNeedsDisplay];
+
+        [fullscreenWindow makeKeyAndOrderFront:nil];
+        [fullscreenWindow enterFullscreen];
+    } else {
+        [fullscreenWindow leaveFullscreen];
+        [fullscreenWindow orderOut: nil];
+        [noMediaLayer removeFromSuperlayer];
+        [playbackLayer removeFromSuperlayer];
+        [controllerLayer removeFromSuperlayer];
+
+        [browserRootLayer addSublayer: noMediaLayer];
+        [browserRootLayer addSublayer: playbackLayer];
+        [browserRootLayer addSublayer: controllerLayer];
+    }
 }
 
 void VlcPluginMac::set_fullscreen(int i_value)
@@ -269,20 +309,22 @@ NPError VlcPluginMac::get_root_layer(void *value)
 {
     noMediaLayer = [[VLCNoMediaLayer alloc] init];
     noMediaLayer.opaque = 1.;
-    [rootLayer addSublayer: noMediaLayer];
+    [browserRootLayer addSublayer: noMediaLayer];
 
     playbackLayer = [[VLCPlaybackLayer alloc] init];
     playbackLayer.opaque = 1.;
-    [rootLayer addSublayer: playbackLayer];
+    [browserRootLayer addSublayer: playbackLayer];
     [playbackLayer setCppPlugin: this];
     [playbackLayer setHidden: YES];
 
     controllerLayer = [[VLCControllerLayer alloc] init];
     controllerLayer.opaque = 1.;
-    [rootLayer addSublayer: controllerLayer];
+    [browserRootLayer addSublayer: controllerLayer];
     [controllerLayer setCppPlugin: this];
 
-    *(CALayer **)value = rootLayer;
+    [browserRootLayer setNeedsDisplay];
+
+    *(CALayer **)value = browserRootLayer;
     return NPERR_NO_ERROR;
 }
 
@@ -304,7 +346,7 @@ bool VlcPluginMac::handle_event(void *event)
             CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
-            [controllerLayer handleMouseDown:[rootLayer convertPoint:point toLayer:controllerLayer]];
+            [controllerLayer handleMouseDown:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
 
             return true;
         }
@@ -314,7 +356,7 @@ bool VlcPluginMac::handle_event(void *event)
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
 
-            [controllerLayer handleMouseUp:[rootLayer convertPoint:point toLayer:controllerLayer]];
+            [controllerLayer handleMouseUp:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
 
             return true;
         }
@@ -324,7 +366,7 @@ bool VlcPluginMac::handle_event(void *event)
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
 
-            [controllerLayer handleMouseDragged:[rootLayer convertPoint:point toLayer:controllerLayer]];
+            [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
 
             return true;
         }
@@ -775,23 +817,35 @@ static CGImageRef createImageNamed(NSString *name)
 
 @implementation VLCFullscreenWindow
 
+@synthesize customContentView = _customContentView;
+
 - (id)initWithContentRect:(NSRect)contentRect
 {
     if( self = [super initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO]) {
-        initialFrame = contentRect;
+        _initialFrame = contentRect;
         [self setBackgroundColor:[NSColor blackColor]];
         [self setHasShadow:YES];
         [self setMovableByWindowBackground: YES];
         [self center];
+
+        _customContentView = [[VLCFullscreenContentView alloc] initWithFrame:_initialFrame];
+        [[self contentView] setAutoresizesSubviews:YES];
+        [[self contentView] addSubview: _customContentView];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [_customContentView release];
+    [super dealloc];
 }
 
 - (void)enterFullscreen
 {
     NSScreen *screen = [self screen];
 
-    initialFrame = [self frame];
+    _initialFrame = [self frame];
     [self setFrame:[[self screen] frame] display:YES animate:YES];
 
     NSApplicationPresentationOptions presentationOpts = [NSApp presentationOptions];
@@ -805,8 +859,12 @@ static CGImageRef createImageNamed(NSString *name)
 - (void)leaveFullscreen
 {
     [NSApp setPresentationOptions: NSApplicationPresentationDefault];
-    [self setFrame:initialFrame display:YES animate:YES];
+    [self setFrame:_initialFrame display:YES animate:YES];
 }
+
+@end
+
+@implementation VLCFullscreenContentView
 
 @end
 
