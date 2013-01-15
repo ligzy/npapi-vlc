@@ -289,10 +289,7 @@ VLCPlugin::~VLCPlugin()
         if( isPlaying() )
             playlist_stop();
 
-#warning FIXME
-#if 0
         player_unregister_events();
-#endif
     }
 
     delete vlcSupportErrorInfo;
@@ -535,6 +532,9 @@ void VLCPlugin::initVLC()
 
     vlc_player::set_mode(_b_autoloop ? libvlc_playback_mode_loop :
                                        libvlc_playback_mode_default);
+
+    // register player events
+    player_register_events();
 
     // initial playlist item
     if( SysStringLen(_bstr_mrl) > 0 )
@@ -1272,6 +1272,26 @@ void VLCPlugin::on_player_action(vlc_player_action_e pa)
     }
 }
 
+static vlcplugin_event_t vlcevents[] = {
+    //{ "MediaPlayerMediaChanged", libvlc_MediaPlayerMediaChanged, handle_input_state_event },
+    { "MediaPlayerNothingSpecial", libvlc_MediaPlayerNothingSpecial, handle_input_state_event },
+    { "MediaPlayerOpening", libvlc_MediaPlayerOpening, handle_input_state_event },
+    { "MediaPlayerBuffering", libvlc_MediaPlayerBuffering, handle_input_state_event },
+    { "MediaPlayerPlaying", libvlc_MediaPlayerPlaying, handle_input_state_event },
+    { "MediaPlayerPaused", libvlc_MediaPlayerPaused, handle_input_state_event },
+    { "MediaPlayerStopped", libvlc_MediaPlayerStopped, handle_input_state_event },
+    { "MediaPlayerForward", libvlc_MediaPlayerForward, handle_input_state_event },
+    { "MediaPlayerBackward", libvlc_MediaPlayerBackward, handle_input_state_event },
+    { "MediaPlayerEndReached", libvlc_MediaPlayerEndReached, handle_input_state_event },
+    { "MediaPlayerEncounteredError", libvlc_MediaPlayerEncounteredError, handle_input_state_event },
+    { "MediaPlayerTimeChanged", libvlc_MediaPlayerTimeChanged, handle_time_changed_event },
+    { "MediaPlayerPositionChanged", libvlc_MediaPlayerPositionChanged, handle_position_changed_event },
+    { "MediaPlayerSeekableChanged", libvlc_MediaPlayerSeekableChanged, handle_seekable_changed_event },
+    { "MediaPlayerPausableChanged", libvlc_MediaPlayerPausableChanged, handle_pausable_changed_event },
+    //{ "MediaPlayerTitleChanged", libvlc_MediaPlayerTitleChanged, handle_input_state_event },
+    //{ "MediaPlayerLengthChanged", libvlc_MediaPlayerLengthChanged, handle_input_state_event },
+};
+
 void VLCPlugin::player_register_events()
 {
     libvlc_event_manager_t *eventManager = NULL;
@@ -1279,35 +1299,13 @@ void VLCPlugin::player_register_events()
 
     eventManager = libvlc_media_player_event_manager(vlc_player::get_mp());
     if(eventManager) {
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerNothingSpecial,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerForward,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerBackward,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerEndReached,
-                            handle_input_state_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerEncounteredError,
-                            handle_input_state_event, this);
-
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerTimeChanged,
-                            handle_time_changed_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPositionChanged,
-                            handle_position_changed_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerSeekableChanged,
-                            handle_seekable_changed_event, this);
-        libvlc_event_attach(eventManager, libvlc_MediaPlayerPausableChanged,
-                            handle_pausable_changed_event, this);
+        /* attach all libvlc events we care about */
+        for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
+        {
+            libvlc_event_attach( eventManager, vlcevents[i].libvlc_type,
+                                               vlcevents[i].libvlc_callback,
+                                               this );
+        }
     }
 }
 
@@ -1318,34 +1316,12 @@ void VLCPlugin::player_unregister_events()
 
     eventManager = libvlc_media_player_event_manager(vlc_player::get_mp());
     if(eventManager) {
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerNothingSpecial,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerOpening,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerBuffering,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerPlaying,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerPaused,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerStopped,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerForward,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerBackward,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerEndReached,
-                            handle_input_state_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerEncounteredError,
-                            handle_input_state_event, this);
-
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerTimeChanged,
-                            handle_time_changed_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerPositionChanged,
-                            handle_position_changed_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerSeekableChanged,
-                            handle_seekable_changed_event, this);
-        libvlc_event_detach(eventManager, libvlc_MediaPlayerPausableChanged,
-                            handle_pausable_changed_event, this);
+        /* detach all libvlc events we cared about */
+        for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
+        {
+            libvlc_event_detach( eventManager, vlcevents[i].libvlc_type,
+                                               vlcevents[i].libvlc_callback,
+                                               this );
+        }
     }
 }

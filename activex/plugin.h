@@ -37,6 +37,14 @@ extern "C" const GUID CLSID_VLCPlugin2;
 extern "C" const GUID LIBID_AXVLC;
 extern "C" const GUID DIID_DVLCEvents;
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
+typedef struct {
+    const char *name;                      /* event name */
+    const libvlc_event_type_t libvlc_type; /* libvlc event type */
+    libvlc_callback_t libvlc_callback;     /* libvlc callback function */
+} vlcplugin_event_t;
+
 class VLCPluginClass : public IClassFactory
 {
 
