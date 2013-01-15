@@ -11,9 +11,9 @@ Changes between VLC 2.0.2 and 2.0.6:
  * Upgrade the libVLC wrapper
  * Drop the dependency on external NPAPI headers: it will get downloaded
  * Support for Windowless under X11 with XCB
- * Support for Windowless under Mac OS X using CoreGraphic
+ * Support for Windowless under Mac OS X using CoreGraphics
  * Support for Windowless under Windows using GDI+
- * Port the Mac OS X version to 64 bits
+ * Re-write Mac OS X Port to use CoreAnimation for video playback
 
 
 Changes between VLC 2.0.0 and 2.0.2:
