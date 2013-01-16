@@ -270,7 +270,7 @@ void VlcPluginMac::set_toolbar_visible(bool b_value)
 
 bool VlcPluginMac::get_toolbar_visible()
 {
-    return (bool)controllerLayer.opaque;
+    return controllerLayer.isHidden;
 }
 
 void VlcPluginMac::update_controls()
