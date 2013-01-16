@@ -1273,23 +1273,23 @@ void VLCPlugin::on_player_action(vlc_player_action_e pa)
 }
 
 static vlcplugin_event_t vlcevents[] = {
-    //{ "MediaPlayerMediaChanged", libvlc_MediaPlayerMediaChanged, handle_input_state_event },
-    { "MediaPlayerNothingSpecial", libvlc_MediaPlayerNothingSpecial, handle_input_state_event },
-    { "MediaPlayerOpening", libvlc_MediaPlayerOpening, handle_input_state_event },
-    { "MediaPlayerBuffering", libvlc_MediaPlayerBuffering, handle_input_state_event },
-    { "MediaPlayerPlaying", libvlc_MediaPlayerPlaying, handle_input_state_event },
-    { "MediaPlayerPaused", libvlc_MediaPlayerPaused, handle_input_state_event },
-    { "MediaPlayerStopped", libvlc_MediaPlayerStopped, handle_input_state_event },
-    { "MediaPlayerForward", libvlc_MediaPlayerForward, handle_input_state_event },
-    { "MediaPlayerBackward", libvlc_MediaPlayerBackward, handle_input_state_event },
-    { "MediaPlayerEndReached", libvlc_MediaPlayerEndReached, handle_input_state_event },
-    { "MediaPlayerEncounteredError", libvlc_MediaPlayerEncounteredError, handle_input_state_event },
-    { "MediaPlayerTimeChanged", libvlc_MediaPlayerTimeChanged, handle_time_changed_event },
-    { "MediaPlayerPositionChanged", libvlc_MediaPlayerPositionChanged, handle_position_changed_event },
-    { "MediaPlayerSeekableChanged", libvlc_MediaPlayerSeekableChanged, handle_seekable_changed_event },
-    { "MediaPlayerPausableChanged", libvlc_MediaPlayerPausableChanged, handle_pausable_changed_event },
-    //{ "MediaPlayerTitleChanged", libvlc_MediaPlayerTitleChanged, handle_input_state_event },
-    //{ "MediaPlayerLengthChanged", libvlc_MediaPlayerLengthChanged, handle_input_state_event },
+    //{ libvlc_MediaPlayerMediaChanged, handle_input_state_event },         // unused
+    { libvlc_MediaPlayerNothingSpecial, handle_input_state_event },
+    { libvlc_MediaPlayerOpening, handle_input_state_event },
+    { libvlc_MediaPlayerBuffering, handle_input_state_event },
+    { libvlc_MediaPlayerPlaying, handle_input_state_event },
+    { libvlc_MediaPlayerPaused, handle_input_state_event },
+    { libvlc_MediaPlayerStopped, handle_input_state_event },
+    { libvlc_MediaPlayerForward, handle_input_state_event },
+    { libvlc_MediaPlayerBackward, handle_input_state_event },
+    { libvlc_MediaPlayerEndReached, handle_input_state_event },
+    { libvlc_MediaPlayerEncounteredError, handle_input_state_event },
+    { libvlc_MediaPlayerTimeChanged, handle_time_changed_event },
+    { libvlc_MediaPlayerPositionChanged, handle_position_changed_event },
+    { libvlc_MediaPlayerSeekableChanged, handle_seekable_changed_event },
+    { libvlc_MediaPlayerPausableChanged, handle_pausable_changed_event },
+    //{ libvlc_MediaPlayerTitleChanged, handle_input_state_event },         // unused
+    //{ libvlc_MediaPlayerLengthChanged, handle_input_state_event },        // unused
 };
 
 void VLCPlugin::player_register_events()
