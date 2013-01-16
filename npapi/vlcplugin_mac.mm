@@ -150,17 +150,18 @@ unsigned VlcPluginMac::video_format_cb(char *chroma,
                                        unsigned *pitches, unsigned *lines)
 {
     if ( p_browser ) {
+        /* request video in fullscreen size. scaling will be done by CA */
+        NSSize screenSize = [[NSScreen mainScreen] visibleFrame].size;
         float src_aspect = (float)(*width) / (*height);
-        float dst_aspect = (float)npwindow.width/npwindow.height;
+        float dst_aspect = (float)screenSize.width/screenSize.height;
         if ( src_aspect > dst_aspect ) {
-            if( npwindow.width != (*width) ) { //don't scale if size equal
-                (*width) = npwindow.width;
+            if( screenSize.width != (*width) ) { //don't scale if size equal
+                (*width) = screenSize.width;
                 (*height) = static_cast<unsigned>( (*width) / src_aspect + 0.5);
             }
-        }
-        else {
-            if( npwindow.height != (*height) ) { //don't scale if size equal
-                (*height) = npwindow.height;
+        } else {
+            if( screenSize.height != (*height) ) { //don't scale if size equal
+                (*height) = screenSize.height;
                 (*width) = static_cast<unsigned>( (*height) * src_aspect + 0.5);
             }
         }
@@ -452,18 +453,41 @@ bool VlcPluginMac::handle_event(void *event)
     if (![self cppPlugin]->playlist_isplaying() || ![self cppPlugin]->player_has_vout())
         return;
 
-    unsigned int media_width = [self cppPlugin]->m_media_width;
-    unsigned int media_height = [self cppPlugin]->m_media_height;
+    float media_width = (float)[self cppPlugin]->m_media_width;
+    float media_height = (float)[self cppPlugin]->m_media_height;
 
-    if (media_width == 0 || media_height == 0)
+    if (media_width == 0. || media_height == 0.)
         return;
 
-    CGContextSaveGState(cgContext);
+    NSRect layerRect = self.bounds;
+    float display_width = 0.;
+    float display_height = 0.;
+
+    float src_aspect = (float)media_width / media_height;
+    float dst_aspect = (float)layerRect.size.width/layerRect.size.height;
+    if ( src_aspect > dst_aspect ) {
+        if( layerRect.size.width != media_width ) { //don't scale if size equal
+            display_width = layerRect.size.width;
+            display_height = display_width / src_aspect; // + 0.5);
+        } else {
+            display_width = media_width;
+            display_height = media_height;
+        }
+    } else {
+        if( layerRect.size.height != media_height ) { //don't scale if size equal
+            display_height = layerRect.size.height;
+            display_width = display_height * src_aspect; // + 0.5);
+        } else {
+            display_width = media_width;
+            display_height = media_height;
+        }
+    }
 
     /* Compute the position of the video */
-    NSRect layerRect = self.bounds;
-    float left = (layerRect.size.width  - media_width)  / 2.;
-    float top  = (layerRect.size.height - media_height) / 2.;
+    float left = (layerRect.size.width  - display_width)  / 2.;
+    float top  = (layerRect.size.height - display_height) / 2.;
+
+    CGContextSaveGState(cgContext);
 
     static const size_t kComponentsPerPixel = 4;
     static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
@@ -493,7 +517,7 @@ bool VlcPluginMac::handle_event(void *event)
         CGContextRestoreGState(cgContext);
         return;
     }
-    CGRect rect = CGRectMake(left, top, media_width, media_height);
+    CGRect rect = CGRectMake(left, top, display_width, display_height);
     CGContextDrawImage(cgContext, rect, image);
 
     CGColorSpaceRelease(colorspace);
