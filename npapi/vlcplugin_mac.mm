@@ -215,7 +215,7 @@ void VlcPluginMac::toggle_fullscreen()
     if (get_fullscreen() == 0) {
         if (!fullscreenWindow) {
             fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(npwindow.x, npwindow.y, npwindow.width, npwindow.height)];
-            [fullscreenWindow setLevel: kCGFloatingWindowLevel];
+            [fullscreenWindow setLevel: CGShieldingWindowLevel()];
             fullscreenView = [fullscreenWindow customContentView];
 
             /* CAVE: the order of these methods is important, since we want a layer-hosting view instead of
@@ -237,6 +237,8 @@ void VlcPluginMac::toggle_fullscreen()
 
         [fullscreenWindow makeKeyAndOrderFront:nil];
         [fullscreenWindow enterFullscreen];
+        [fullscreenWindow orderFrontRegardless];
+        [fullscreenWindow makeKeyWindow];
     } else {
         [fullscreenWindow leaveFullscreen];
         [fullscreenWindow orderOut: nil];
@@ -890,6 +892,7 @@ static CGImageRef createImageNamed(NSString *name)
     NSApplicationPresentationOptions presentationOpts = [NSApp presentationOptions];
     if ([screen hasMenuBar])
         presentationOpts |= NSApplicationPresentationAutoHideMenuBar;
+
     if ([screen hasMenuBar] || [screen hasDock])
         presentationOpts |= NSApplicationPresentationAutoHideDock;
     [NSApp setPresentationOptions:presentationOpts];
