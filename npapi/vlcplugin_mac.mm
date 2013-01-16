@@ -88,6 +88,7 @@
 
 @interface VLCFullscreenContentView : NSView {
     VlcPluginMac *_cppPlugin;
+    NSTimeInterval _timeSinceLastMouseMove;
 }
 @property (readwrite) VlcPluginMac * cppPlugin;
 
@@ -984,8 +985,18 @@ static CGImageRef createImageNamed(NSString *name)
 - (void)mouseMoved:(NSEvent *)theEvent
 {
     self.cppPlugin->set_toolbar_visible(true);
+    _timeSinceLastMouseMove = [NSDate timeIntervalSinceReferenceDate];
+    [self performSelector:@selector(hideToolbar) withObject:nil afterDelay: 4.1];
 
     [super mouseMoved: theEvent];
+}
+
+- (void)hideToolbar
+{
+    if ([NSDate timeIntervalSinceReferenceDate] - _timeSinceLastMouseMove >= 4) {
+        self.cppPlugin->set_toolbar_visible(false);
+        [NSCursor setHiddenUntilMouseMoves:YES];
+    }
 }
 
 @end
