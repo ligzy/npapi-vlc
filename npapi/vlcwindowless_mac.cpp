@@ -27,6 +27,12 @@
 VlcWindowlessMac::VlcWindowlessMac(NPP instance, NPuint16_t mode) :
     VlcWindowlessBase(instance, mode)
 {
+    colorspace = CGColorSpaceCreateDeviceRGB();
+}
+
+VlcWindowlessMac::~VlcWindowlessMac()
+{
+    CGColorSpaceRelease(colorspace);
 }
 
 void VlcWindowlessMac::drawBackground(CGContextRef cgContext)
@@ -192,7 +198,6 @@ bool VlcWindowlessMac::handle_event(void *event)
                                                           sizeof(m_frame_buf[0]),
                                                           kCFAllocatorNull);
         CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
-        CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
         CGImageRef image = CGImageCreate(m_media_width,
                                          m_media_height,
                                          kBitsPerComponent,
@@ -205,7 +210,6 @@ bool VlcWindowlessMac::handle_event(void *event)
                                          true,
                                          kCGRenderingIntentPerceptual);
         if (!image) {
-            CGColorSpaceRelease(colorspace);
             CGImageRelease(image);
             CGDataProviderRelease(dataProvider);
             CGContextRestoreGState(cgContext);
@@ -214,7 +218,6 @@ bool VlcWindowlessMac::handle_event(void *event)
         CGRect rect = CGRectMake(left, top, m_media_width, m_media_height);
         CGContextDrawImage(cgContext, rect, image);
 
-        CGColorSpaceRelease(colorspace);
         CGImageRelease(image);
         CGDataProviderRelease(dataProvider);
 
