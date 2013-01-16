@@ -388,6 +388,9 @@ bool VlcPluginMac::handle_event(void *event)
             if (cocoaEvent->data.key.keyCode == 53) {
                 toggle_fullscreen();
                 return true;
+            } else if (cocoaEvent->data.key.keyCode == 49) {
+                playlist_togglePause();
+                return true;
             }
         }
         case NPCocoaEventKeyUp:
@@ -936,10 +939,23 @@ static CGImageRef createImageNamed(NSString *name)
             if (key == (unichar) 0x1b) {
                 self.cppPlugin->toggle_fullscreen();
                 return;
+            } else if (key == ' ') {
+                self.cppPlugin->playlist_togglePause();
+                return;
             }
         }
     }
     [super keyDown: theEvent];
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+    if ([theEvent type] == NSLeftMouseDown && !([theEvent modifierFlags] & NSControlKeyMask)) {
+        if ([theEvent clickCount] > 1)
+            self.cppPlugin->toggle_fullscreen();
+    }
+
+    [super mouseDown: theEvent];
 }
 
 @end
