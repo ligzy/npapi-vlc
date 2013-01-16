@@ -934,7 +934,7 @@ static CGImageRef createImageNamed(NSString *name)
         else {
             NSPoint point = [NSEvent mouseLocation];
 
-            [controllerLayer handleMouseDown:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+            [controllerLayer handleMouseDown:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
         }
     }
 
@@ -945,7 +945,7 @@ static CGImageRef createImageNamed(NSString *name)
 {
     NSPoint point = [NSEvent mouseLocation];
 
-    [controllerLayer handleMouseUp:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+    [controllerLayer handleMouseUp:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
 
     [super mouseUp: theEvent];
 }
@@ -954,7 +954,7 @@ static CGImageRef createImageNamed(NSString *name)
 {
     NSPoint point = [NSEvent mouseLocation];
 
-    [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+    [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
 
     [super mouseDragged: theEvent];
 }
