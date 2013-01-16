@@ -951,11 +951,41 @@ static CGImageRef createImageNamed(NSString *name)
 - (void)mouseDown:(NSEvent *)theEvent
 {
     if ([theEvent type] == NSLeftMouseDown && !([theEvent modifierFlags] & NSControlKeyMask)) {
-        if ([theEvent clickCount] > 1)
+        if ([theEvent clickCount] >= 2)
             self.cppPlugin->toggle_fullscreen();
+        else {
+            NSPoint point = [NSEvent mouseLocation];
+
+            [controllerLayer handleMouseDown:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+        }
     }
 
     [super mouseDown: theEvent];
+}
+
+- (void)mouseUp:(NSEvent *)theEvent
+{
+    NSPoint point = [NSEvent mouseLocation];
+
+    [controllerLayer handleMouseUp:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+
+    [super mouseUp: theEvent];
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+    NSPoint point = [NSEvent mouseLocation];
+
+    [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+
+    [super mouseDragged: theEvent];
+}
+
+- (void)mouseMoved:(NSEvent *)theEvent
+{
+    self.cppPlugin->set_toolbar_visible(true);
+
+    [super mouseMoved: theEvent];
 }
 
 @end
