@@ -39,6 +39,7 @@
 @end
 
 @interface VLCPlaybackLayer : CALayer {
+    CGColorSpaceRef _colorspace;
     VlcPluginMac *_cppPlugin;
 }
 @property (readwrite) VlcPluginMac * cppPlugin;
@@ -440,9 +441,17 @@ bool VlcPluginMac::handle_event(void *event)
     if (self = [super init]) {
         self.needsDisplayOnBoundsChange = YES;
         self.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
+
+        _colorspace = CGColorSpaceCreateDeviceRGB();
     }
 
     return self;
+}
+
+- (void)dealloc
+{
+    CGColorSpaceRelease(_colorspace);
+    [super dealloc];
 }
 
 - (void)drawInContext:(CGContextRef)cgContext
@@ -498,20 +507,19 @@ bool VlcPluginMac::handle_event(void *event)
                                                     sizeof([self cppPlugin]->m_frame_buf[0]),
                                                     kCFAllocatorNull);
     CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
-    CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
+
     CGImageRef image = CGImageCreate(media_width,
                                      media_height,
                                      kBitsPerComponent,
                                      kBitsPerComponent * kComponentsPerPixel,
                                      kComponentsPerPixel * media_width,
-                                     colorspace,
+                                     _colorspace,
                                      kCGBitmapByteOrder16Big,
                                      dataProvider,
                                      NULL,
                                      true,
                                      kCGRenderingIntentPerceptual);
     if (!image) {
-        CGColorSpaceRelease(colorspace);
         CGImageRelease(image);
         CGDataProviderRelease(dataProvider);
         CGContextRestoreGState(cgContext);
@@ -520,7 +528,6 @@ bool VlcPluginMac::handle_event(void *event)
     CGRect rect = CGRectMake(left, top, display_width, display_height);
     CGContextDrawImage(cgContext, rect, image);
 
-    CGColorSpaceRelease(colorspace);
     CGImageRelease(image);
     CGDataProviderRelease(dataProvider);
 
