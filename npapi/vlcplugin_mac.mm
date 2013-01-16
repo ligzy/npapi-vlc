@@ -468,7 +468,7 @@ bool VlcPluginMac::handle_event(void *event)
     if (media_width == 0. || media_height == 0.)
         return;
 
-    NSRect layerRect = self.bounds;
+    CGRect layerRect = self.bounds;
     float display_width = 0.;
     float display_height = 0.;
 
