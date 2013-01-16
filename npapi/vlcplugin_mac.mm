@@ -102,9 +102,6 @@
 
 - (id)initWithContentRect:(NSRect)contentRect;
 
-- (void)enterFullscreen;
-- (void)leaveFullscreen;
-
 @end
 
 @interface NSScreen (VLCAdditions)
@@ -215,6 +212,8 @@ void VlcPluginMac::toggle_fullscreen()
 
     if (get_fullscreen() == 0) {
         if (!fullscreenWindow) {
+            /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the 
+             * existance of a parent window. This is solved in 10.6 and we should remove the window once we require it. */
             fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(npwindow.x, npwindow.y, npwindow.width, npwindow.height)];
             [fullscreenWindow setLevel: CGShieldingWindowLevel()];
             fullscreenView = [fullscreenWindow customContentView];
@@ -233,15 +232,11 @@ void VlcPluginMac::toggle_fullscreen()
         [[fullscreenView layer] addSublayer: noMediaLayer];
         [[fullscreenView layer] addSublayer: playbackLayer];
         [[fullscreenView layer] addSublayer: controllerLayer];
-
         [[fullscreenView layer] setNeedsDisplay];
 
-        [fullscreenWindow makeKeyAndOrderFront:nil];
-        [fullscreenWindow enterFullscreen];
-        [fullscreenWindow orderFrontRegardless];
-        [fullscreenWindow makeKeyWindow];
+        [[fullscreenWindow contentView] enterFullScreenMode: [NSScreen mainScreen] withOptions: [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithInt: 0], NSFullScreenModeAllScreens, nil]];
     } else {
-        [fullscreenWindow leaveFullscreen];
+        [[fullscreenWindow contentView] exitFullScreenModeWithOptions: nil];
         [fullscreenWindow orderOut: nil];
         [noMediaLayer removeFromSuperlayer];
         [playbackLayer removeFromSuperlayer];
@@ -867,10 +862,7 @@ static CGImageRef createImageNamed(NSString *name)
     if( self = [super initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO]) {
         _initialFrame = contentRect;
         [self setBackgroundColor:[NSColor blackColor]];
-        [self setHasShadow:YES];
-        [self setMovableByWindowBackground: YES];
         [self setAcceptsMouseMovedEvents: YES];
-        [self center];
 
         _customContentView = [[VLCFullscreenContentView alloc] initWithFrame:_initialFrame];
         [_customContentView setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable];
@@ -884,28 +876,6 @@ static CGImageRef createImageNamed(NSString *name)
 {
     [_customContentView release];
     [super dealloc];
-}
-
-- (void)enterFullscreen
-{
-    NSScreen *screen = [self screen];
-
-    _initialFrame = [self frame];
-    [self setFrame:[[self screen] frame] display:YES animate:YES];
-
-    NSApplicationPresentationOptions presentationOpts = [NSApp presentationOptions];
-    if ([screen hasMenuBar])
-        presentationOpts |= NSApplicationPresentationAutoHideMenuBar;
-
-    if ([screen hasMenuBar] || [screen hasDock])
-        presentationOpts |= NSApplicationPresentationAutoHideDock;
-    [NSApp setPresentationOptions:presentationOpts];
-}
-
-- (void)leaveFullscreen
-{
-    [NSApp setPresentationOptions: NSApplicationPresentationDefault];
-    [self setFrame:_initialFrame display:YES animate:YES];
 }
 
 - (BOOL)canBecomeKeyWindow
@@ -924,6 +894,11 @@ static CGImageRef createImageNamed(NSString *name)
 @synthesize cppPlugin = _cppPlugin;
 
 - (BOOL)acceptsFirstResponder
+{
+    return YES;
+}
+
+- (BOOL)canBecomeKeyView
 {
     return YES;
 }
