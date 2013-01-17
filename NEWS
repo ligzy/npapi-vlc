@@ -1,19 +1,39 @@
 Changes between VLC 2.0.2 and 2.0.6:
 ------------------------------------
- * NPAPI: core class rework and redesign
- * NPAPI: core windowless support
- * Update test page
- * Drop OJI support
- * Improve packaging on most platforms
- * Fix memory and Handle leaks
- * Fix browser events propagation in NPAPI
- * ActiveX: first step of Win64 support
+
+Common:
  * Upgrade the libVLC wrapper
+ * Improve packaging on most platforms
+ * Optionnal toolbars display in webview and in fullscreen
+ * Quit fullscreen with Esc key
+ * Fix background color
+ * Fix memory and handle leaks
+
+Webpages:
+ * Update classic test pages
+ * Add jQuery class to control the webplugin
+ * Add VLCObject and VLCControl classes to control the webplugin
+ * Add Windowless and resize test pages
+
+NPAPI core:
+ * Core class rework and redesign
+ * Windowless support
+ * Drop OJI support
+ * Fix browser events propagation in NPAPI
  * Drop the dependency on external NPAPI headers: it will get downloaded
+
+ActiveX:
+ * ActiveX: first step of Win64 support
+ * Fix events propagation
+ * Fix memory cleaning on unload
+
+Platforms:
  * Support for Windowless under X11 with XCB
  * Support for Windowless under Mac OS X using CoreGraphics
  * Support for Windowless under Windows using GDI+
- * Re-write Mac OS X Port to use CoreAnimation for video playback
+ * Re-write Mac OS X Port to use CoreAnimation for Windowed video playback
+ * Support for Mac OS X 64 bits
+ * Support for Windows 64 bits
 
 
 Changes between VLC 2.0.0 and 2.0.2:
