@@ -99,6 +99,8 @@ case "${host_os}" in
     AC_DEFINE([_WIN32_WINNT], 0x0501, [Define to '0x0501' for Windows XP APIs.])
     AC_DEFINE([_WIN32_IE], 0x0600, [Define to '0x0600' for IE6.0 APIs.])
     AC_DEFINE([_WIN32], 1, [Define to 1 if targetting Windows.])
+    CC="$CC -static-libgcc"
+    CXX="$CXX -static-libgcc -static-libstdc++"
     ;;
 esac
 AM_CONDITIONAL(HAVE_DARWIN, test "${SYS}" = "darwin")
