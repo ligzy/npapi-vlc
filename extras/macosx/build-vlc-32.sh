@@ -144,6 +144,7 @@ cd 32build
         --enable-macosx-audio \
         --disable-macosx-eyetv \
         --disable-macosx-qtkit \
+        --disable-macosx-avfoundation \
         --enable-macosx-vout \
         --disable-skins2 \
         --disable-xcb \

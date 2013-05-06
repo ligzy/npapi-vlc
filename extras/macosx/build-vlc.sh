@@ -143,7 +143,8 @@ cd 64build
         --enable-libass \
         --enable-macosx-audio \
         --disable-macosx-eyetv \
-        --enable-macosx-qtkit \
+        --disable-macosx-qtkit \
+        --disable-macosx-avfoundation \
         --enable-macosx-vout \
         --disable-skins2 \
         --disable-xcb \
