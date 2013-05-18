@@ -35,29 +35,6 @@ VlcWindowlessMac::~VlcWindowlessMac()
     CGColorSpaceRelease(colorspace);
 }
 
-void VlcWindowlessMac::drawBackground(CGContextRef cgContext)
-{
-    float windowWidth = npwindow.width;
-    float windowHeight = npwindow.height;
-
-    CGContextSaveGState(cgContext);
-
-    // this context is flipped..
-    CGContextTranslateCTM(cgContext, 0.0, windowHeight);
-    CGContextScaleCTM(cgContext, 1., -1.);
-
-    // fetch background color
-    unsigned r = 0, g = 0, b = 0;
-    HTMLColor2RGB(get_options().get_bg_color().c_str(), &r, &g, &b);
-
-    // draw background
-    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetRGBFillColor(cgContext,r/255.,g/255.,b/255.,1.);
-    CGContextDrawPath(cgContext, kCGPathFill);
-
-    CGContextRestoreGState(cgContext);
-}
-
 void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
 {
     float windowWidth = npwindow.width;
@@ -171,7 +148,7 @@ bool VlcWindowlessMac::handle_event(void *event)
             return true;
         }
 
-        drawBackground(cgContext);
+        CGContextClearRect(cgContext, CGRectMake(0, 0, npwindow.width, npwindow.height) );
 
         if(!VlcPluginBase::player_has_vout())
             return true;
@@ -191,12 +168,11 @@ bool VlcWindowlessMac::handle_event(void *event)
         static const size_t kComponentsPerPixel = 4;
         static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
 
-
         /* render frame */
         CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
-                                                          (const uint8_t *)&m_frame_buf[0],
-                                                          sizeof(m_frame_buf[0]),
-                                                          kCFAllocatorNull);
+                                                        (const uint8_t *)&m_frame_buf[0],
+                                                        sizeof(m_frame_buf[0]),
+                                                        kCFAllocatorNull);
         CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
         CGImageRef image = CGImageCreate(m_media_width,
                                          m_media_height,

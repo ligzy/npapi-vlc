@@ -36,7 +36,6 @@ public:
     NPError get_root_layer(void *value);
 
 protected:
-    void drawBackground(CGContextRef cgContext);
     void drawNoPlayback(CGContextRef cgContext);
 
 private:
