@@ -148,30 +148,15 @@ unsigned VlcPluginMac::video_format_cb(char *chroma,
                                        unsigned *width, unsigned *height,
                                        unsigned *pitches, unsigned *lines)
 {
-    if ( p_browser ) {
-        /* request video in fullscreen size. scaling will be done by CA */
-        NSSize screenSize = [[NSScreen mainScreen] visibleFrame].size;
-        float src_aspect = (float)(*width) / (*height);
-        float dst_aspect = (float)screenSize.width/screenSize.height;
-        if ( src_aspect > dst_aspect ) {
-            if( screenSize.width != (*width) ) { //don't scale if size equal
-                (*width) = screenSize.width;
-                (*height) = static_cast<unsigned>( (*width) / src_aspect + 0.5);
-            }
-        } else {
-            if( screenSize.height != (*height) ) { //don't scale if size equal
-                (*height) = screenSize.height;
-                (*width) = static_cast<unsigned>( (*height) * src_aspect + 0.5);
-            }
-        }
-    }
-
-    m_media_width = (*width);
-    m_media_height = (*height);
+    /* store native video resolution and use it
+     * scaling will be performed by CA, which is more efficient */
+    m_media_width = (float)(*width);
+    m_media_height = (float)(*height);
 
     memcpy(chroma, "RGBA", sizeof("RGBA")-1);
-    (*pitches) = m_media_width * 4;
-    (*lines) = m_media_height;
+
+    (*pitches) = (*width) * 4;
+    (*lines) = (*height);
 
     //+1 for vlc 2.0.3/2.1 bug workaround.
     //They writes after buffer end boundary by some reason unknown to me...
@@ -183,8 +168,8 @@ unsigned VlcPluginMac::video_format_cb(char *chroma,
 void VlcPluginMac::video_cleanup_cb()
 {
     m_frame_buf.resize(0);
-    m_media_width = 0;
-    m_media_height = 0;
+    m_media_width = 0.;
+    m_media_height = 0.;
     [fullscreenWindow orderOut: nil];
 }
 
@@ -212,7 +197,7 @@ void VlcPluginMac::toggle_fullscreen()
 
     if (get_fullscreen() == 0) {
         if (!fullscreenWindow) {
-            /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the 
+            /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the
              * existance of a parent window. This is solved in 10.6 and we should remove the window once we require it. */
             fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(npwindow.x, npwindow.y, npwindow.width, npwindow.height)];
             [fullscreenWindow setLevel: CGShieldingWindowLevel()];
@@ -465,8 +450,8 @@ bool VlcPluginMac::handle_event(void *event)
     if (![self cppPlugin]->playlist_isplaying() || ![self cppPlugin]->player_has_vout())
         return;
 
-    float media_width = (float)[self cppPlugin]->m_media_width;
-    float media_height = (float)[self cppPlugin]->m_media_height;
+    float media_width = [self cppPlugin]->m_media_width;
+    float media_height = [self cppPlugin]->m_media_height;
 
     if (media_width == 0. || media_height == 0.)
         return;

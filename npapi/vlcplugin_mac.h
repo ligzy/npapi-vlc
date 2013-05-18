@@ -81,8 +81,8 @@ public:
     NPError get_root_layer(void *value);
 
     std::vector<char> m_frame_buf;
-    unsigned int m_media_width;
-    unsigned int m_media_height;
+    float m_media_width;
+    float m_media_height;
 
 private:
     void set_player_window();
