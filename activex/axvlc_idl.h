@@ -1580,7 +1580,7 @@ typedef struct IVLCPlaylistVtbl {
         IVLCPlaylist* This,
         long itemId);
 
-    HRESULT (STDMETHODCALLTYPE *pause(
+    HRESULT (STDMETHODCALLTYPE *pause)(
         IVLCPlaylist* This);
 
     HRESULT (STDMETHODCALLTYPE *togglePause)(
