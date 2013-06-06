@@ -351,6 +351,9 @@ library AXVLC
         [helpstring("Play item in playlist.")]
         HRESULT playItem([in] long itemId);
 
+        [helpstring("Pause the playlist.")]
+        HRESULT pause();
+
         [helpstring("Play/Pause current clip.")]
         HRESULT togglePause();
 
