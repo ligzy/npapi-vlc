@@ -11,7 +11,6 @@
  *          Pierre d'Herbemont <pdherbemont # videolan.org>
  *          David Fuhrmann <david dot fuhrmann at googlemail dot com>
  *
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -34,7 +33,12 @@
 #include <QuartzCore/QuartzCore.h>
 #include <AppKit/AppKit.h>
 
-@interface VLCNoMediaLayer : CALayer
+#define SHOW_BRANDING 1
+
+@interface VLCNoMediaLayer : CALayer {
+    VlcPluginMac *_cppPlugin;
+}
+@property (readwrite) VlcPluginMac * cppPlugin;
 
 @end
 
@@ -295,6 +299,7 @@ NPError VlcPluginMac::get_root_layer(void *value)
 {
     noMediaLayer = [[VLCNoMediaLayer alloc] init];
     noMediaLayer.opaque = 1.;
+    [noMediaLayer setCppPlugin: this];
     [browserRootLayer addSublayer: noMediaLayer];
 
     playbackLayer = [[VLCPlaybackLayer alloc] init];
@@ -525,6 +530,7 @@ bool VlcPluginMac::handle_event(void *event)
 @end
 
 @implementation VLCNoMediaLayer
+@synthesize cppPlugin = _cppPlugin;
 
 - (id)init
 {
@@ -543,6 +549,7 @@ bool VlcPluginMac::handle_event(void *event)
 
     CGContextSaveGState(cgContext);
 
+#if SHOW_BRANDING
     // draw a gray background
     CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
     CGContextSetGrayFillColor(cgContext, .5, 1.);
@@ -597,6 +604,47 @@ bool VlcPluginMac::handle_event(void *event)
     CFRelease(textLine);
     CFRelease(attRef);
     CFRelease(stylesDict);
+#else
+    // draw a black rect
+    CGRect rect;
+    float media_width = [self cppPlugin]->m_media_width;
+    float media_height = [self cppPlugin]->m_media_height;
+
+    if (media_width == 0. || media_height == 0.)
+        CGRectMake(0, 0, windowWidth, windowHeight);
+    else {
+        CGRect layerRect = self.bounds;
+        float display_width = 0.;
+        float display_height = 0.;
+        float src_aspect = (float)media_width / media_height;
+        float dst_aspect = (float)layerRect.size.width/layerRect.size.height;
+        if ( src_aspect > dst_aspect ) {
+            if( layerRect.size.width != media_width ) { //don't scale if size equal
+                display_width = layerRect.size.width;
+                display_height = display_width / src_aspect; // + 0.5);
+            } else {
+                display_width = media_width;
+                display_height = media_height;
+            }
+        } else {
+            if( layerRect.size.height != media_height ) { //don't scale if size equal
+                display_height = layerRect.size.height;
+                display_width = display_height * src_aspect; // + 0.5);
+            } else {
+                display_width = media_width;
+                display_height = media_height;
+            }
+        }
+
+        float left = (layerRect.size.width  - display_width)  / 2.;
+        float top  = (layerRect.size.height - display_height) / 2.;
+        CGRect rect = CGRectMake(left, top, display_width, display_height);
+    }
+
+    CGContextAddRect(cgContext, rect);
+    CGContextSetGrayFillColor(cgContext, 0., 1.);
+    CGContextDrawPath(cgContext, kCGPathFill);
+#endif
 
     CGContextRestoreGState(cgContext);
 }

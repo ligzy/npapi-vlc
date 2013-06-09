@@ -24,6 +24,8 @@
 #include <npapi.h>
 #include "vlcwindowless_mac.h"
 
+#define SHOW_BRANDING 1
+
 VlcWindowlessMac::VlcWindowlessMac(NPP instance, NPuint16_t mode) :
     VlcWindowlessBase(instance, mode)
 {
@@ -46,6 +48,7 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
     CGContextTranslateCTM(cgContext, 0.0, windowHeight);
     CGContextScaleCTM(cgContext, 1., -1.);
 
+#if SHOW_BRANDING
     // draw a gray background
     CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
     CGContextSetGrayFillColor(cgContext, .5, 1.);
@@ -100,6 +103,19 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
     CFRelease(textLine);
     CFRelease(attRef);
     CFRelease(stylesDict);
+#else
+    // draw a black rect
+    CGRect rect;
+    if (m_media_height != 0 && m_media_width != 0) {
+        float left = (npwindow.width  - m_media_width)  / 2.;
+        float top  = (npwindow.height - m_media_height) / 2.;
+        rect = CGRectMake(left, top, m_media_width, m_media_height);
+    } else
+        rect = CGRectMake(0, 0, windowWidth, windowHeight);
+    CGContextAddRect(cgContext, rect);
+    CGContextSetGrayFillColor(cgContext, 0., 1.);
+    CGContextDrawPath(cgContext, kCGPathFill);
+#endif
 
     CGContextRestoreGState(cgContext);
 }
