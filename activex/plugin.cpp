@@ -461,19 +461,14 @@ HRESULT VLCPlugin::onLoad(void)
 
 void VLCPlugin::initVLC()
 {
-    /*
-    ** default initialization options
-    */
-    const char *ppsz_argv[32] = { };
-    int   ppsz_argc = 0;
+    static const char * const ppsz_argv[] = {
+        "-vv",
+        "--no-stats",
+        "--intf=dummy",
+        "--no-video-title-show",
+    };
 
-    /* common settings */
-    ppsz_argv[ppsz_argc++] = "-vv";
-    ppsz_argv[ppsz_argc++] = "--no-stats";
-    ppsz_argv[ppsz_argc++] = "--intf=dummy";
-    ppsz_argv[ppsz_argc++] = "--no-video-title-show";
-
-    _p_libvlc = libvlc_new(ppsz_argc, ppsz_argv);
+    _p_libvlc = libvlc_new(sizeof(ppsz_argv) / sizeof(*ppsz_argv), ppsz_argv);
     if( !_p_libvlc )
         return;
 
