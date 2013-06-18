@@ -486,8 +486,6 @@ void VLCPlugin::initVLC()
         }
     }
 
-    ppsz_argv[ppsz_argc++] = "-vv";
-
     HKEY h_key;
     char p_pluginpath[MAX_PATH];
     if( RegOpenKeyEx( HKEY_LOCAL_MACHINE, TEXT("Software\\VideoLAN\\VLC"),
