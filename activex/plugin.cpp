@@ -486,31 +486,6 @@ void VLCPlugin::initVLC()
         }
     }
 
-    HKEY h_key;
-    char p_pluginpath[MAX_PATH];
-    if( RegOpenKeyEx( HKEY_LOCAL_MACHINE, TEXT("Software\\VideoLAN\\VLC"),
-                      0, KEY_READ, &h_key ) == ERROR_SUCCESS )
-    {
-        DWORD i_type, i_data = MAX_PATH;
-        TCHAR w_pluginpath[MAX_PATH];
-        if( RegQueryValueEx( h_key, TEXT("InstallDir"), 0, &i_type,
-                             (LPBYTE)w_pluginpath, &i_data ) == ERROR_SUCCESS )
-        {
-            w_pluginpath[MAX_PATH-1] = '\0';
-            if( i_type == REG_SZ )
-            {
-                if( WideCharToMultiByte(CP_UTF8, 0, w_pluginpath, -1, p_pluginpath,
-                         sizeof(p_pluginpath)-sizeof("\\plugins")+1, NULL, NULL) )
-                {
-                    strcat( p_pluginpath, "\\plugins" );
-                    ppsz_argv[ppsz_argc++] = "--plugin-path";
-                    ppsz_argv[ppsz_argc++] = p_pluginpath;
-                }
-            }
-        }
-        RegCloseKey( h_key );
-    }
-
     // make sure plugin isn't affected with VLC single instance mode
     ppsz_argv[ppsz_argc++] = "--no-one-instance";
 
