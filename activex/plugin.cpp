@@ -486,13 +486,9 @@ void VLCPlugin::initVLC()
         }
     }
 
-    // make sure plugin isn't affected with VLC single instance mode
-    ppsz_argv[ppsz_argc++] = "--no-one-instance";
-
     /* common settings */
     ppsz_argv[ppsz_argc++] = "-vv";
     ppsz_argv[ppsz_argc++] = "--no-stats";
-    ppsz_argv[ppsz_argc++] = "--no-media-library";
     ppsz_argv[ppsz_argc++] = "--intf=dummy";
     ppsz_argv[ppsz_argc++] = "--no-video-title-show";
 
