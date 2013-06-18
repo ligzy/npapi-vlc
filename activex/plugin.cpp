@@ -461,30 +461,11 @@ HRESULT VLCPlugin::onLoad(void)
 
 void VLCPlugin::initVLC()
 {
-    extern HMODULE DllGetModule();
-
     /*
     ** default initialization options
     */
     const char *ppsz_argv[32] = { };
     int   ppsz_argc = 0;
-
-    char p_progpath[MAX_PATH];
-    {
-        TCHAR w_progpath[MAX_PATH];
-        DWORD len = GetModuleFileName(DllGetModule(), w_progpath, MAX_PATH);
-        w_progpath[MAX_PATH-1] = '\0';
-        if( len > 0 )
-        {
-            len = WideCharToMultiByte(CP_UTF8, 0, w_progpath, len, p_progpath,
-                       sizeof(p_progpath)-1, NULL, NULL);
-            if( len > 0 )
-            {
-                p_progpath[len] = '\0';
-                ppsz_argv[0] = p_progpath;
-            }
-        }
-    }
 
     /* common settings */
     ppsz_argv[ppsz_argc++] = "-vv";
