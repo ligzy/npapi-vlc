@@ -34,6 +34,8 @@ VlcWindowlessMac::VlcWindowlessMac(NPP instance, NPuint16_t mode) :
 
 VlcWindowlessMac::~VlcWindowlessMac()
 {
+    if (lastFrame)
+        CGImageRelease(lastFrame);
     CGColorSpaceRelease(colorspace);
 }
 
@@ -161,10 +163,7 @@ bool VlcWindowlessMac::handle_event(void *event)
 
         CGContextClearRect(cgContext, CGRectMake(0, 0, npwindow.width, npwindow.height) );
 
-        if(!VlcPluginBase::player_has_vout())
-            return true;
-
-        if (m_media_width == 0 || m_media_height == 0) {
+        if (m_media_width == 0 || m_media_height == 0 || (!lastFrame && !VlcPluginBase::playlist_isplaying()) || !get_player().is_open()) {
             drawNoPlayback(cgContext);
             return true;
         }
@@ -176,39 +175,55 @@ bool VlcWindowlessMac::handle_event(void *event)
         CGContextScaleCTM(cgContext, 1., -1.);
 
         /* Compute the position of the video */
-        float left = (npwindow.width  - m_media_width)  / 2.;
-        float top  = (npwindow.height - m_media_height) / 2.;
+        float left = 0;
+        float top  = 0;
+
         static const size_t kComponentsPerPixel = 4;
         static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
+        CGRect rect;
 
-        /* render frame */
-        CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
-                                                        (const uint8_t *)&m_frame_buf[0],
-                                                        sizeof(m_frame_buf[0]),
-                                                        kCFAllocatorNull);
-        CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
-        CGImageRef image = CGImageCreate(m_media_width,
-                                         m_media_height,
-                                         kBitsPerComponent,
-                                         kBitsPerComponent * kComponentsPerPixel,
-                                         kComponentsPerPixel * m_media_width,
-                                         colorspace,
-                                         kCGBitmapByteOrder16Big,
-                                         dataProvider,
-                                         NULL,
-                                         true,
-                                         kCGRenderingIntentPerceptual);
-        if (!image) {
-            CGImageRelease(image);
+        if (m_media_width != 0 && m_media_height != 0) {
+            cached_width = m_media_width;
+            cached_height = m_media_height;
+            left = (npwindow.width  - m_media_width) / 2.;
+            top = (npwindow.height - m_media_height) / 2.;
+
+            /* fetch frame */
+            CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+                                                            (const uint8_t *)&m_frame_buf[0],
+                                                            sizeof(m_frame_buf[0]),
+                                                            kCFAllocatorNull);
+            CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
+            lastFrame = CGImageCreate(m_media_width,
+                                      m_media_height,
+                                      kBitsPerComponent,
+                                      kBitsPerComponent * kComponentsPerPixel,
+                                      kComponentsPerPixel * m_media_width,
+                                      colorspace,
+                                      kCGBitmapByteOrder16Big,
+                                      dataProvider,
+                                      NULL,
+                                      true,
+                                      kCGRenderingIntentPerceptual);
+
             CGDataProviderRelease(dataProvider);
-            CGContextRestoreGState(cgContext);
-            return true;
-        }
-        CGRect rect = CGRectMake(left, top, m_media_width, m_media_height);
-        CGContextDrawImage(cgContext, rect, image);
 
-        CGImageRelease(image);
-        CGDataProviderRelease(dataProvider);
+            if (!lastFrame) {
+                fprintf(stderr, "image creation failed\n");
+                CGImageRelease(lastFrame);
+                CGContextRestoreGState(cgContext);
+                return true;
+            }
+
+            rect = CGRectMake(left, top, m_media_width, m_media_height);
+        } else {
+            fprintf(stderr, "drawing old frame again\n");
+            left = (npwindow.width - cached_width) / 2.;
+            top = (npwindow.height - cached_height) / 2.;
+            rect = CGRectMake(left, top, cached_width, cached_width);
+        }
+
+        CGContextDrawImage(cgContext, rect, lastFrame);
 
         CGContextRestoreGState(cgContext);
 

@@ -40,6 +40,9 @@ protected:
 
 private:
     CGColorSpaceRef colorspace;
+    CGImageRef lastFrame;
+    int cached_width;
+    int cached_height;
 };
 
 #endif /* __VLCWINDOWLESS_MAC_H__ */
