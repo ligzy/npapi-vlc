@@ -461,10 +461,8 @@ bool VlcPluginMac::handle_event(void *event)
 
     BOOL b_paused = !([self cppPlugin]->playlist_isplaying());
 
-    if ((!_lastFrame && b_paused) || ![self cppPlugin]->get_player().is_open()) {
-        NSLog(@"no last frame or no open player");
+    if ((!_lastFrame && b_paused) || ![self cppPlugin]->get_player().is_open())
         return;
-    }
 
     float media_width = [self cppPlugin]->m_media_width;
     float media_height = [self cppPlugin]->m_media_height;
