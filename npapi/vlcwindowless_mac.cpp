@@ -159,18 +159,15 @@ bool VlcWindowlessMac::handle_event(void *event)
             return false;
         }
 
-        if (!VlcPluginBase::playlist_isplaying()) {
-            drawNoPlayback(cgContext);
-            return true;
-        }
-
         CGContextClearRect(cgContext, CGRectMake(0, 0, npwindow.width, npwindow.height) );
 
         if(!VlcPluginBase::player_has_vout())
             return true;
 
-        if (m_media_width == 0 || m_media_height == 0)
+        if (m_media_width == 0 || m_media_height == 0) {
+            drawNoPlayback(cgContext);
             return true;
+        }
 
         CGContextSaveGState(cgContext);
 
