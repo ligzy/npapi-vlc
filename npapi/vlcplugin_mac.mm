@@ -45,6 +45,9 @@
 @interface VLCPlaybackLayer : CALayer {
     CGColorSpaceRef _colorspace;
     VlcPluginMac *_cppPlugin;
+    CGImageRef _lastFrame;
+    int _cached_width;
+    int _cached_height;
 }
 @property (readwrite) VlcPluginMac * cppPlugin;
 
@@ -268,7 +271,9 @@ void VlcPluginMac::update_controls()
     [controllerLayer setIsPlaying: playlist_isplaying()];
     [controllerLayer setIsFullscreen:this->get_fullscreen()];
 
-    if (player_has_vout()) {
+
+    libvlc_state_t currentstate = libvlc_media_player_get_state(getMD());
+    if (currentstate == libvlc_Playing || currentstate == libvlc_Paused || currentstate == libvlc_Opening) {
         [noMediaLayer setHidden: YES];
         [playbackLayer setHidden: NO];
     } else {
@@ -444,6 +449,8 @@ bool VlcPluginMac::handle_event(void *event)
 - (void)dealloc
 {
     CGColorSpaceRelease(_colorspace);
+    if (_lastFrame)
+        CGImageRelease(_lastFrame);
     [super dealloc];
 }
 
@@ -452,14 +459,26 @@ bool VlcPluginMac::handle_event(void *event)
     if (!cgContext)
         return;
 
-    if (![self cppPlugin]->playlist_isplaying() || ![self cppPlugin]->player_has_vout())
+    BOOL b_paused = !([self cppPlugin]->playlist_isplaying());
+
+    if ((!_lastFrame && b_paused) || ![self cppPlugin]->get_player().is_open()) {
+        NSLog(@"no last frame or no open player");
         return;
+    }
 
     float media_width = [self cppPlugin]->m_media_width;
     float media_height = [self cppPlugin]->m_media_height;
 
-    if (media_width == 0. || media_height == 0.)
-        return;
+    if (media_width == 0. || media_height == 0.) {
+        if (_cached_height != 0 && _cached_width != 0) {
+            media_width = _cached_width;
+            media_height = _cached_height;
+        } else
+            return;
+    } else {
+        _cached_width = media_width;
+        _cached_height = media_height;
+    }
 
     CGRect layerRect = self.bounds;
     float display_width = 0.;
@@ -494,35 +513,39 @@ bool VlcPluginMac::handle_event(void *event)
     static const size_t kComponentsPerPixel = 4;
     static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
 
-    /* render frame */
-    CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
-                                                    (const uint8_t *)&[self cppPlugin]->m_frame_buf[0],
-                                                    sizeof([self cppPlugin]->m_frame_buf[0]),
-                                                    kCFAllocatorNull);
-    CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
+    if (!b_paused) {
+        /* fetch frame */
+        CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
+                                                        (const uint8_t *)&[self cppPlugin]->m_frame_buf[0],
+                                                        sizeof([self cppPlugin]->m_frame_buf[0]),
+                                                        kCFAllocatorNull);
+        CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
 
-    CGImageRef image = CGImageCreate(media_width,
-                                     media_height,
-                                     kBitsPerComponent,
-                                     kBitsPerComponent * kComponentsPerPixel,
-                                     kComponentsPerPixel * media_width,
-                                     _colorspace,
-                                     kCGBitmapByteOrder16Big,
-                                     dataProvider,
-                                     NULL,
-                                     true,
-                                     kCGRenderingIntentPerceptual);
-    if (!image) {
-        CGImageRelease(image);
+        if (_lastFrame)
+            CGImageRelease(_lastFrame);
+
+        _lastFrame = CGImageCreate(media_width,
+                                         media_height,
+                                         kBitsPerComponent,
+                                         kBitsPerComponent * kComponentsPerPixel,
+                                         kComponentsPerPixel * media_width,
+                                         _colorspace,
+                                         kCGBitmapByteOrder16Big,
+                                         dataProvider,
+                                         NULL,
+                                         true,
+                                         kCGRenderingIntentPerceptual);
+
         CGDataProviderRelease(dataProvider);
-        CGContextRestoreGState(cgContext);
-        return;
+
+        if (!_lastFrame) {
+            CGImageRelease(_lastFrame);
+            CGContextRestoreGState(cgContext);
+            return;
+        }
     }
     CGRect rect = CGRectMake(left, top, display_width, display_height);
-    CGContextDrawImage(cgContext, rect, image);
-
-    CGImageRelease(image);
-    CGDataProviderRelease(dataProvider);
+    CGContextDrawImage(cgContext, rect, _lastFrame);
 
     CGContextRestoreGState(cgContext);
 }
