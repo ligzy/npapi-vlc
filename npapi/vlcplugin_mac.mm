@@ -42,15 +42,10 @@
 
 @end
 
-@interface VLCPlaybackLayer : CALayer {
-    CGColorSpaceRef _colorspace;
-    VlcPluginMac *_cppPlugin;
-    CGImageRef _lastFrame;
-    int _cached_width;
-    int _cached_height;
-}
-@property (readwrite) VlcPluginMac * cppPlugin;
-
+@interface VLCBrowserRootLayer : CALayer
+- (void)addVoutLayer:(CALayer *)aLayer;
+- (void)removeVoutLayer:(CALayer *)aLayer;
+- (CGSize)currentOutputSize;
 @end
 
 @interface VLCControllerLayer : CALayer {
@@ -117,8 +112,8 @@
 - (CGDirectDisplayID)displayID;
 @end
 
-static CALayer * browserRootLayer;
-static VLCPlaybackLayer * playbackLayer;
+static VLCBrowserRootLayer * browserRootLayer;
+static CALayer * playbackLayer;
 static VLCNoMediaLayer * noMediaLayer;
 static VLCControllerLayer * controllerLayer;
 static VLCFullscreenWindow * fullscreenWindow;
@@ -127,7 +122,7 @@ static VLCFullscreenContentView * fullscreenView;
 VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
     VlcPluginBase(instance, mode)
 {
-    browserRootLayer = [[CALayer alloc] init];
+    browserRootLayer = [[VLCBrowserRootLayer alloc] init];
 }
 
 VlcPluginMac::~VlcPluginMac()
@@ -141,58 +136,8 @@ VlcPluginMac::~VlcPluginMac()
 
 void VlcPluginMac::set_player_window()
 {
-    libvlc_video_set_format_callbacks(getMD(),
-                                      video_format_proxy,
-                                      video_cleanup_proxy);
-    libvlc_video_set_callbacks(getMD(),
-                               video_lock_proxy,
-                               video_unlock_proxy,
-                               video_display_proxy,
-                               this);
-}
-
-unsigned VlcPluginMac::video_format_cb(char *chroma,
-                                       unsigned *width, unsigned *height,
-                                       unsigned *pitches, unsigned *lines)
-{
-    /* store native video resolution and use it
-     * scaling will be performed by CA, which is more efficient */
-    m_media_width = (float)(*width);
-    m_media_height = (float)(*height);
-
-    memcpy(chroma, "RGBA", sizeof("RGBA")-1);
-
-    (*pitches) = (*width) * 4;
-    (*lines) = (*height);
-
-    //+1 for vlc 2.0.3/2.1 bug workaround.
-    //They writes after buffer end boundary by some reason unknown to me...
-    m_frame_buf.resize( (*pitches) * ((*lines)+1) );
-
-    return 1;
-}
-
-void VlcPluginMac::video_cleanup_cb()
-{
-    m_frame_buf.resize(0);
-    m_media_width = 0.;
-    m_media_height = 0.;
-    [fullscreenWindow orderOut: nil];
-}
-
-void* VlcPluginMac::video_lock_cb(void **planes)
-{
-    (*planes) = m_frame_buf.empty()? 0 : &m_frame_buf[0];
-    return 0;
-}
-
-void VlcPluginMac::video_unlock_cb(void* /*picture*/, void *const * /*planes*/)
-{
-}
-
-void VlcPluginMac::video_display_cb(void * /*picture*/)
-{
-    [playbackLayer performSelectorOnMainThread:@selector(setNeedsDisplay) withObject: nil waitUntilDone:NO];
+    /* pass base layer to libvlc to pass it on to the vout */
+    libvlc_media_player_set_nsobject(getMD(), browserRootLayer);
 }
 
 void VlcPluginMac::toggle_fullscreen()
@@ -271,11 +216,11 @@ void VlcPluginMac::update_controls()
     [controllerLayer setIsPlaying: playlist_isplaying()];
     [controllerLayer setIsFullscreen:this->get_fullscreen()];
 
-
     libvlc_state_t currentstate = libvlc_media_player_get_state(getMD());
     if (currentstate == libvlc_Playing || currentstate == libvlc_Paused || currentstate == libvlc_Opening) {
         [noMediaLayer setHidden: YES];
         [playbackLayer setHidden: NO];
+        [playbackLayer setNeedsDisplay];
     } else {
         [noMediaLayer setHidden: NO];
         [playbackLayer setHidden: YES];
@@ -306,12 +251,6 @@ NPError VlcPluginMac::get_root_layer(void *value)
     noMediaLayer.opaque = 1.;
     [noMediaLayer setCppPlugin: this];
     [browserRootLayer addSublayer: noMediaLayer];
-
-    playbackLayer = [[VLCPlaybackLayer alloc] init];
-    playbackLayer.opaque = 1.;
-    [browserRootLayer addSublayer: playbackLayer];
-    [playbackLayer setCppPlugin: this];
-    [playbackLayer setHidden: YES];
 
     controllerLayer = [[VLCControllerLayer alloc] init];
     controllerLayer.opaque = 1.;
@@ -431,121 +370,48 @@ bool VlcPluginMac::handle_event(void *event)
     return VlcPluginBase::handle_event(event);
 }
 
-@implementation VLCPlaybackLayer
-@synthesize cppPlugin = _cppPlugin;
+@implementation VLCBrowserRootLayer
 
 - (id)init
 {
     if (self = [super init]) {
         self.needsDisplayOnBoundsChange = YES;
         self.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
-
-        _colorspace = CGColorSpaceCreateDeviceRGB();
     }
 
     return self;
 }
 
-- (void)dealloc
+- (void)addVoutLayer:(CALayer *)aLayer
 {
-    CGColorSpaceRelease(_colorspace);
-    if (_lastFrame)
-        CGImageRelease(_lastFrame);
-    [super dealloc];
+    [CATransaction begin];
+    playbackLayer = [aLayer retain];
+    playbackLayer.opaque = 1.;
+    playbackLayer.hidden = NO;
+    playbackLayer.bounds = noMediaLayer.bounds;
+    [self insertSublayer:playbackLayer below:controllerLayer];
+    [self setNeedsDisplay];
+    [playbackLayer setNeedsDisplay];
+    CGRect frame = playbackLayer.bounds;
+    frame.origin.x = 0.;
+    frame.origin.y = 0.;
+    playbackLayer.frame = frame;
+    [CATransaction commit];
 }
 
-- (void)drawInContext:(CGContextRef)cgContext
+- (void)removeVoutLayer:(CALayer *)aLayer
 {
-    if (!cgContext)
-        return;
+    [CATransaction begin];
+    [aLayer removeFromSuperlayer];
+    [CATransaction commit];
 
-    BOOL b_paused = !([self cppPlugin]->playlist_isplaying());
+    if (playbackLayer == aLayer)
+        [playbackLayer release];
+}
 
-    if ((!_lastFrame && b_paused) || ![self cppPlugin]->get_player().is_open())
-        return;
-
-    float media_width = [self cppPlugin]->m_media_width;
-    float media_height = [self cppPlugin]->m_media_height;
-
-    if (media_width == 0. || media_height == 0.) {
-        if (_cached_height != 0 && _cached_width != 0) {
-            media_width = _cached_width;
-            media_height = _cached_height;
-        } else
-            return;
-    } else {
-        _cached_width = media_width;
-        _cached_height = media_height;
-    }
-
-    CGRect layerRect = self.bounds;
-    float display_width = 0.;
-    float display_height = 0.;
-
-    float src_aspect = (float)media_width / media_height;
-    float dst_aspect = (float)layerRect.size.width/layerRect.size.height;
-    if ( src_aspect > dst_aspect ) {
-        if( layerRect.size.width != media_width ) { //don't scale if size equal
-            display_width = layerRect.size.width;
-            display_height = display_width / src_aspect; // + 0.5);
-        } else {
-            display_width = media_width;
-            display_height = media_height;
-        }
-    } else {
-        if( layerRect.size.height != media_height ) { //don't scale if size equal
-            display_height = layerRect.size.height;
-            display_width = display_height * src_aspect; // + 0.5);
-        } else {
-            display_width = media_width;
-            display_height = media_height;
-        }
-    }
-
-    /* Compute the position of the video */
-    float left = (layerRect.size.width  - display_width)  / 2.;
-    float top  = (layerRect.size.height - display_height) / 2.;
-
-    CGContextSaveGState(cgContext);
-
-    static const size_t kComponentsPerPixel = 4;
-    static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
-
-    if (!b_paused) {
-        /* fetch frame */
-        CFDataRef dataRef = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault,
-                                                        (const uint8_t *)&[self cppPlugin]->m_frame_buf[0],
-                                                        sizeof([self cppPlugin]->m_frame_buf[0]),
-                                                        kCFAllocatorNull);
-        CGDataProviderRef dataProvider = CGDataProviderCreateWithCFData(dataRef);
-
-        if (_lastFrame)
-            CGImageRelease(_lastFrame);
-
-        _lastFrame = CGImageCreate(media_width,
-                                         media_height,
-                                         kBitsPerComponent,
-                                         kBitsPerComponent * kComponentsPerPixel,
-                                         kComponentsPerPixel * media_width,
-                                         _colorspace,
-                                         kCGBitmapByteOrder16Big,
-                                         dataProvider,
-                                         NULL,
-                                         true,
-                                         kCGRenderingIntentPerceptual);
-
-        CGDataProviderRelease(dataProvider);
-
-        if (!_lastFrame) {
-            CGImageRelease(_lastFrame);
-            CGContextRestoreGState(cgContext);
-            return;
-        }
-    }
-    CGRect rect = CGRectMake(left, top, display_width, display_height);
-    CGContextDrawImage(cgContext, rect, _lastFrame);
-
-    CGContextRestoreGState(cgContext);
+- (CGSize)currentOutputSize
+{
+    return [browserRootLayer visibleRect].size;
 }
 
 @end

@@ -124,7 +124,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 
 #endif
 #ifdef XP_MACOSX
-    ppsz_argv[ppsz_argc++] = "--vout=vmem";
+    ppsz_argv[ppsz_argc++] = "--vout=vout_coregraphicslayer";
 #endif
 
     /* common settings */
