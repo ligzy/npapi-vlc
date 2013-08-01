@@ -151,7 +151,7 @@ glibc run-time.])
 dnl
 dnl libraries checks
 AC_PATH_XTRA
-PKG_CHECK_MODULES([LIBVLC], [libvlc >= 1.1.0], [
+PKG_CHECK_MODULES([LIBVLC], [libvlc >= 2.0.0], [
     LIBVLC_PREFIX=`pkg-config --variable=prefix libvlc`
     AC_SUBST(LIBVLC_PREFIX)])
 
