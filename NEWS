@@ -1,3 +1,13 @@
+Changes between VLC plugins 2.0.6 and 2.1.0:
+--------------------------------------------
+
+NPAPI core:
+ * libVLC 2.0.0 is now required
+
+Platforms:
+ * New MacOS windowed rendering path
+
+
 Changes between VLC 2.0.2 and 2.0.6:
 ------------------------------------
 
