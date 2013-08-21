@@ -78,7 +78,7 @@ info "Preparing build dirs"
 spushd extras/macosx
 
 if ! [ -e vlc ]; then
-git clone git://git.videolan.org/vlc/vlc-2.0.git vlc
+git clone git://git.videolan.org/vlc.git vlc
 fi
 
 spopd #extras/macosx
