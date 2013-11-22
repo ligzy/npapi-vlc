@@ -38,6 +38,11 @@ info "Collecting items"
 mkdir -p "${DMGFOLDERNAME}"
 cp -R "${UBROOT}" "${DMGFOLDERNAME}"
 cp NEWS AUTHORS COPYING "${DMGFOLDERNAME}"
+spushd "${DMGFOLDERNAME}"
+mv NEWS NEWS.txt
+mv AUTHORS AUTHORS.txt
+mv COPYING COPYING.txt
+spopd
 ln -s "/Library/Internet Plug-Ins" "${DMGFOLDERNAME}/Internet Plug-Ins"
 rm -f ${DMGITEMNAME}-rw.dmg
 
