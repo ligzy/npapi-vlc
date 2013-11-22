@@ -13,11 +13,8 @@ if test "${ACTION}" = "release-makefile"; then
     echo "running build-package.sh in release-makefile mode"
 
     FULL_PRODUCT_NAME="${PRODUCT}"
-    if [ "$FULL_PRODUCT_NAME" = "VLC-Plugin.plugin" ] ; then
-        TARGET_BUILD_DIR="${src_dir}"
-    else
-        TARGET_BUILD_DIR="${build_dir}"
-    fi
+    TARGET_BUILD_DIR="${build_dir}"
+
     CONTENTS_FOLDER_PATH="${FULL_PRODUCT_NAME}/Contents/MacOS"
     VLC_BUILD_DIR="${build_dir}"
     VLC_SRC_DIR="${src_dir}"
@@ -234,12 +231,7 @@ fi
 
 ##########################
 # Hack for VLC.app
-if [ "$FULL_PRODUCT_NAME" = "VLC-Plugin.plugin" ] ; then
-    # install Safari webplugin
-    vlc_install "${src_dir}/${prefix}" "npvlc.${suffix}" "${target}" "lib" "@loader_path/lib"
-    mv ${target}/npvlc.${suffix} "${target}/VLC Plugin"
-    chmod +x "${target}/VLC Plugin"
-else
+if [ "$FULL_PRODUCT_NAME" != "VLC-Plugin.plugin" ] ; then
     vlc_install "bin/${prefix}" "vlc" "${target}/bin" "bin" "@loader_path/../lib"
 fi
 
