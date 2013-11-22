@@ -122,10 +122,10 @@ spushd extras/macosx/vlc
 if ! [ -e configure ]; then
     ./bootstrap > ${out}
 fi
-if ! [ -e 64build ]; then
-    mkdir 64build
+if ! [ -e 64bit-build ]; then
+    mkdir 64bit-build
 fi
-cd 64build
+cd 64bit-build
 ../configure \
         --build=x86_64-apple-darwin10 \
         --disable-lua --disable-httpd --disable-vlm --disable-sout \
@@ -145,6 +145,7 @@ cd 64build
         --disable-macosx-eyetv \
         --disable-macosx-qtkit \
         --disable-macosx-avfoundation \
+        --disable-macosx-quartztext \
         --enable-macosx-vout \
         --disable-skins2 \
         --disable-xcb \
@@ -159,7 +160,8 @@ cd 64build
         --disable-sdl-image \
         --disable-macosx-vlc-app \
         --disable-dirac \
-	--with-macosx-sdk=$SDKROOT \
+        --enable-coregraphicslayer-vout \
+        --with-macosx-sdk=$SDKROOT \
         --with-macosx-version-min=10.6 \
         --prefix=${PREFIX} > ${out}
 
