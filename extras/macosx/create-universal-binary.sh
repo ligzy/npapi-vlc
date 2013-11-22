@@ -18,7 +18,7 @@ spopd()
     popd > /dev/null
 }
 
-#out="/dev/null"
+out="/dev/null"
 
 npapiroot=`dirname $0`/../..
 INTEL32ROOT="${npapiroot}/i686-build/VLC Plugin.plugin"
