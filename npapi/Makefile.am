@@ -169,7 +169,7 @@ define FIXEXECPATH
 endef
 
 VLC\ Plugin.plugin: $(lib_LTLIBRARIES)
-	rm -Rf "$@"
+	rm -Rf "$(top_builddir)/$@"
 	$(INSTALL) -d "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/lib"
 	$(INSTALL) -d "$(top_builddir)/VLC-Plugin.plugin/Contents/Resources"
 	$(INSTALL) $(top_srcdir)/share/pixmaps/macosx/*.png "$(top_builddir)/VLC-Plugin.plugin/Contents/Resources"
