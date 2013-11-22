@@ -170,14 +170,17 @@ endef
 
 VLC\ Plugin.plugin: $(lib_LTLIBRARIES)
 	rm -Rf "$@"
-	$(INSTALL) -d "VLC-Plugin.plugin/Contents/MacOS/lib"
-	$(INSTALL) -d "VLC-Plugin.plugin/Contents/Resources"
-	$(INSTALL) $(top_srcdir)/share/pixmaps/macosx/*.png "VLC-Plugin.plugin/Contents/Resources"
+	$(INSTALL) -d "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/lib"
+	$(INSTALL) -d "$(top_builddir)/VLC-Plugin.plugin/Contents/Resources"
+	$(INSTALL) $(top_srcdir)/share/pixmaps/macosx/*.png "$(top_builddir)/VLC-Plugin.plugin/Contents/Resources"
 	ACTION="release-makefile" PRODUCT="VLC-Plugin.plugin" libvlc_dir=$(LIBVLC_PREFIX) src_dir=$(srcdir) build_dir=$(top_builddir) sh "$(top_srcdir)/extras/macosx/build-package.sh"
-	$(INSTALL) "$(top_builddir)/extras/macosx/Info.plist" "VLC-Plugin.plugin/Contents/Info.plist"
-	mv "VLC-Plugin.plugin" "VLC Plugin.plugin"
-	find "VLC Plugin.plugin" -type d -exec chmod ugo+rx '{}' \;
-	find "VLC Plugin.plugin" -type f -exec chmod ugo+r '{}' \;
+	$(INSTALL) "$(top_builddir)/extras/macosx/Info.plist" "$(top_builddir)/VLC-Plugin.plugin/Contents/Info.plist"
+	$(INSTALL) "$(top_builddir)/npapi/.libs/npvlc.dylib" "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/"
+	mv $(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/npvlc.dylib "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC Plugin"
+	chmod +x "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC Plugin"
+	mv "$(top_builddir)/VLC-Plugin.plugin" "$(top_builddir)/VLC Plugin.plugin"
+	find "$(top_builddir)/VLC Plugin.plugin" -type d -exec chmod ugo+rx '{}' \;
+	find "$(top_builddir)/VLC Plugin.plugin" -type f -exec chmod ugo+r '{}' \;
 
 # uncomment if dependencies on XPCOM libs is sought
 #	if test -d "$(MOZILLA_SDK_PATH)/lib"; then \
