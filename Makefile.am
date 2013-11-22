@@ -20,12 +20,11 @@ DISTCHECK_CONFIGURE_FLAGS=--without-gtk
 EXTRA_DIST = \
 	autogen.sh \
 	extras/macosx/Info.plist.in \
-	extras/macosx/InstallerInfo.plist.in \
-	extras/macosx/InstallerDescription.plist \
-	extras/macosx/pbdevelopment.plist \
 	extras/macosx/build-package.sh \
+	extras/macosx/build-plugin.sh \
 	extras/macosx/build-vlc-32.sh \
-	extras/macosx/build-vlc.sh
+	extras/macosx/build-vlc.sh \
+	extras/macosx/create-universal-binary.sh
 
 package-macosx-xpi:
 	mkdir -p "$(top_builddir)/macosx-xpi/plugins"
