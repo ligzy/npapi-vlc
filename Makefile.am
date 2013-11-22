@@ -27,37 +27,6 @@ EXTRA_DIST = \
 	extras/macosx/build-vlc-32.sh \
 	extras/macosx/build-vlc.sh
 
-package-macosx-plugin:
-# Create Installer
-	rm -rf "$(top_builddir)/macosx-plugin-instdata/"; true
-	mkdir -p "$(top_builddir)/macosx-plugin-instdata"
-	rm -f "$(top_builddir)/src/VLC Plugin.plugin/Contents/MacOS/modules/libmacosx_plugin.dylib"
-	cp -R "$(top_builddir)/src/VLC Plugin.plugin" "$(top_builddir)/macosx-plugin-instdata"
-	rm -rf "$(top_builddir)/VLC Internet Plug-In.pkg"
-	export PACKAGEMAKER=
-	if test -x /Developer/Tools/packagemaker; then \
-	   export PACKAGEMAKER=/Developer/Tools/packagemaker; \
-	fi; \
-	if test -x /Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker; then \
-	   export PACKAGEMAKER=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker; \
-	fi; \
-	$${PACKAGEMAKER} -build -ds -p "$(top_builddir)/VLC Internet Plug-In.pkg" \
-	-f "$(top_builddir)/macosx-plugin-instdata" \
-	-i "$(top_builddir)/extras/macosx/InstallerInfo.plist" \
-	-d "$(top_srcdir)/extras/macosx/InstallerDescription.plist"; true
-	rm -rf "$(top_builddir)/macosx-plugin-instdata/"
-
-# Create disk image
-	rm -f "$(top_builddir)/vlc-plugin-$(VERSION).dmg"; true
-	rm -rf "$(top_builddir)/vlc-plugin-$(VERSION)/"; true
-	mkdir -p "$(top_builddir)/vlc-plugin-$(VERSION)/"
-	mv "$(top_builddir)/VLC Internet Plug-In.pkg" "$(top_builddir)/vlc-plugin-$(VERSION)/"
-	hdiutil create -srcfolder "$(top_builddir)/vlc-plugin-$(VERSION)" \
-	  "$(top_builddir)/vlc-plugin-$(VERSION).dmg" -format UDBZ \
-	  -scrub -imagekey zlib-level=9
-	echo "Disk image creation completed:"
-	rm -rf "$(top_builddir)/vlc-plugin-$(VERSION)"
-
 package-macosx-xpi:
 	mkdir -p "$(top_builddir)/macosx-xpi/plugins"
 	cp $(top_builddir)/src/install.rdf \
