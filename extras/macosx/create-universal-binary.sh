@@ -27,22 +27,15 @@ UBROOT="${npapiroot}/VLC Plugin.plugin"
 
 info "checking for libvlc"
 
-spushd ${npapiroot}/extras/macosx
-if [ ! -e "vlc" ]; then
-    info "vlc wasn't checked out, bailing out"
-    exit -1
+if [ ! -e "${npapiroot}/extras/macosx/vlc/x86_64-install" ]; then
+    info "libvlc wasn't compiled for 64bit, compiling"
+    ./extras/macosx/build-vlc.sh -a x86_64
 fi
 
-if [ ! -e "vlc/64bit_install_dir" ]; then
-    info "libvlc wasn't compiled for 64bit, bailing out"
-    exit -1
+if [ ! -e "${npapiroot}/extras/macosx/vlc/i686-install" ]; then
+    info "libvlc wasn't compiled for 32bit, compiling"
+    ./extras/macosx/build-vlc.sh -a i686
 fi
-
-#if [ ! -e "vlc/32bit_install_dir" ]; then
-#    info "libvlc wasn't compiled for 32bit, bailing out"
-#    exit -1
-#fi
-spopd
 
 spushd ${npapiroot}
 

@@ -90,11 +90,7 @@ export OBJC="xcrun clang"
 export OBJCXX="xcrun clang++"
 export CFLAGS="-isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
 export PATH="${npapiroot}/extras/macosx/vlc/extras/tools/build/bin:${npapiroot}/extras/macosx/vlc/contrib/${ARCH}-apple-darwin10/bin:$PATH"
-if [ "$ARCH" = "x86_64" ]; then
-    export PKG_CONFIG_PATH="${npapiroot}/extras/macosx/vlc/64bit_install_dir/lib/pkgconfig"
-else
-    export PKG_CONFIG_PATH="${npapiroot}/extras/macosx/vlc/32bit_install_dir/lib/pkgconfig"
-fi
+export PKG_CONFIG_PATH="${npapiroot}/extras/macosx/vlc/${$ARCH}-install/lib/pkgconfig"
 
 spushd ${npapiroot}
 
