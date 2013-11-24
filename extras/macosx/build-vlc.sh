@@ -1,9 +1,17 @@
 #!/bin/sh
-
-OSX_VERSION="10.7"
-SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_VERSION.sdk
-
 set -e
+
+info()
+{
+    local green="\033[1;32m"
+    local normal="\033[0m"
+    echo "[${green}build${normal}] $1"
+}
+
+OSX_VERSION="10.8"
+ARCH="x86_64"
+MINIMAL_OSX_VERSION="10.6"
+SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_VERSION.sdk
 
 usage()
 {
@@ -11,8 +19,9 @@ cat << EOF
 usage: $0 [-v] [-d]
 
 OPTIONS
-   -v       Be more verbose
-   -d       Enable Debug
+   -v            Be more verbose
+   -k <sdk>      Use the specified sdk (default: $SDKROOT for $ARCH)
+   -a <arch>     Use the specified arch (default: $ARCH)
 EOF
 }
 
@@ -33,7 +42,7 @@ info()
      echo "[${green}info${normal}] $1"
 }
 
-while getopts "hvsdk:" OPTION
+while getopts "hva:k:" OPTION
 do
      case $OPTION in
          h)
@@ -43,7 +52,11 @@ do
          v)
              VERBOSE=yes
              ;;
-         d)  CONFIGURATION="--enable-debug"
+         a)
+             ARCH=$OPTARG
+             ;;
+         k)
+             SDKROOT=$OPTARG
              ;;
          ?)
              usage
@@ -61,6 +74,10 @@ fi
 if [ "x$1" != "x" ]; then
     usage
     exit 1
+fi
+
+if [ "$ARCH" = "i686" ]; then
+    MINIMAL_OSX_VERSION="10.5"
 fi
 
 export OSX_VERSION
@@ -98,10 +115,10 @@ info "Fetching contrib"
 
 spushd extras/macosx/vlc/contrib
 
-if ! [ -e 64bit-npapi ]; then
-mkdir 64bit-npapi
-cd 64bit-npapi
-../bootstrap --build=x86_64-apple-darwin10
+if ! [ -e ${ARCH}-npapi ]; then
+mkdir ${ARCH}-npapi
+cd ${ARCH}-npapi
+../bootstrap --build=${ARCH}-apple-darwin10
 make prebuilt
 fi
 
@@ -110,7 +127,7 @@ spopd
 export CC="xcrun clang"
 export CXX="xcrun clang++"
 export OBJC="xcrun clang"
-PREFIX="${npapi_root_dir}/extras/macosx/vlc/64bit_install_dir"
+PREFIX="${npapi_root_dir}/extras/macosx/vlc/${ARCH}-install"
 
 info "Configuring VLC"
 
@@ -122,18 +139,22 @@ spushd extras/macosx/vlc
 if ! [ -e configure ]; then
     ./bootstrap > ${out}
 fi
-if ! [ -e 64bit-build ]; then
-    mkdir 64bit-build
+if ! [ -e ${ARCH}-build ]; then
+    mkdir ${ARCH}-build
 fi
-cd 64bit-build
+cd ${ARCH}-build
 ../configure \
-        --build=x86_64-apple-darwin10 \
+        --build=${ARCH}-apple-darwin10 \
         --disable-lua --disable-httpd --disable-vlm --disable-sout \
         --disable-vcd --disable-dvdnav --disable-dvdread --disable-screen \
+        --disable-debug \
         --disable-macosx \
+        --disable-notify \
+        --disable-projectm \
         --enable-merge-ffmpeg \
         --disable-growl \
         --enable-faad \
+        --disable-bluray \
         --enable-flac \
         --enable-theora \
         --enable-shout \
@@ -142,10 +163,12 @@ cd 64bit-build
         --enable-realrtsp \
         --enable-libass \
         --enable-macosx-audio \
+        --disable-macosx-avfoundation \
+        --disable-macosx-dialog-provider \
         --disable-macosx-eyetv \
         --disable-macosx-qtkit \
-        --disable-macosx-avfoundation \
         --disable-macosx-quartztext \
+        --disable-macosx-vlc-app \
         --enable-macosx-vout \
         --disable-skins2 \
         --disable-xcb \
@@ -154,15 +177,13 @@ cd 64bit-build
         --disable-samplerate \
         --disable-upnp \
         --disable-goom \
-        --disable-macosx-dialog-provider \
         --disable-nls \
         --disable-sdl \
         --disable-sdl-image \
-        --disable-macosx-vlc-app \
         --disable-dirac \
         --enable-coregraphicslayer-vout \
         --with-macosx-sdk=$SDKROOT \
-        --with-macosx-version-min=10.6 \
+        --with-macosx-version-min=${MINIMAL_OSX_VERSION} \
         --prefix=${PREFIX} > ${out}
 
 info "Compiling VLC"
@@ -247,8 +268,6 @@ colorthres
 antiflicker
 anaglyph
 remap
-bluray
-x264
 "
 
 for i in ${blacklist}
