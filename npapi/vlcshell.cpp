@@ -311,6 +311,8 @@ NPError NPP_Destroy( NPP instance, NPSavedData** )
     if( p_plugin->playlist_isplaying() )
         p_plugin->playlist_stop();
 
+    p_plugin->destroy_windows();
+
     delete p_plugin;
 
     return NPERR_NO_ERROR;
