@@ -112,7 +112,7 @@ dnl
 dnl Check widl/midl tools for win32
 AS_IF([test "${SYS}" = "mingw32"],[
     AC_CHECK_PROGS(MIDL, [midl], no)
-    AC_CHECK_PROGS(WIDL, [widl], no)
+    AC_CHECK_TOOL(WIDL, [widl], no)
 
     AC_LANG_PUSH(C++)
     AC_CHECK_HEADER(ole2.h,,[AC_MSG_ERROR([required OLE header ole2.h is missing from your system])])
