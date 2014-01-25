@@ -207,6 +207,7 @@ bool VlcWindowlessMac::handle_event(void *event)
                                       kCGRenderingIntentPerceptual);
 
             CGDataProviderRelease(dataProvider);
+            CFRelease(dataRef);
 
             if (!lastFrame) {
                 fprintf(stderr, "image creation failed\n");
@@ -223,7 +224,10 @@ bool VlcWindowlessMac::handle_event(void *event)
             rect = CGRectMake(left, top, cached_width, cached_width);
         }
 
-        CGContextDrawImage(cgContext, rect, lastFrame);
+        if(lastFrame) {
+            CGContextDrawImage(cgContext, rect, lastFrame);
+            CGImageRelease(lastFrame);
+        }
 
         CGContextRestoreGState(cgContext);
 
