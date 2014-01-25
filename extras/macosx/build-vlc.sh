@@ -118,8 +118,14 @@ spushd extras/macosx/vlc/contrib
 if ! [ -e ${ARCH}-npapi ]; then
 mkdir ${ARCH}-npapi
 cd ${ARCH}-npapi
-../bootstrap --build=${ARCH}-apple-darwin10
-make prebuilt
+../bootstrap --build=${ARCH}-apple-darwin10 --disable-disc \
+ --disable-sout --disable-gpl --disable-sdl --disable-sparkle \
+ --disable-bghudappkit --disable-growl --disable-goom \
+ --disable-SDL_image --disable-lua --disable-chromaprint \
+ --disable-caca --disable-upnp --disable-vncserver \
+ --disable-ncurses
+make fetch
+make .gettext && make
 fi
 
 spopd
@@ -142,6 +148,13 @@ fi
 if ! [ -e ${ARCH}-build ]; then
     mkdir ${ARCH}-build
 fi
+
+CONFIG_OPTIONS=""
+if [ "$ARCH" = "i686" ]; then
+    CONFIG_OPTIONS="--disable-vda"
+    export LDFLAGS="-Wl,-read_only_relocs,suppress"
+fi
+
 cd ${ARCH}-build
 ../configure \
         --build=${ARCH}-apple-darwin10 \
@@ -153,13 +166,14 @@ cd ${ARCH}-build
         --disable-projectm \
         --enable-merge-ffmpeg \
         --disable-growl \
-        --enable-faad \
+        --disable-faad \
         --disable-bluray \
         --enable-flac \
         --enable-theora \
         --enable-shout \
         --disable-ncurses \
         --disable-twolame \
+        --disable-a52 \
         --enable-realrtsp \
         --enable-libass \
         --enable-macosx-audio \
@@ -178,12 +192,13 @@ cd ${ARCH}-build
         --disable-upnp \
         --disable-goom \
         --disable-nls \
+        --disable-mad \
         --disable-sdl \
         --disable-sdl-image \
-        --disable-dirac \
         --enable-coregraphicslayer-vout \
         --with-macosx-sdk=$SDKROOT \
         --with-macosx-version-min=${MINIMAL_OSX_VERSION} \
+        ${CONFIG_OPTIONS} \
         --prefix=${PREFIX} > ${out}
 
 info "Compiling VLC"
