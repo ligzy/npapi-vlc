@@ -124,7 +124,6 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 
 #endif
 #ifdef XP_MACOSX
-    setenv("VLC_PLUGIN_PATH", "/Library/Internet Plug-Ins/VLC Plugin.plugin/Contents/MacOS/plugins", 1);
     ppsz_argv[ppsz_argc++] = "--vout=vout_coregraphicslayer";
 #endif
 
