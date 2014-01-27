@@ -104,6 +104,8 @@ spopd #extras/macosx
 # Build time
 #
 
+export PATH="${npapi_root_dir}/extras/macosx/vlc/extras/tools/build/bin:${npapi_root_dir}/extras/macosx/contrib/${ARCH}-apple-darwin10/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin"
+
 info "Building tools"
 spushd extras/macosx/vlc/extras/tools
 if ! [ -e build ]; then
@@ -164,7 +166,6 @@ cd ${ARCH}-build
         --disable-macosx \
         --disable-notify \
         --disable-projectm \
-        --enable-merge-ffmpeg \
         --disable-growl \
         --disable-faad \
         --disable-bluray \
