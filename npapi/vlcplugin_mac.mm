@@ -490,6 +490,19 @@ bool VlcPluginMac::handle_event(void *event)
     CTLineDraw(textLine, cgContext);
     CFRelease(textLine);
     CFRelease(attRef);
+
+    // expose arch
+#ifdef __x86_64__
+    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("Intel, 64-bit"), stylesDict);
+#else
+    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("Intel, 32-bit"), stylesDict);
+#endif
+    textLine = CTLineCreateWithAttributedString(attRef);
+    textRect = CTLineGetImageBounds(textLine, cgContext);
+    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 65.);
+    CTLineDraw(textLine, cgContext);
+    CFRelease(textLine);
+    CFRelease(attRef);
     CFRelease(stylesDict);
 #else
     // draw a black rect
