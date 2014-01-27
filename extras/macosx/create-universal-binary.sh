@@ -20,10 +20,10 @@ spopd()
 
 out="/dev/null"
 
-npapiroot=`dirname $0`/../..
-INTEL32ROOT="${npapiroot}/i686-build/VLC Plugin.plugin"
-INTEL64ROOT="${npapiroot}/x86_64-build/VLC Plugin.plugin"
-UBROOT="${npapiroot}/VLC Plugin.plugin"
+npapiroot=`pwd`
+INTEL32ROOT="${npapiroot}/i686-build/VLC-Plugin.plugin"
+INTEL64ROOT="${npapiroot}/x86_64-build/VLC-Plugin.plugin"
+UBROOT="${npapiroot}/VLC-Plugin.plugin"
 
 info "checking for libvlc"
 
@@ -56,7 +56,7 @@ cp -Rf "$INTEL64ROOT" "$UBROOT"
 LIBS=Contents/MacOS/lib
 PLUGINS=Contents/MacOS/plugins
 rm -Rf $UBROOT/$LIBS/*
-rm -Rf "$UBROOT/Contents/MacOS/VLC Plugin"
+rm -Rf "$UBROOT/Contents/MacOS/VLC-Plugin"
 rm -Rf $UBROOT/$PLUGINS/*
 
 function do_lipo {
@@ -74,33 +74,38 @@ function do_lipo {
         fi
     fi
     if [ "x$files" != "x" ]; then
-        lipo $files -create -output $UBROOT/$file
+        lipo $files -create -output "$UBROOT"/$file
     fi;
 }
 
 info "Installing libs"
-for i in `ls $INTEL32ROOT/$LIBS/ | grep .dylib`
+echo `dirname $0`
+echo `pwd`
+for i in `ls "$INTEL32ROOT/$LIBS/" | grep .dylib`
 do
     do_lipo $LIBS/$i
 done
 
 info "Installing modules"
-for i in `ls $INTEL32ROOT/$PLUGINS/ | grep .dylib`
+for i in `ls "$INTEL32ROOT/$PLUGINS/" | grep .dylib`
 do
     do_lipo $PLUGINS/$i
 done
 
 info "Installing VLC Plugin"
-do_lipo "Contents/MacOS/VLC\ Plugin"
+do_lipo "Contents/MacOS/VLC-Plugin"
 
 info "Installing Extra modules"
 
 if [ "x$INTEL32ROOT" != "x" ]; then
-    cp "$INTELROOT/$PLUGINS/"*mmx* "$UBROOT/$PLUGINS/"
-    cp "$INTELROOT/$PLUGINS/"*3dn* "$UBROOT/$PLUGINS/"
+    cp "$INTEL32ROOT/$PLUGINS/"*mmx* "$UBROOT/$PLUGINS/"
 fi
 if [ "x$INTEL64ROOT" != "x" ]; then
     cp -f "$INTEL64ROOT/$PLUGINS/"*sse* "$UBROOT/$PLUGINS/"
 fi
+
+info "moving bundle"
+
+mv "${npapiroot}/VLC-Plugin.plugin" "${npapiroot}/VLC Plugin.plugin"
 
 info "Creation succeeded"
