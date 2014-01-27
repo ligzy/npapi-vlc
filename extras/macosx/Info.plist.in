@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>VLC Plugin</string>
+	<string>VLC-Plugin</string>
 	<key>CFBundleGetInfoString</key>
 	<string>VLC Webbrowser Plugin - Version @VERSION@ - (c) @COPYRIGHT_YEARS@ The VideoLAN Team.</string>
 	<key>CFHumanReadableCopyright</key>
