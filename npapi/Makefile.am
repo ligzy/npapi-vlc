@@ -163,6 +163,8 @@ VLC-Plugin.plugin: $(lib_LTLIBRARIES)
 	$(INSTALL) "$(top_builddir)/npapi/.libs/npvlc.dylib" "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/"
 	mv $(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/npvlc.dylib "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC-Plugin"
 	chmod +x "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC-Plugin"
+	install_name_tool -change $(LIBVLC_PREFIX)/lib/libvlc.5.dylib @loader_path/lib/libvlc.5.dylib $(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC-Plugin
+	install_name_tool -change $(LIBVLC_PREFIX)/lib/libvlccore.7.dylib @loader_path/lib/libvlccore.7.dylib $(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC-Plugin
 	find "$(top_builddir)/VLC-Plugin.plugin" -type d -exec chmod ugo+rx '{}' \;
 	find "$(top_builddir)/VLC-Plugin.plugin" -type f -exec chmod ugo+r '{}' \;
 
