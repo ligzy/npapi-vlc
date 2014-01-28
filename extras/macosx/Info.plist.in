@@ -7,15 +7,15 @@
 	<key>CFBundleExecutable</key>
 	<string>VLC-Plugin</string>
 	<key>CFBundleGetInfoString</key>
-	<string>VLC Webbrowser Plugin - Version @VERSION@ - (c) @COPYRIGHT_YEARS@ The VideoLAN Team.</string>
+	<string>VLC Webbrowser Plugin - Version @VERSION@ - (c) @COPYRIGHT_YEARS@ VideoLAN & authors.</string>
 	<key>CFHumanReadableCopyright</key>
-	<string>Copyright (c) @COPYRIGHT_YEARS@ the VideoLAN Team</string>
+	<string>Copyright (c) @COPYRIGHT_YEARS@ VideoLAN & authors</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.netscape.vlc</string>
+	<string>org.videolan.vlc-npapi-plugin</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>VideoLAN VLC Plug-in</string>
+	<string>VLC Web Plug-in</string>
 	<key>CFBundlePackageType</key>
 	<string>BRPL</string>
 	<key>CFBundleSignature</key>
@@ -26,8 +26,22 @@
 	<string>@VERSION@</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
-	<key>LSMinimumSystemVersion</key>
-	<string>10.5.0</string>
+	<key>LSMinimumSystemVersionByArchitecture</key>
+	<dict>
+		<key>i386</key>
+		<string>10.5.8</string>
+		<key>x86_64</key>
+		<string>10.6.0</string>
+	</dict>
+    <key>LSArchitecturePriority</key>
+	<array>
+		<string>x86_64</string>
+		<string>i386</string>
+	</array>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>http://update.videolan.org/vlc/sparkle/vlc-intel64.xml</string>
 	<key>WebPluginName</key>
 	<string>VLC Multimedia Plug-in</string>
 	<key>WebPluginDescription</key>
@@ -64,7 +78,11 @@
 			<array>
 				<string>mpg</string>
 				<string>mpeg</string>
+				<string>m1v</string>
+				<string>mpeg1</string>
+				<string>mpeg2</string>
 				<string>mpe</string>
+				<string>m2v</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>MPEG video</string>
@@ -75,7 +93,11 @@
 			<array>
 				<string>mpg</string>
 				<string>mpeg</string>
+				<string>m1v</string>
+				<string>mpeg1</string>
+				<string>mpeg2</string>
 				<string>mpe</string>
+				<string>m2v</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>MPEG video</string>
@@ -86,6 +108,10 @@
 			<array>
 				<string>mpg</string>
 				<string>mpeg</string>
+				<string>m1v</string>
+				<string>mpeg1</string>
+				<string>mpeg2</string>
+				<string>m2v</string>
 				<string>vob</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
@@ -97,6 +123,10 @@
 			<array>
 				<string>mpg</string>
 				<string>mpeg</string>
+				<string>m1v</string>
+				<string>mpeg1</string>
+				<string>mpeg2</string>
+				<string>m2v</string>
 				<string>vob</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
@@ -160,6 +190,18 @@
 			<key>WebPluginTypeDescription</key>
 			<string>MPEG-4 video</string>
 		</dict>
+		<key>video/mp2t</key>
+		<dict>
+			<key>WebPluginExtensions</key>
+			<array>
+				<string>ts</string>
+				<string>m2ts</string>
+				<string>mts</string>
+				<string>mt2s</string>
+			</array>
+			<key>WebPluginTypeDescription</key>
+			<string>MPEG-2 Transport Stream</string>
+		</dict>
 		<key>video/x-msvideo</key>
 		<dict>
 			<key>WebPluginExtensions</key>
@@ -174,6 +216,8 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>ogg</string>
+				<string>ogm</string>
+				<string>spx</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>Ogg stream</string>
@@ -183,6 +227,8 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>ogv</string>
+				<string>ogm</string>
+				<string>ogg</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>Ogg video</string>
@@ -192,9 +238,31 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>ogg</string>
+				<string>ogx</string>
+				<string>spx</string>
+				<string>ogm</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>Ogg stream</string>
+		</dict>
+		<key>audio/ogg</key>
+		<dict>
+			<key>WebPluginExtensions</key>
+			<array>
+				<string>oga</string>
+				<string>opus</string>
+			</array>
+			<key>WebPluginTypeDescription</key>
+			<string>Ogg video</string>
+		</dict>
+		<key>application/mxf</key>
+		<dict>
+			<key>WebPluginExtensions</key>
+			<array>
+				<string>mxf</string>
+			</array>
+			<key>WebPluginTypeDescription</key>
+			<string>MXF video</string>
 		</dict>
 		<key>application/x-vlc-plugin</key>
 		<dict>
@@ -267,6 +335,7 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>wav</string>
+				<string>wv</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>WAV audio</string>
@@ -276,6 +345,7 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>wav</string>
+				<string>wv</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>WAV audio</string>
@@ -334,6 +404,7 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>flv</string>
+				<string>f4v</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>FLV video</string>
@@ -352,6 +423,7 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>mkv</string>
+				<string>mks</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>MKV video</string>
@@ -361,6 +433,7 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>mkv</string>
+				<string>mks</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>MKV video</string>
@@ -370,6 +443,7 @@
 			<key>WebPluginExtensions</key>
 			<array>
 				<string>mka</string>
+				<string>mks</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
 			<string>MKV audio</string>
