@@ -128,7 +128,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     ppsz_argv[ppsz_argc++] = "--scaletempo-stride=30";
     ppsz_argv[ppsz_argc++] = "--scaletempo-overlap=0,2";
     ppsz_argv[ppsz_argc++] = "--scaletempo-search=14";
-    ppsz_argv[ppsz_argc++] = "--auhal-volume=100";
+    ppsz_argv[ppsz_argc++] = "--auhal-volume=256";
     ppsz_argv[ppsz_argc++] = "--auhal-audio-device=0";
     ppsz_argv[ppsz_argc++] = "--no-volume-save";
 #endif
