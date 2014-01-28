@@ -51,6 +51,7 @@ fi
 
 info "Creating Universal Binary"
 rm -Rf "$UBROOT"
+rm -Rf "${npapiroot}/VLC Plugin.plugin"
 cp -Rf "$INTEL64ROOT" "$UBROOT"
 
 LIBS=Contents/MacOS/lib
