@@ -562,7 +562,7 @@ bool VlcPluginMac::handle_event(void *event)
 
 static CGImageRef createImageNamed(NSString *name)
 {
-    CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("com.netscape.vlc")), (CFStringRef)name, CFSTR("png"), NULL);
+    CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("org.videolan.vlc-npapi-plugin")), (CFStringRef)name, CFSTR("png"), NULL);
 
     if (!url)
         return NULL;
@@ -691,10 +691,10 @@ static CGImageRef createImageNamed(NSString *name)
     CGContextSaveGState(cgContext);
     CGContextSetFillColorWithColor(cgContext, CGColorGetConstantColor(kCGColorBlack));
     CGContextFillRect(cgContext, self.bounds);
-    CGContextRestoreGState(cgContext);
 
     [self _drawPlayPauseButtonInContext:cgContext];
     [self _drawSliderInContext:cgContext];
+    CGContextRestoreGState(cgContext);
 }
 
 #pragma mark -
