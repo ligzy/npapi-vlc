@@ -7,9 +7,9 @@
 	<key>CFBundleExecutable</key>
 	<string>VLC-Plugin</string>
 	<key>CFBundleGetInfoString</key>
-	<string>VLC Webbrowser Plugin - Version @VERSION@ - (c) @COPYRIGHT_YEARS@ VideoLAN & authors.</string>
+	<string>VLC Webbrowser Plugin - Version @VERSION@ - (c) @COPYRIGHT_YEARS@ VideoLAN and authors.</string>
 	<key>CFHumanReadableCopyright</key>
-	<string>Copyright (c) @COPYRIGHT_YEARS@ VideoLAN & authors</string>
+	<string>Copyright (c) @COPYRIGHT_YEARS@ VideoLAN and authors</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.videolan.vlc-npapi-plugin</string>
 	<key>CFBundleInfoDictionaryVersion</key>
