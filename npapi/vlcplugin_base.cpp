@@ -125,6 +125,12 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 #endif
 #ifdef XP_MACOSX
     ppsz_argv[ppsz_argc++] = "--vout=vout_coregraphicslayer";
+    ppsz_argv[ppsz_argc++] = "--scaletempo-stride=30";
+    ppsz_argv[ppsz_argc++] = "--scaletempo-overlap=0,2";
+    ppsz_argv[ppsz_argc++] = "--scaletempo-search=14";
+    ppsz_argv[ppsz_argc++] = "--auhal-volume=100";
+    ppsz_argv[ppsz_argc++] = "--auhal-audio-device=0";
+    ppsz_argv[ppsz_argc++] = "--no-volume-save";
 #endif
 
     /* common settings */
