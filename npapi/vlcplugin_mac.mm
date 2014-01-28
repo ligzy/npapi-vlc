@@ -405,8 +405,10 @@ bool VlcPluginMac::handle_event(void *event)
     [aLayer removeFromSuperlayer];
     [CATransaction commit];
 
-    if (playbackLayer == aLayer)
+    if (playbackLayer == aLayer) {
         [playbackLayer release];
+        playbackLayer = nil;
+    }
 }
 
 - (CGSize)currentOutputSize
