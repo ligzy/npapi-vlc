@@ -84,11 +84,12 @@ builddir=`pwd`
 
 info "Building in \"$builddir\""
 
-export CC="xcrun clang"
-export CXX="xcrun clang++"
-export OBJC="xcrun clang"
-export OBJCXX="xcrun clang++"
-export CFLAGS="-isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+export CC="xcrun clang -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+export CXX="xcrun clang++ -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+export OBJC="xcrun clang -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+export OBJCXX="xcrun clang++ -isysroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+export LD="xcrun ld -syslibroot ${SDKROOT} -mmacosx-version-min=${MINIMAL_OSX_VERSION}"
+
 export PATH="${npapiroot}/extras/macosx/vlc/extras/tools/build/bin:${npapiroot}/extras/macosx/vlc/contrib/${ARCH}-apple-darwin10/bin:$PATH"
 export PKG_CONFIG_PATH="${npapiroot}/extras/macosx/vlc/${ARCH}-install/lib/pkgconfig"
 
