@@ -152,22 +152,6 @@ libvlcplugin_la_LDFLAGS += \
 noinst_DATA = VLC-Plugin.plugin
 CLEANFILES += VLC-Plugin.plugin
 
-#
-# Plugin uses shared libraries that are located relatively through @executable_path,
-# which unfortunately references the path of the App using the Plugin, rather than the
-# Plugin itself. Since this Plugin should always be installed in '/Library/Internet Plug-Ins',
-# it is safer to force dylibs to locate dependents through a fixed path
-#
-define FIXEXECPATH
-	otool -L "$$dylib" | \
-	awk -v libdylib="$$dylib" ' \
-	/@executable_path/ { \
-	    newpath=$$1 ; \
-	    sub("@executable_path","/Library/Internet Plug-Ins/VLC Plugin.plugin/Contents/MacOS",newpath) ; \
-	    print "install_name_tool -change \""$$1"\" \""newpath"\" \""libdylib"\"" ; \
-	}' | sh -x
-endef
-
 VLC-Plugin.plugin: $(lib_LTLIBRARIES)
 	rm -Rf "$(top_builddir)/$@"
 	$(INSTALL) -d "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/lib"
@@ -181,14 +165,5 @@ VLC-Plugin.plugin: $(lib_LTLIBRARIES)
 	chmod +x "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC-Plugin"
 	find "$(top_builddir)/VLC-Plugin.plugin" -type d -exec chmod ugo+rx '{}' \;
 	find "$(top_builddir)/VLC-Plugin.plugin" -type f -exec chmod ugo+r '{}' \;
-
-# uncomment if dependencies on XPCOM libs is sought
-#	if test -d "$(MOZILLA_SDK_PATH)/lib"; then \
-#	  for i in "$(MOZILLA_SDK_PATH)"/lib/*.dylib ; do \
-#	    dylib="$(srcdir)/$@/Contents/MacOS/`basename $${i}`" ; \
-#	    $(INSTALL) -m 644 "$${i}" "$$dylib" ; \
-#	    $(FIXEXECPATH); \
-#	  done ; \
-#	fi
 
 endif # Mac
