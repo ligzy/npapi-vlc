@@ -149,8 +149,8 @@ libvlcplugin_la_LDFLAGS += \
 	-Wl,-framework,CoreFoundation -Wl,-framework,ApplicationServices \
 	-Wl,-framework,QuartzCore, -Wl,-framework,AppKit, -shrext .dylib
 
-noinst_DATA = VLC\ Plugin.plugin
-CLEANFILES += VLC\ Plugin.plugin
+noinst_DATA = VLC-Plugin.plugin
+CLEANFILES += VLC-Plugin.plugin
 
 #
 # Plugin uses shared libraries that are located relatively through @executable_path,
@@ -168,13 +168,14 @@ define FIXEXECPATH
 	}' | sh -x
 endef
 
-VLC\ Plugin.plugin: $(lib_LTLIBRARIES)
+VLC-Plugin.plugin: $(lib_LTLIBRARIES)
 	rm -Rf "$(top_builddir)/$@"
 	$(INSTALL) -d "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/lib"
 	$(INSTALL) -d "$(top_builddir)/VLC-Plugin.plugin/Contents/Resources"
 	$(INSTALL) $(top_srcdir)/share/pixmaps/macosx/*.png "$(top_builddir)/VLC-Plugin.plugin/Contents/Resources"
 	ACTION="release-makefile" PRODUCT="VLC-Plugin.plugin" libvlc_dir=$(LIBVLC_PREFIX) src_dir=$(srcdir) build_dir=$(top_builddir) sh "$(top_srcdir)/extras/macosx/build-package.sh"
 	$(INSTALL) "$(top_builddir)/extras/macosx/Info.plist" "$(top_builddir)/VLC-Plugin.plugin/Contents/Info.plist"
+	xcrun plutil -convert binary1 "$(top_builddir)/VLC-Plugin.plugin/Contents/Info.plist"
 	$(INSTALL) "$(top_builddir)/npapi/.libs/npvlc.dylib" "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/"
 	mv $(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/npvlc.dylib "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC-Plugin"
 	chmod +x "$(top_builddir)/VLC-Plugin.plugin/Contents/MacOS/VLC-Plugin"
