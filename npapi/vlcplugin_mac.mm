@@ -147,7 +147,7 @@ void VlcPluginMac::toggle_fullscreen()
     libvlc_toggle_fullscreen(getMD());
     this->update_controls();
 
-    if (get_fullscreen() == 0) {
+    if (get_fullscreen() != 0) {
         if (!fullscreenWindow) {
             /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the
              * existance of a parent window. This is solved in 10.6 and we should remove the window once we require it. */
