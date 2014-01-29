@@ -151,7 +151,7 @@ void VlcPluginMac::toggle_fullscreen()
         if (!fullscreenWindow) {
             /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the
              * existance of a parent window. This is solved in 10.6 and we should remove the window once we require it. */
-            fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(npwindow.x, npwindow.y, npwindow.width, npwindow.height)];
+            fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(0., 0., npwindow.width, npwindow.height)];
             [fullscreenWindow setLevel: CGShieldingWindowLevel()];
             fullscreenView = [fullscreenWindow customContentView];
 
