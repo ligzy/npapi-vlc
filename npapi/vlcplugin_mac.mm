@@ -174,7 +174,6 @@ void VlcPluginMac::toggle_fullscreen()
         [[fullscreenWindow contentView] enterFullScreenMode: [NSScreen mainScreen] withOptions: [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithInt: 0], NSFullScreenModeAllScreens, nil]];
     } else {
         [[fullscreenWindow contentView] exitFullScreenModeWithOptions: nil];
-        [fullscreenWindow orderOut: nil];
         [noMediaLayer removeFromSuperlayer];
         [playbackLayer removeFromSuperlayer];
         [controllerLayer removeFromSuperlayer];
@@ -182,6 +181,7 @@ void VlcPluginMac::toggle_fullscreen()
         [browserRootLayer addSublayer: noMediaLayer];
         [browserRootLayer addSublayer: playbackLayer];
         [browserRootLayer addSublayer: controllerLayer];
+        [fullscreenWindow orderOut: nil];
     }
 }
 
