@@ -217,8 +217,6 @@ info "Installing VLC"
 make install > ${out}
 cd ..
 
-find ${PREFIX}/lib/vlc/plugins -name *.dylib -type f -exec cp '{}' ${PREFIX}/lib/vlc/plugins \;
-
 info "Removing unneeded modules"
 blacklist="
 stats
