@@ -124,7 +124,7 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
 
 #endif
 #ifdef XP_MACOSX
-    ppsz_argv[ppsz_argc++] = "--vout=vout_coregraphicslayer";
+    ppsz_argv[ppsz_argc++] = "--vout=caopengllayer";
     ppsz_argv[ppsz_argc++] = "--scaletempo-stride=30";
     ppsz_argv[ppsz_argc++] = "--scaletempo-overlap=0,2";
     ppsz_argv[ppsz_argc++] = "--scaletempo-search=14";
