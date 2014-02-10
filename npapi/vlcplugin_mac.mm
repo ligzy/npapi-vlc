@@ -387,6 +387,7 @@ bool VlcPluginMac::handle_event(void *event)
 }
 
 @implementation VLCBrowserRootLayer
+@synthesize cppPlugin = _cppPlugin;
 
 - (id)init
 {
