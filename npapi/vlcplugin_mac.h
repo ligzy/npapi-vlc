@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcplugin_mac.h: a VLC plugin for Mozilla (Mac interface)
  *****************************************************************************
- * Copyright (C) 2011-2013 VLC authors and VideoLAN
+ * Copyright (C) 2011-2014 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Felix Paul Kühne <fkuehne # videolan # org>

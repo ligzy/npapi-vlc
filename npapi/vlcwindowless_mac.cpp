@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcwindowless_mac.cpp: VLC NPAPI windowless plugin for Mac
  *****************************************************************************
- * Copyright (C) 2012-2013 VLC Authors and VideoLAN
+ * Copyright (C) 2012-2014 VLC Authors and VideoLAN
  * $Id$
  *
  * Authors: Felix Paul Kühne <fkuehne # videolan # org>
@@ -30,6 +30,12 @@ VlcWindowlessMac::VlcWindowlessMac(NPP instance, NPuint16_t mode) :
     VlcWindowlessBase(instance, mode)
 {
     colorspace = CGColorSpaceCreateDeviceRGB();
+
+    const char *userAgent = NPN_UserAgent(this->getBrowser());
+    if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
+        legacy_drawing_mode = true;
+        fprintf(stderr, "Safari 5 detected, using legacy drawing mode\n");
+    }
 }
 
 VlcWindowlessMac::~VlcWindowlessMac()
@@ -248,4 +254,27 @@ bool VlcWindowlessMac::handle_event(void *event)
     }
 
     return VlcPluginBase::handle_event(event);
+}
+
+void VlcWindowlessMac::video_display_cb(void * /*picture*/)
+{
+    if (p_browser) {
+        if (!legacy_drawing_mode)
+            NPN_PluginThreadAsyncCall(p_browser,
+                                      VlcWindowlessBase::invalidate_window_proxy,
+                                      this);
+        else
+            invalidate_window();
+    }
+}
+
+void VlcWindowlessMac::set_player_window() {
+    libvlc_video_set_format_callbacks(getMD(),
+                                      video_format_proxy,
+                                      video_cleanup_proxy);
+    libvlc_video_set_callbacks(getMD(),
+                               video_lock_proxy,
+                               video_unlock_proxy,
+                               video_display_proxy,
+                               this);
 }
