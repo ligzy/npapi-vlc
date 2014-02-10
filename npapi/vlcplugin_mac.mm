@@ -43,6 +43,14 @@
 @end
 
 @interface VLCBrowserRootLayer : CALayer
+{
+    NSTimer *_interfaceUpdateTimer;
+    VlcPluginMac *_cppPlugin;
+}
+@property (readwrite) VlcPluginMac * cppPlugin;
+
+- (void)startUIUpdateTimer;
+
 - (void)addVoutLayer:(CALayer *)aLayer;
 - (void)removeVoutLayer:(CALayer *)aLayer;
 - (CGSize)currentOutputSize;
@@ -123,6 +131,13 @@ VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
     VlcPluginBase(instance, mode)
 {
     browserRootLayer = [[VLCBrowserRootLayer alloc] init];
+    [browserRootLayer setCppPlugin:this];
+
+    const char *userAgent = NPN_UserAgent(this->getBrowser());
+    if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
+        NSLog(@"Safari 5 detected, deploying UI update timer");
+        [browserRootLayer performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
+    }
 }
 
 VlcPluginMac::~VlcPluginMac()
@@ -212,10 +227,6 @@ bool VlcPluginMac::get_toolbar_visible()
 
 void VlcPluginMac::update_controls()
 {
-    [controllerLayer setMediaPosition: libvlc_media_player_get_position(getMD())];
-    [controllerLayer setIsPlaying: playlist_isplaying()];
-    [controllerLayer setIsFullscreen:this->get_fullscreen()];
-
     libvlc_state_t currentstate = libvlc_media_player_get_state(getMD());
     if (currentstate == libvlc_Playing || currentstate == libvlc_Paused || currentstate == libvlc_Opening) {
         [noMediaLayer setHidden: YES];
@@ -226,7 +237,12 @@ void VlcPluginMac::update_controls()
         [playbackLayer setHidden: YES];
     }
 
-    [controllerLayer setNeedsDisplay];
+    if (controllerLayer) {
+        [controllerLayer setMediaPosition: libvlc_media_player_get_position(getMD())];
+        [controllerLayer setIsPlaying: playlist_isplaying()];
+        [controllerLayer setIsFullscreen:this->get_fullscreen()];
+        [controllerLayer setNeedsDisplay];
+    }
 }
 
 bool VlcPluginMac::create_windows()
@@ -380,6 +396,29 @@ bool VlcPluginMac::handle_event(void *event)
     }
 
     return self;
+}
+
+- (void)startUIUpdateTimer
+{
+    _interfaceUpdateTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(_updateUI) userInfo:nil repeats:YES];
+    [_interfaceUpdateTimer retain];
+    [_interfaceUpdateTimer fire];
+}
+
+- (void)dealloc
+{
+    if (_interfaceUpdateTimer) {
+        [_interfaceUpdateTimer invalidate];
+        [_interfaceUpdateTimer release];
+    }
+
+    [super dealloc];
+}
+
+- (void)_updateUI
+{
+    if (_cppPlugin)
+        _cppPlugin->update_controls();
 }
 
 - (void)addVoutLayer:(CALayer *)aLayer
