@@ -74,6 +74,31 @@ public:
     static char* stringValue(const NPString &v);
     static char* stringValue(const NPVariant &v);
 
+    bool isValid()
+    {
+        return _instance != NULL;
+    };
+
+    enum InvokeResult
+    {
+        INVOKERESULT_NO_ERROR       = 0,    /* returns no error */
+        INVOKERESULT_GENERIC_ERROR  = 1,    /* returns error */
+        INVOKERESULT_NO_SUCH_METHOD = 2,    /* throws method does not exist */
+        INVOKERESULT_INVALID_ARGS   = 3,    /* throws invalid arguments */
+        INVOKERESULT_INVALID_VALUE  = 4,    /* throws invalid value in assignment */
+        INVOKERESULT_OUT_OF_MEMORY  = 5,    /* throws out of memory */
+    };
+
+    virtual InvokeResult getProperty(int index, NPVariant &result);
+    virtual InvokeResult setProperty(int index, const NPVariant &value);
+    virtual InvokeResult removeProperty(int index);
+    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
+    virtual InvokeResult invokeDefault(const NPVariant *args, uint32_t argCount, NPVariant &result);
+
+    bool returnInvokeResult(InvokeResult result);
+
+    static InvokeResult invokeResultString(const char *,NPVariant &);
+
 protected:
     void *operator new(size_t n)
     {
@@ -89,11 +114,6 @@ protected:
         NPN_MemFree(p);
     };
 
-    bool isValid()
-    {
-        return _instance != NULL;
-    };
-
     RuntimeNPObject(NPP instance, const NPClass *aClass) :
         _instance(instance)
     {
@@ -101,16 +121,6 @@ protected:
         referenceCount = 1;
     };
     virtual ~RuntimeNPObject() {};
-
-    enum InvokeResult
-    {
-        INVOKERESULT_NO_ERROR       = 0,    /* returns no error */
-        INVOKERESULT_GENERIC_ERROR  = 1,    /* returns error */
-        INVOKERESULT_NO_SUCH_METHOD = 2,    /* throws method does not exist */
-        INVOKERESULT_INVALID_ARGS   = 3,    /* throws invalid arguments */
-        INVOKERESULT_INVALID_VALUE  = 4,    /* throws invalid value in assignment */
-        INVOKERESULT_OUT_OF_MEMORY  = 5,    /* throws out of memory */
-    };
 
     friend void RuntimeNPClassDeallocate(NPObject *npobj);
     friend void RuntimeNPClassInvalidate(NPObject *npobj);
@@ -124,16 +134,6 @@ protected:
                                             const NPVariant *args,
                                             uint32_t argCount,
                                             NPVariant *result);
-
-    virtual InvokeResult getProperty(int index, NPVariant &result);
-    virtual InvokeResult setProperty(int index, const NPVariant &value);
-    virtual InvokeResult removeProperty(int index);
-    virtual InvokeResult invoke(int index, const NPVariant *args, uint32_t argCount, NPVariant &result);
-    virtual InvokeResult invokeDefault(const NPVariant *args, uint32_t argCount, NPVariant &result);
-
-    bool returnInvokeResult(InvokeResult result);
-
-    static InvokeResult invokeResultString(const char *,NPVariant &);
 
     bool isPluginRunning()
     {
