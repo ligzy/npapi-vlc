@@ -52,8 +52,7 @@ npapi-sdk:
 	svn export http://npapi-sdk.googlecode.com/svn/trunk/headers npapi-sdk-svn -r HEAD
 	mv npapi-sdk-svn npapi-sdk
 
-if !HAVE_DARWIN
-if !HAVE_WIN32
+if HAVE_XCB
 
 # Unix (x11) platforms
 #
@@ -85,7 +84,9 @@ SOURCES_support += \
 	vlcplugin_xcb.h
 endif # !USE_GTK
 
-else # Win32
+endif
+
+if HAVE_WIN32
 
 # Under Win32|Mac, Mozilla plugins need to be named NP******.DLL, but under Unix
 # the common naming scheme is lib******plugin.so.
@@ -122,7 +123,8 @@ npvlc_rc.$(OBJEXT): package/npvlc_rc.rc
 	$(WINDRES) --include-dir $(srcdir) -i $< -o $@
 
 endif
-else
+
+if HAVE_DARWIN
 
 if FETCH_NPAPI
 $(npvlc_la_OBJECTS): npapi-sdk

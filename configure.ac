@@ -250,7 +250,7 @@ dnl GTK+ for linux toolbar
 AC_ARG_WITH([gtk], AS_HELP_STRING([--with-gtk], [Build the GTK+ toolbars in NPAPI plugin [default=auto]]),, [with_gtk=yes])
 gtk_found=no
 AS_IF([ test "${SYS}" != "mingw32" -a "${SYS}" != "darwin" ], [
-  PKG_CHECK_MODULES(XCB, [xcb x11-xcb],[], [
+  PKG_CHECK_MODULES(XCB, [xcb x11-xcb],[xcb_found=yes], [
      AC_MSG_ERROR([Please install the libxcb and x11-xcb development files])
   ])
   AS_IF([ test "x$with_gtk" != "xno" ],
@@ -261,6 +261,7 @@ AS_IF([ test "${SYS}" != "mingw32" -a "${SYS}" != "darwin" ], [
 AS_IF([ test "x$gtk_found" = "xyes" ],
     AC_DEFINE([USE_GTK], [1], [Define to 1 if using GTK+]))
 AM_CONDITIONAL(WITH_GTK, [ test "x$gtk_found" = "xyes" ])
+AM_CONDITIONAL(HAVE_XCB, [ test "x$xcb_found" = "xyes" ])
 
 dnl
 dnl final flags for ActiveX
