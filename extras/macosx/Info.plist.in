@@ -9,7 +9,7 @@
 	<key>CFBundleGetInfoString</key>
 	<string>VLC media player Web Plugin @VERSION@</string>
 	<key>CFHumanReadableCopyright</key>
-	<string>Copyright Â @COPYRIGHT_YEARS@ VideoLAN and authors</string>
+	<string>Copyright Â© @COPYRIGHT_YEARS@ VideoLAN and authors</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.videolan.vlc-npapi-plugin</string>
 	<key>CFBundleInfoDictionaryVersion</key>
