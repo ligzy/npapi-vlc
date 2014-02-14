@@ -7,15 +7,15 @@
 	<key>CFBundleExecutable</key>
 	<string>VLC-Plugin</string>
 	<key>CFBundleGetInfoString</key>
-	<string>VLC Webbrowser Plugin - Version @VERSION@ - (c) @COPYRIGHT_YEARS@ VideoLAN and authors.</string>
+	<string>VLC media player Web Plugin @VERSION@</string>
 	<key>CFHumanReadableCopyright</key>
-	<string>Copyright (c) @COPYRIGHT_YEARS@ VideoLAN and authors</string>
+	<string>Copyright Â @COPYRIGHT_YEARS@ VideoLAN and authors</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.videolan.vlc-npapi-plugin</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>VLC Web Plug-in</string>
+	<string>VLC Web Plugin</string>
 	<key>CFBundlePackageType</key>
 	<string>BRPL</string>
 	<key>CFBundleSignature</key>
@@ -43,7 +43,7 @@
 	<key>SUFeedURL</key>
 	<string>http://update.videolan.org/vlc/sparkle/vlc-intel64.xml</string>
 	<key>WebPluginName</key>
-	<string>VLC Multimedia Plug-in</string>
+	<string>VLC Web Plugin</string>
 	<key>WebPluginDescription</key>
 	<string>@COPYRIGHT_MESSAGE@&lt;BR&gt;&lt;A HREF="http://www.videolan.org"&gt;http://www.videolan.org&lt;/A&gt;</string>
 	<key>WebPluginMIMETypes</key>
@@ -271,7 +271,7 @@
 				<string>vlc</string>
 			</array>
 			<key>WebPluginTypeDescription</key>
-			<string>VLC plug-in</string>
+			<string>VLC plugin</string>
 		</dict>
 		<key>video/x-ms-asf-plugin</key>
 		<dict>
