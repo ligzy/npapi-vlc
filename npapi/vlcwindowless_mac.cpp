@@ -76,7 +76,7 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
                                                     (const void **)&keys,
                                                     (const void **)&values,
                                                     2, NULL, NULL);
-    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Multimedia Plug-in"), stylesDict);
+    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
     CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
     CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
     CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2));
