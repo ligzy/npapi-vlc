@@ -67,8 +67,8 @@ NPint16_t NPP_HandleEvent( NPP instance, void * event );
  ******************************************************************************/
 #define PLUGIN_NAME         "VLC Web Plugin"
 #define PLUGIN_DESCRIPTION \
-    "Version %s, copyright 1996-2012 VideoLAN and Authors" \
-    "<br />" \
+    "VLC media player Web Plugin %s<br />" \
+    "Copyright © 2002-2014 VLC authors and VideoLAN<br />" \
     "<a href=\"http://www.videolan.org/vlc/\">http://www.videolan.org/vlc/</a>"
 
 #endif
