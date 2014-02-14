@@ -1,3 +1,17 @@
+Changes between VLC plugins 2.1.0 and 2.2.0:
+--------------------------------------------
+
+NPAPI Core:
+ * Various fixes and cleanups
+
+Mac:
+ * New MacOS output based on CoreAnimation
+ * Create UB for 32 and 64 bits
+ * Fix support for Safari 5 starting from X.6
+ * Fix compilation with clang++
+ * Fix compilation with Xcode5 and Mavericks
+
+
 Changes between VLC plugins 2.0.6 and 2.1.0:
 --------------------------------------------
 
@@ -5,7 +19,7 @@ NPAPI core:
  * libVLC 2.0.0 is now required
 
 Platforms:
- * New MacOS windowed rendering path
+ * New MacOS windowed rendering path, using CoreGraphics
 
 
 Changes between VLC 2.0.2 and 2.0.6:
