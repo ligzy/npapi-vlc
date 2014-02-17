@@ -1,11 +1,12 @@
 /*****************************************************************************
  * npolibvlc.cpp: official Javascript APIs
  *****************************************************************************
- * Copyright (C) 2002-2009 the VideoLAN team
+ * Copyright (C) 2002-2014 VLC authors and VideoLAN
  * Copyright (C) 2010 M2X BV
  *
  * Authors: Damien Fouilleul <Damien.Fouilleul@laposte.net>
  *          JP Dinger <jpd@videolan.org>
+ *          Felix Paul Kühne <fkuehne # videolan.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,14 +1,16 @@
 /*****************************************************************************
  * vlcplugin_base.cpp: a VLC plugin for Mozilla
  *****************************************************************************
- * Copyright (C) 2002-2010 the VideoLAN team
+ * Copyright (C) 2002-2012 VLC authors and VideoLAN
  * $Id$
  *
- * Authors: Samuel Hocevar <sam@zoy.org>
- *          Damien Fouilleul <damienf.fouilleul@laposte.net>
+ * Authors: Damien Fouilleul <damienf.fouilleul@laposte.net>
  *          Jean-Paul Saman <jpsaman@videolan.org>
  *          Sergey Radionov <rsatom@gmail.com>
  *          Cheng Sun <chengsun9@gmail.com>
+ *          Yannick Brehon <y.brehon@qiplay.com>
+ *          Felix Paul Kühne <fkuehne # videolan.org>
+ *          Ludovic Fauvet <etix@videolan.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

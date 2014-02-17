@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcplugin_base.h: a VLC plugin for Mozilla
  *****************************************************************************
- * Copyright (C) 2002-2009 the VideoLAN team
+ * Copyright (C) 2002-2012 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Samuel Hocevar <sam@zoy.org>

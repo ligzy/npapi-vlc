@@ -1,10 +1,11 @@
 /*****************************************************************************
  * vlcshell.h:
  *****************************************************************************
- * Copyright (C) 2009-2010 the VideoLAN team
+ * Copyright (C) 2009-2014 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Jean-Paul Saman <jpsaman@videolan.org>
+ *          Cheng Sun <chengsun9@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

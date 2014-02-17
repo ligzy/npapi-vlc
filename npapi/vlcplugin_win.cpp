@@ -1,13 +1,11 @@
 /*****************************************************************************
  * vlcplugin_win.cpp: a VLC plugin for Mozilla (Windows interface)
  *****************************************************************************
- * Copyright (C) 2011 the VideoLAN team
+ * Copyright (C) 2011-2012 VLC authors and VideoLAN
  * $Id$
  *
- * Authors: Samuel Hocevar <sam@zoy.org>
- *          Damien Fouilleul <damienf@videolan.org>
- *          Jean-Paul Saman <jpsaman@videolan.org>
- *          Cheng Sun <chengsun9@gmail.com>
+ * Authors: Cheng Sun <chengsun9@gmail.com>
+ *          Sergey Radionov <RSATom@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

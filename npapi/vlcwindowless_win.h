@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcwindowless_win.h: a VLC plugin for Mozilla (Windows windowless)
  *****************************************************************************
- * Copyright (C) 2011 the VideoLAN team
+ * Copyright (C) 2011-2013 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Cheng Sun <chengsun9@gmail.com>

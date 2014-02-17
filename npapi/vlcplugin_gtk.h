@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcplugin_gtk.h: a VLC plugin for Mozilla (GTK+ interface)
  *****************************************************************************
- * Copyright (C) 2011 the VideoLAN team
+ * Copyright (C) 2012 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Cheng Sun <chengsun9@gmail.com>

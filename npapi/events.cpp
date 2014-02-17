@@ -1,14 +1,16 @@
 /*****************************************************************************
  * events.cpp: events for the VLC Plugin
  *****************************************************************************
- * Copyright (C) 2002-2009 the VideoLAN team
+ * Copyright (C) 2002-2012 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Samuel Hocevar <sam@zoy.org>
- *          Damien Fouilleul <damienf@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
  *          Sergey Radionov <rsatom@gmail.com>
  *          Cheng Sun <chengsun9@gmail.com>
+ *          Yannick Brehon <y.brehon@qiplay.com>
+ *          Jean-Baptiste Kempf <jb@videolan.org>
+ *          JP Dinger <jpd@videolan.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

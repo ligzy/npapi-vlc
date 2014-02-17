@@ -2,10 +2,11 @@
  * runtime.cpp: support for NPRuntime API for Netscape Script-able plugins
  *              FYI: http://www.mozilla.org/projects/plugins/npruntime.html
  *****************************************************************************
- * Copyright (C) 2002-2005 the VideoLAN team
+ * Copyright (C) 2002-2012  VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Damien Fouilleul <damien.fouilleul@laposte.net>
+ *          JP Dinger <jpd@videolan.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

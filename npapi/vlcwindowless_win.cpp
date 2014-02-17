@@ -1,12 +1,10 @@
 /*****************************************************************************
  * vlcwindowless_win.cpp: a VLC plugin for Mozilla (Windows windowless)
  *****************************************************************************
- * Copyright (C) 2011 the VideoLAN team
+ * Copyright (C) 2011-2013 VLC authors and VideoLAN
  * $Id$
  *
- * Authors: Sergey Radionov <rsatom@gmail.com>
- *          Mark Lesha <mlesha(at)hotmail(dot)com>
- *          Cheng Sun <chengsun9@gmail.com>
+ * Authors: Cheng Sun <chengsun9@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
