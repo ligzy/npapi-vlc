@@ -1357,7 +1357,7 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
                     /* get the good spuDesc */
                     for (i = 0; i < i_limit; i++)
                     {
-                        if (p_trackDesc->i_id == i_trackID)
+                        if (p_spuDesc->i_id == i_spuID)
                             break;
 
                         p_spuDesc = p_spuDesc->p_next;
