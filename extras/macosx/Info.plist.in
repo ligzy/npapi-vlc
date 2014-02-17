@@ -325,7 +325,7 @@
 			<key>WebPluginTypeDescription</key>
 			<string>Windows Media audio</string>
 		</dict>
-		<key>video/x-google-vlc-plugin</key>
+		<key>application/x-google-vlc-plugin</key>
 		<dict>
 			<key>WebPluginTypeDescription</key>
 			<string>Google VLC plug-in</string>

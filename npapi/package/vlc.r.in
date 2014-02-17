@@ -130,7 +130,7 @@ resource 'STR#' (128,"MIME Type")
         "video/x-ms-wvx", "wvx",
         "video/x-ms-wma", "wma",
         /* Google VLC */
-        "video/x-google-vlc-plugin", "",
+        "application/x-google-vlc-plugin", "",
         /* WAV audio */
         "audio/wav", "wav",
         "audio/x-wav", "wav",
