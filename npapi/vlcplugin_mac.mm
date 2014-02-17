@@ -494,10 +494,15 @@ bool VlcPluginMac::handle_event(void *event)
 
     CGContextSaveGState(cgContext);
 
+    CGColorRef backgroundColor;
+    unsigned r = 0, g = 0, b = 0;
+    HTMLColor2RGB(self.cppPlugin->get_options().get_bg_color().c_str(), &r, &g, &b);
+    backgroundColor = CGColorCreateGenericRGB(r, g, b, 1.);
+
 #if SHOW_BRANDING
-    // draw an orange background
+    // draw background
     CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetFillColorWithColor(cgContext, CGColorCreateGenericRGB(240./255., 150./255., 9./255., 1.));
+    CGContextSetFillColorWithColor(cgContext, backgroundColor);
     CGContextDrawPath(cgContext, kCGPathFill);
 
     // draw gradient
@@ -561,46 +566,12 @@ bool VlcPluginMac::handle_event(void *event)
     CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
     CGImageRelease(cone);
 #else
-    // draw a black rect
-    CGRect rect;
-    float media_width = [self cppPlugin]->m_media_width;
-    float media_height = [self cppPlugin]->m_media_height;
-
-    if (media_width == 0. || media_height == 0.)
-        CGRectMake(0, 0, windowWidth, windowHeight);
-    else {
-        CGRect layerRect = self.bounds;
-        float display_width = 0.;
-        float display_height = 0.;
-        float src_aspect = (float)media_width / media_height;
-        float dst_aspect = (float)layerRect.size.width/layerRect.size.height;
-        if ( src_aspect > dst_aspect ) {
-            if( layerRect.size.width != media_width ) { //don't scale if size equal
-                display_width = layerRect.size.width;
-                display_height = display_width / src_aspect; // + 0.5);
-            } else {
-                display_width = media_width;
-                display_height = media_height;
-            }
-        } else {
-            if( layerRect.size.height != media_height ) { //don't scale if size equal
-                display_height = layerRect.size.height;
-                display_width = display_height * src_aspect; // + 0.5);
-            } else {
-                display_width = media_width;
-                display_height = media_height;
-            }
-        }
-
-        float left = (layerRect.size.width  - display_width)  / 2.;
-        float top  = (layerRect.size.height - display_height) / 2.;
-        CGRect rect = CGRectMake(left, top, display_width, display_height);
-    }
-
-    CGContextAddRect(cgContext, rect);
-    CGContextSetGrayFillColor(cgContext, 0., 1.);
+    // draw a background colored rect
+    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
+    CGContextSetFillColorWithColor(cgContext, backgroundColor);
     CGContextDrawPath(cgContext, kCGPathFill);
 #endif
+    CGColorRelease(backgroundColor);
 
     CGContextRestoreGState(cgContext);
 }
