@@ -413,12 +413,15 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
                         return INVOKERESULT_INVALID_VALUE;
 
                     /* if bad number is given return invalid value */
-                    if ( ( i_trackID > ( i_limit - 1 ) ) || ( i_trackID < 0 ) )
+                    if (i_trackID < 0)
                         return INVOKERESULT_INVALID_VALUE;
 
                     /* get the good trackDesc */
-                    for( i = 0 ; i < i_trackID ; i++ )
+                    for (i = 0; i < i_limit; i++)
                     {
+                        if (p_trackDesc->i_id == i_trackID)
+                            break;
+
                         p_trackDesc = p_trackDesc->p_next;
                     }
                     psz_name = p_trackDesc->psz_name;
@@ -1325,7 +1328,7 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
         {
             case ID_subtitle_description:
             {
-                if( argCount == 1)
+                if (argCount == 1)
                 {
                     char *psz_name;
                     int i_spuID, i_limit, i;
@@ -1347,12 +1350,15 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
                         return INVOKERESULT_INVALID_VALUE;
 
                     /* if bad number is given return invalid value */
-                    if ( ( i_spuID > ( i_limit -1 ) ) || ( i_spuID < 0 ) )
+                    if (i_spuID < 0)
                         return INVOKERESULT_INVALID_VALUE;
 
                     /* get the good spuDesc */
-                    for( i = 0 ; i < i_spuID ; i++ )
+                    for (i = 0; i < i_limit; i++)
                     {
+                        if (p_trackDesc->i_id == i_trackID)
+                            break;
+
                         p_spuDesc = p_spuDesc->p_next;
                     }
                     psz_name = p_spuDesc->psz_name;
