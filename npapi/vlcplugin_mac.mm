@@ -502,7 +502,7 @@ bool VlcPluginMac::handle_event(void *event)
 
     // draw gradient
     CGImageRef gradient = createImageNamed(@"gradient");
-    CGContextDrawImage(cgContext, CGRectMake(0., 0., self.bounds.size.width, 150.), gradient);
+    CGContextDrawImage(cgContext, CGRectMake(0., 0., windowWidth, 150.), gradient);
     CGImageRelease(gradient);
 
     // draw info text
@@ -533,7 +533,6 @@ bool VlcPluginMac::handle_event(void *event)
                                     (const void **)&keys,
                                     (const void **)&values,
                                     2, NULL, NULL);
-    //CGContextSetGrayFillColor(cgContext, .8, 1.);
 
     // draw version string
     CFStringRef arch;
@@ -555,11 +554,11 @@ bool VlcPluginMac::handle_event(void *event)
     CGImageRef cone = createImageNamed(@"cone");
     CGFloat coneWidth = CGImageGetWidth(cone);
     CGFloat coneHeight = CGImageGetHeight(cone);
-    if (self.bounds.size.height <= 320.) {
+    if (windowHeight <= 320.) {
         coneWidth = coneWidth / 2.;
         coneHeight = coneHeight / 2.;
     }
-    CGContextDrawImage(cgContext, CGRectMake((self.bounds.size.width - coneWidth) / 2., (self.bounds.size.height - coneHeight) / 2., coneWidth, coneHeight), cone);
+    CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
     CGImageRelease(cone);
 #else
     // draw a black rect

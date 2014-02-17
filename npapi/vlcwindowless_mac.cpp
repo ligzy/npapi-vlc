@@ -114,7 +114,6 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
                                     (const void **)&keys,
                                     (const void **)&values,
                                     2, NULL, NULL);
-    //CGContextSetGrayFillColor(cgContext, .8, 1.);
 
     // draw version string
     CFStringRef arch;
