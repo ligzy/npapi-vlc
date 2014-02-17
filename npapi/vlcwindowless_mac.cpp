@@ -146,10 +146,53 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
         }
         CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
         CGImageRelease(cone);
+
+        // draw custom text
+        values[0] = CTFontCreateWithName(CFSTR("Helvetica"),14,NULL);
+        stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                        (const void **)&keys,
+                                        (const void **)&values,
+                                        2, NULL, NULL);
+        const char *text = get_options().get_bg_text().c_str();
+        if (text != NULL) {
+            attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
+            textLine = CTLineCreateWithAttributedString(attRef);
+            CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
+            CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.) + (coneHeight / 2.) + textRect.size.height + 50.);
+            CTLineDraw(textLine, cgContext);
+            CFRelease(textLine);
+            CFRelease(attRef);
+        }
+        CFRelease(stylesDict);
     } else {
         CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
         CGContextSetFillColorWithColor(cgContext, backgroundColor);
         CGContextDrawPath(cgContext, kCGPathFill);
+
+        const char *text = get_options().get_bg_text().c_str();
+        if (text != NULL) {
+            CGContextSetGrayStrokeColor(cgContext, .95, 1.);
+            CGContextSetTextDrawingMode(cgContext, kCGTextFill);
+            CGContextSetGrayFillColor(cgContext, 1., 1.);
+            CFStringRef keys[2];
+            keys[0] = kCTFontAttributeName;
+            keys[1] = kCTForegroundColorFromContextAttributeName;
+            CFTypeRef values[2];
+            values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
+            values[1] = kCFBooleanTrue;
+            CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                                            (const void **)&keys,
+                                                            (const void **)&values,
+                                                            2, NULL, NULL);
+            CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
+            CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
+            CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
+            CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.));
+            CTLineDraw(textLine, cgContext);
+            CFRelease(textLine);
+            CFRelease(attRef);
+            CFRelease(stylesDict);
+        }
     }
     CGColorRelease(backgroundColor);
 
