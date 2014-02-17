@@ -231,7 +231,6 @@ void VlcPluginMac::update_controls()
     if (currentstate == libvlc_Playing || currentstate == libvlc_Paused || currentstate == libvlc_Opening) {
         [noMediaLayer setHidden: YES];
         [playbackLayer setHidden: NO];
-        [playbackLayer setNeedsDisplay];
     } else {
         [noMediaLayer setHidden: NO];
         [playbackLayer setHidden: YES];
@@ -269,7 +268,6 @@ NPError VlcPluginMac::get_root_layer(void *value)
     [browserRootLayer addSublayer: noMediaLayer];
 
     controllerLayer = [[VLCControllerLayer alloc] init];
-    controllerLayer.opaque = 1.;
     [browserRootLayer addSublayer: controllerLayer];
     [controllerLayer setCppPlugin: this];
 
@@ -728,13 +726,11 @@ static CGImageRef createImageNamed(NSString *name)
 
 - (void)drawInContext:(CGContextRef)cgContext
 {
-    CGContextSaveGState(cgContext);
     CGContextSetFillColorWithColor(cgContext, CGColorGetConstantColor(kCGColorBlack));
     CGContextFillRect(cgContext, self.bounds);
 
     [self _drawPlayPauseButtonInContext:cgContext];
     [self _drawSliderInContext:cgContext];
-    CGContextRestoreGState(cgContext);
 }
 
 #pragma mark -
