@@ -438,26 +438,11 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
             return NPERR_INCOMPATIBLE_VERSION_ERROR;
         }
 
-        /* FIXME by implementing CoreAnimation invalidation
-        NPBool supportsInvalidatingCoreAnimation = FALSE;
-        err = NPN_GetValue(instance, NPNVsupportsInvalidatingCoreAnimationBool, &supportsInvalidatingCoreAnimation);
-        if (err != NPERR_NO_ERROR || !supportsInvalidatingCoreAnimation)
-            fprintf(stderr, "New: browser doesn't support the Invalidating CoreAnimation drawing model\n");
-
-        if (supportsInvalidatingCoreAnimation) {
-            err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelInvalidatingCoreAnimation);
-            if (err != NPERR_NO_ERROR) {
-                fprintf(stderr, "Error in New: couldn't activate Invalidating CoreAnimation drawing model\n");
-                return NPERR_INCOMPATIBLE_VERSION_ERROR;
-            }
-        } else {*/
-            fprintf(stderr, "New: falling back to non-invalidating CoreAnimation drawing, since invalidation is not supported\n");
-            err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreAnimation);
-            if (err != NPERR_NO_ERROR) {
-                fprintf(stderr, "Error in New: couldn't activate CoreAnimation drawing model\n");
-                return NPERR_INCOMPATIBLE_VERSION_ERROR;
-            }
-        //}
+        err = NPN_SetValue(instance, NPPVpluginDrawingModel, (void*)NPDrawingModelCoreAnimation);
+        if (err != NPERR_NO_ERROR) {
+            fprintf(stderr, "Error in New: couldn't activate CoreAnimation drawing model\n");
+            return NPERR_INCOMPATIBLE_VERSION_ERROR;
+        }
     }
 
     NPBool supportsCocoaEvents = FALSE;
