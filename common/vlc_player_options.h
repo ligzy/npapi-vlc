@@ -1,8 +1,9 @@
 /*****************************************************************************
- * Copyright © 2002-2011 VideoLAN and VLC authors
+ * Copyright (C) 2002-2014 VideoLAN and VLC authors
  * $Id$
  *
  * Authors: Sergey Radionov <rsatom@gmail.com>
+ *          Felix Paul KÃ¼hne <fkuehne # videolan.org>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
@@ -54,7 +55,8 @@ enum vlc_player_option_e
     po_show_toolbar,
     po_enable_fullscreen,
     po_bg_text,
-    po_bg_color
+    po_bg_color,
+    po_enable_branding
 };
 
 class vlc_player_options
@@ -62,7 +64,7 @@ class vlc_player_options
 public:
     vlc_player_options()
         :_autoplay(true), _show_toolbar(true), _enable_fullscreen(true),
-        _bg_color(/*black*/"#000000")
+        _bg_color(/*black*/"#000000"), _enable_branding(true)
     {}
 
     void set_autoplay(bool ap){
@@ -102,12 +104,20 @@ public:
         return _bg_color;
     }
 
+    void set_enable_branding(bool st){
+        _enable_branding = st;
+        on_option_change(po_enable_branding);
+    }
+    bool get_enable_branding() const
+    {return _enable_branding;}
+
     virtual void on_option_change(vlc_player_option_e ){};
 
 private:
     bool         _autoplay;
     bool         _show_toolbar;
     bool         _enable_fullscreen;
+    bool         _enable_branding;
     std::string  _bg_text;
     //background color format is "#rrggbb"
     std::string  _bg_color;

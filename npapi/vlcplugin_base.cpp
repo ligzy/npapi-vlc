@@ -192,6 +192,10 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
         {
             set_bg_color( argv[i] );
         }
+        else if( !strcmp( argn[i], "branding" ) )
+        {
+            set_enable_branding( boolValue(argv[i]) );
+        }
     }
 
     libvlc_instance = libvlc_new(ppsz_argc, ppsz_argv);

@@ -80,77 +80,77 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
     HTMLColor2RGB(get_options().get_bg_color().c_str(), &r, &g, &b);
     backgroundColor = CGColorCreateGenericRGB(r, g, b, 1.);
 
-#if SHOW_BRANDING
-    // draw background
-    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetFillColorWithColor(cgContext, backgroundColor);
-    CGContextDrawPath(cgContext, kCGPathFill);
+    if (get_options().get_enable_branding()) {
+        // draw background
+        CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
+        CGContextSetFillColorWithColor(cgContext, backgroundColor);
+        CGContextDrawPath(cgContext, kCGPathFill);
 
-    // draw gradient
-    CGImageRef gradient = createImageNamed(CFSTR("gradient"));
-    CGContextDrawImage(cgContext, CGRectMake(0., 0., windowWidth, 150.), gradient);
-    CGImageRelease(gradient);
+        // draw gradient
+        CGImageRef gradient = createImageNamed(CFSTR("gradient"));
+        CGContextDrawImage(cgContext, CGRectMake(0., 0., windowWidth, 150.), gradient);
+        CGImageRelease(gradient);
 
-    // draw info text
-    CGContextSetGrayStrokeColor(cgContext, .95, 1.);
-    CGContextSetTextDrawingMode(cgContext, kCGTextFill);
-    CGContextSetGrayFillColor(cgContext, 1., 1.);
-    CFStringRef keys[2];
-    keys[0] = kCTFontAttributeName;
-    keys[1] = kCTForegroundColorFromContextAttributeName;
-    CFTypeRef values[2];
-    values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
-    values[1] = kCFBooleanTrue;
-    CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
-                                                    (const void **)&keys,
-                                                    (const void **)&values,
-                                                    2, NULL, NULL);
-    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
-    CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
-    CGContextSetTextPosition(cgContext, 25., 45.);
-    CTLineDraw(textLine, cgContext);
-    CFRelease(textLine);
-    CFRelease(attRef);
+        // draw info text
+        CGContextSetGrayStrokeColor(cgContext, .95, 1.);
+        CGContextSetTextDrawingMode(cgContext, kCGTextFill);
+        CGContextSetGrayFillColor(cgContext, 1., 1.);
+        CFStringRef keys[2];
+        keys[0] = kCTFontAttributeName;
+        keys[1] = kCTForegroundColorFromContextAttributeName;
+        CFTypeRef values[2];
+        values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
+        values[1] = kCFBooleanTrue;
+        CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                                        (const void **)&keys,
+                                                        (const void **)&values,
+                                                        2, NULL, NULL);
+        CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
+        CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
+        CGContextSetTextPosition(cgContext, 25., 45.);
+        CTLineDraw(textLine, cgContext);
+        CFRelease(textLine);
+        CFRelease(attRef);
 
-    // print smaller text from here
-    CFRelease(stylesDict);
-    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),12,NULL);
-    stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
-                                    (const void **)&keys,
-                                    (const void **)&values,
-                                    2, NULL, NULL);
+        // print smaller text from here
+        CFRelease(stylesDict);
+        values[0] = CTFontCreateWithName(CFSTR("Helvetica"),12,NULL);
+        stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                        (const void **)&keys,
+                                        (const void **)&values,
+                                        2, NULL, NULL);
 
-    // draw version string
-    CFStringRef arch;
-#ifdef __x86_64__
-    arch = CFSTR("64-bit");
-#else
-    arch = CFSTR("32-bit");
-#endif
+        // draw version string
+        CFStringRef arch;
+    #ifdef __x86_64__
+        arch = CFSTR("64-bit");
+    #else
+        arch = CFSTR("32-bit");
+    #endif
 
-    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%s — windowless mode — %@"), libvlc_get_version(), arch), stylesDict);
-    textLine = CTLineCreateWithAttributedString(attRef);
-    CGContextSetTextPosition(cgContext, 25., 25.);
-    CTLineDraw(textLine, cgContext);
-    CFRelease(textLine);
-    CFRelease(attRef);
-    CFRelease(stylesDict);
+        attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%s — windowless mode — %@"), libvlc_get_version(), arch), stylesDict);
+        textLine = CTLineCreateWithAttributedString(attRef);
+        CGContextSetTextPosition(cgContext, 25., 25.);
+        CTLineDraw(textLine, cgContext);
+        CFRelease(textLine);
+        CFRelease(attRef);
+        CFRelease(stylesDict);
 
-    // draw cone
-    CGImageRef cone = createImageNamed(CFSTR("cone"));
-    CGFloat coneWidth = CGImageGetWidth(cone);
-    CGFloat coneHeight = CGImageGetHeight(cone);
-    if (windowHeight <= 320.) {
-        coneWidth = coneWidth / 2.;
-        coneHeight = coneHeight / 2.;
+        // draw cone
+        CGImageRef cone = createImageNamed(CFSTR("cone"));
+        CGFloat coneWidth = CGImageGetWidth(cone);
+        CGFloat coneHeight = CGImageGetHeight(cone);
+        if (windowHeight <= 320.) {
+            coneWidth = coneWidth / 2.;
+            coneHeight = coneHeight / 2.;
+        }
+        CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
+        CGImageRelease(cone);
+    } else {
+        CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
+        CGContextSetFillColorWithColor(cgContext, backgroundColor);
+        CGContextDrawPath(cgContext, kCGPathFill);
     }
-    CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
-    CGImageRelease(cone);
-#else
-    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetFillColorWithColor(cgContext, backgroundColor);
-    CGContextDrawPath(cgContext, kCGPathFill);
-#endif
     CGColorRelease(backgroundColor);
 
     CGContextRestoreGState(cgContext);

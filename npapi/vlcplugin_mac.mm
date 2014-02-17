@@ -33,8 +33,6 @@
 #include <QuartzCore/QuartzCore.h>
 #include <AppKit/AppKit.h>
 
-#define SHOW_BRANDING 1
-
 @interface VLCNoMediaLayer : CALayer {
     VlcPluginMac *_cppPlugin;
 }
@@ -499,98 +497,18 @@ bool VlcPluginMac::handle_event(void *event)
     HTMLColor2RGB(self.cppPlugin->get_options().get_bg_color().c_str(), &r, &g, &b);
     backgroundColor = CGColorCreateGenericRGB(r, g, b, 1.);
 
-#if SHOW_BRANDING
-    // draw background
-    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetFillColorWithColor(cgContext, backgroundColor);
-    CGContextDrawPath(cgContext, kCGPathFill);
+    if (self.cppPlugin->get_options().get_enable_branding()) {
+        // draw background
+        CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
+        CGContextSetFillColorWithColor(cgContext, backgroundColor);
+        CGContextDrawPath(cgContext, kCGPathFill);
 
-    // draw gradient
-    CGImageRef gradient = createImageNamed(@"gradient");
-    CGContextDrawImage(cgContext, CGRectMake(0., 0., windowWidth, 150.), gradient);
-    CGImageRelease(gradient);
+        // draw gradient
+        CGImageRef gradient = createImageNamed(@"gradient");
+        CGContextDrawImage(cgContext, CGRectMake(0., 0., windowWidth, 150.), gradient);
+        CGImageRelease(gradient);
 
-    // draw info text
-    CGContextSetGrayStrokeColor(cgContext, .95, 1.);
-    CGContextSetTextDrawingMode(cgContext, kCGTextFill);
-    CGContextSetGrayFillColor(cgContext, 1., 1.);
-    CFStringRef keys[2];
-    keys[0] = kCTFontAttributeName;
-    keys[1] = kCTForegroundColorFromContextAttributeName;
-    CFTypeRef values[2];
-    values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
-    values[1] = kCFBooleanTrue;
-    CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
-                                                    (const void **)&keys,
-                                                    (const void **)&values,
-                                                    2, NULL, NULL);
-    CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
-    CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
-    CGContextSetTextPosition(cgContext, 25., 60.);
-    CTLineDraw(textLine, cgContext);
-    CFRelease(textLine);
-    CFRelease(attRef);
-
-    // print smaller text from here
-    CFRelease(stylesDict);
-    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),12,NULL);
-    stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
-                                    (const void **)&keys,
-                                    (const void **)&values,
-                                    2, NULL, NULL);
-
-    // draw version string
-    CFStringRef arch;
-#ifdef __x86_64__
-    arch = CFSTR("64-bit");
-#else
-    arch = CFSTR("32-bit");
-#endif
-
-    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%s — windowed mode — %@"), libvlc_get_version(), arch), stylesDict);
-    textLine = CTLineCreateWithAttributedString(attRef);
-    CGContextSetTextPosition(cgContext, 25., 40.);
-    CTLineDraw(textLine, cgContext);
-    CFRelease(textLine);
-    CFRelease(attRef);
-    CFRelease(stylesDict);
-
-    // draw cone
-    CGImageRef cone = createImageNamed(@"cone");
-    CGFloat coneWidth = CGImageGetWidth(cone);
-    CGFloat coneHeight = CGImageGetHeight(cone);
-    if (windowHeight <= 320.) {
-        coneWidth = coneWidth / 2.;
-        coneHeight = coneHeight / 2.;
-    }
-    CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
-    CGImageRelease(cone);
-
-    // draw custom text
-    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),14,NULL);
-    stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
-                                    (const void **)&keys,
-                                    (const void **)&values,
-                                    2, NULL, NULL);
-    const char *text = self.cppPlugin->get_options().get_bg_text().c_str();
-    if (text != NULL) {
-        attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
-        textLine = CTLineCreateWithAttributedString(attRef);
-        CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
-        CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.) + (coneHeight / 2.) + textRect.size.height + 50.);
-        CTLineDraw(textLine, cgContext);
-        CFRelease(textLine);
-        CFRelease(attRef);
-    }
-    CFRelease(stylesDict);
-#else
-    // draw a background colored rect
-    CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetFillColorWithColor(cgContext, backgroundColor);
-    CGContextDrawPath(cgContext, kCGPathFill);
-
-    const char *text = self.cppPlugin->get_options().get_bg_text().c_str();
-    if (text != NULL) {
+        // draw info text
         CGContextSetGrayStrokeColor(cgContext, .95, 1.);
         CGContextSetTextDrawingMode(cgContext, kCGTextFill);
         CGContextSetGrayFillColor(cgContext, 1., 1.);
@@ -604,16 +522,96 @@ bool VlcPluginMac::handle_event(void *event)
                                                         (const void **)&keys,
                                                         (const void **)&values,
                                                         2, NULL, NULL);
-        CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
+        CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
         CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
-        CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
-        CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.));
+        CGContextSetTextPosition(cgContext, 25., 60.);
+        CTLineDraw(textLine, cgContext);
+        CFRelease(textLine);
+        CFRelease(attRef);
+
+        // print smaller text from here
+        CFRelease(stylesDict);
+        values[0] = CTFontCreateWithName(CFSTR("Helvetica"),12,NULL);
+        stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                        (const void **)&keys,
+                                        (const void **)&values,
+                                        2, NULL, NULL);
+
+        // draw version string
+        CFStringRef arch;
+    #ifdef __x86_64__
+        arch = CFSTR("64-bit");
+    #else
+        arch = CFSTR("32-bit");
+    #endif
+
+        attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%s — windowed mode — %@"), libvlc_get_version(), arch), stylesDict);
+        textLine = CTLineCreateWithAttributedString(attRef);
+        CGContextSetTextPosition(cgContext, 25., 40.);
         CTLineDraw(textLine, cgContext);
         CFRelease(textLine);
         CFRelease(attRef);
         CFRelease(stylesDict);
+
+        // draw cone
+        CGImageRef cone = createImageNamed(@"cone");
+        CGFloat coneWidth = CGImageGetWidth(cone);
+        CGFloat coneHeight = CGImageGetHeight(cone);
+        if (windowHeight <= 320.) {
+            coneWidth = coneWidth / 2.;
+            coneHeight = coneHeight / 2.;
+        }
+        CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
+        CGImageRelease(cone);
+
+        // draw custom text
+        values[0] = CTFontCreateWithName(CFSTR("Helvetica"),14,NULL);
+        stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                        (const void **)&keys,
+                                        (const void **)&values,
+                                        2, NULL, NULL);
+        const char *text = self.cppPlugin->get_options().get_bg_text().c_str();
+        if (text != NULL) {
+            attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
+            textLine = CTLineCreateWithAttributedString(attRef);
+            CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
+            CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.) + (coneHeight / 2.) + textRect.size.height + 50.);
+            CTLineDraw(textLine, cgContext);
+            CFRelease(textLine);
+            CFRelease(attRef);
+        }
+        CFRelease(stylesDict);
+    } else {
+        // draw a background colored rect
+        CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
+        CGContextSetFillColorWithColor(cgContext, backgroundColor);
+        CGContextDrawPath(cgContext, kCGPathFill);
+
+        const char *text = self.cppPlugin->get_options().get_bg_text().c_str();
+        if (text != NULL) {
+            CGContextSetGrayStrokeColor(cgContext, .95, 1.);
+            CGContextSetTextDrawingMode(cgContext, kCGTextFill);
+            CGContextSetGrayFillColor(cgContext, 1., 1.);
+            CFStringRef keys[2];
+            keys[0] = kCTFontAttributeName;
+            keys[1] = kCTForegroundColorFromContextAttributeName;
+            CFTypeRef values[2];
+            values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
+            values[1] = kCFBooleanTrue;
+            CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
+                                                            (const void **)&keys,
+                                                            (const void **)&values,
+                                                            2, NULL, NULL);
+            CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
+            CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
+            CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
+            CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.));
+            CTLineDraw(textLine, cgContext);
+            CFRelease(textLine);
+            CFRelease(attRef);
+            CFRelease(stylesDict);
+        }
     }
-#endif
     CGColorRelease(backgroundColor);
 
     CGContextRestoreGState(cgContext);
