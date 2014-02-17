@@ -410,12 +410,16 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
                      * and get the track number */
                     if( isNumberValue(args[0]) )
                         i_trackID = numberValue(args[0]);
-                    else
+                    else {
+                        libvlc_track_description_list_release(p_trackDesc);
                         return INVOKERESULT_INVALID_VALUE;
+                    }
 
                     /* if bad number is given return invalid value */
-                    if (i_trackID < 0)
+                    if (i_trackID < 0) {
+                        libvlc_track_description_list_release(p_trackDesc);
                         return INVOKERESULT_INVALID_VALUE;
+                    }
 
                     /* get the good trackDesc */
                     for (i = 0; i < i_limit; i++)
@@ -1347,12 +1351,16 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
                      * and get the subtitle number */
                     if( isNumberValue(args[0]) )
                         i_spuID = numberValue(args[0]);
-                    else
+                    else {
+                        libvlc_track_description_list_release(p_spuDesc);
                         return INVOKERESULT_INVALID_VALUE;
+                    }
 
                     /* if bad number is given return invalid value */
-                    if (i_spuID < 0)
+                    if (i_spuID < 0) {
+                        libvlc_track_description_list_release(p_spuDesc);
                         return INVOKERESULT_INVALID_VALUE;
+                    }
 
                     /* get the good spuDesc */
                     for (i = 0; i < i_limit; i++)
