@@ -5,9 +5,10 @@ NPAPI Core:
  * Various fixes and cleanups
 
 Mac:
- * New MacOS output based on CoreAnimation
- * Create UB for 32 and 64 bits
- * Fix support for Safari 5 starting from X.6
+ * New MacOS video output based on CoreAnimation
+ * Universal Binary for 32 and 64 bit browsers
+ * Fix fullscreen video output on some setups
+ * Fix support for Safari 5 on OS X 10.6 and later
  * Fix compilation with clang++
  * Fix compilation with Xcode5 and Mavericks
 
