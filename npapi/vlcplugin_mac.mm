@@ -641,9 +641,10 @@ bool VlcPluginMac::handle_event(void *event)
 {
     CGFloat sliderYPosition = (self.bounds.size.height - CGImageGetHeight(_sliderTrackLeft)) / 2.;
     CGFloat playPauseButtonWidth = [self _playPauseButtonRect].size.width;
+    CGFloat fullscreenButtonWidth = self.cppPlugin->get_options().get_enable_fs() ? CGImageGetWidth(_enterFullscreen) : 0.;
 
     return CGRectMake(playPauseButtonWidth + 7, sliderYPosition,
-                      self.bounds.size.width - playPauseButtonWidth - 15 - CGImageGetWidth(_enterFullscreen), CGImageGetHeight(_sliderTrackLeft));
+                      self.bounds.size.width - playPauseButtonWidth - fullscreenButtonWidth - 15., CGImageGetHeight(_sliderTrackLeft));
 }
 
 - (CGRect)_sliderThumbRect
@@ -689,9 +690,11 @@ bool VlcPluginMac::handle_event(void *event)
     CGContextDrawImage(context, sliderRightTrackRect, _sliderTrackRight);
 
     // Draw fullscreen button
-    CGRect fullscreenButtonRect = [self _fullscreenButtonRect];
-    fullscreenButtonRect.origin.x = CGRectGetMaxX(sliderRightTrackRect) + 5;
-    CGContextDrawImage(context, fullscreenButtonRect, self.isFullscreen ? _leaveFullscreen : _enterFullscreen);
+    if (self.cppPlugin->get_options().get_enable_fs()) {
+        CGRect fullscreenButtonRect = [self _fullscreenButtonRect];
+        fullscreenButtonRect.origin.x = CGRectGetMaxX(sliderRightTrackRect) + 5;
+        CGContextDrawImage(context, fullscreenButtonRect, self.isFullscreen ? _leaveFullscreen : _enterFullscreen);
+    }
 }
 
 - (void)drawInContext:(CGContextRef)cgContext
