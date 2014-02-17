@@ -231,8 +231,10 @@ int  VlcPluginMac::get_fullscreen()
 
 void VlcPluginMac::set_toolbar_visible(bool b_value)
 {
-    if (!get_options().get_show_toolbar())
+    if (!get_options().get_show_toolbar()) {
+        [controllerLayer setHidden: YES];
         return;
+    }
     [controllerLayer setHidden: !b_value];
 }
 
