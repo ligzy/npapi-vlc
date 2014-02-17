@@ -26,6 +26,25 @@
 
 #define SHOW_BRANDING 1
 
+static CGImageRef createImageNamed(CFStringRef);
+
+static CGImageRef createImageNamed(CFStringRef name)
+{
+    CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("org.videolan.vlc-npapi-plugin")), name, CFSTR("png"), NULL);
+
+    if (!url)
+        return NULL;
+
+    CGImageSourceRef imageSource = CGImageSourceCreateWithURL(url, NULL);
+    if (!imageSource)
+        return NULL;
+
+    CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+    CFRelease(imageSource);
+
+    return image;
+}
+
 VlcWindowlessMac::VlcWindowlessMac(NPP instance, NPuint16_t mode) :
     VlcWindowlessBase(instance, mode)
 {
@@ -57,20 +76,25 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
     CGContextScaleCTM(cgContext, 1., -1.);
 
 #if SHOW_BRANDING
-    // draw a gray background
+    // draw an orange background
     CGContextAddRect(cgContext, CGRectMake(0, 0, windowWidth, windowHeight));
-    CGContextSetGrayFillColor(cgContext, .5, 1.);
+    CGContextSetFillColorWithColor(cgContext, CGColorCreateGenericRGB(240./255., 150./255., 9./255., 1.));
     CGContextDrawPath(cgContext, kCGPathFill);
 
+    // draw gradient
+    CGImageRef gradient = createImageNamed(CFSTR("gradient"));
+    CGContextDrawImage(cgContext, CGRectMake(0., 0., windowWidth, 150.), gradient);
+    CGImageRelease(gradient);
+
     // draw info text
-    CGContextSetGrayStrokeColor(cgContext, .7, 1.);
-    CGContextSetTextDrawingMode(cgContext, kCGTextFillStroke);
+    CGContextSetGrayStrokeColor(cgContext, .95, 1.);
+    CGContextSetTextDrawingMode(cgContext, kCGTextFill);
     CGContextSetGrayFillColor(cgContext, 1., 1.);
     CFStringRef keys[2];
     keys[0] = kCTFontAttributeName;
     keys[1] = kCTForegroundColorFromContextAttributeName;
     CFTypeRef values[2];
-    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),18,NULL);
+    values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
     values[1] = kCFBooleanTrue;
     CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
                                                     (const void **)&keys,
@@ -78,52 +102,46 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
                                                     2, NULL, NULL);
     CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("VLC Web Plugin"), stylesDict);
     CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
-    CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
-    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2));
+    CGContextSetTextPosition(cgContext, 25., 45.);
     CTLineDraw(textLine, cgContext);
     CFRelease(textLine);
     CFRelease(attRef);
 
     // print smaller text from here
     CFRelease(stylesDict);
-    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),14,NULL);
+    values[0] = CTFontCreateWithName(CFSTR("Helvetica"),12,NULL);
     stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
                                     (const void **)&keys,
                                     (const void **)&values,
                                     2, NULL, NULL);
-    CGContextSetGrayFillColor(cgContext, .8, 1.);
+    //CGContextSetGrayFillColor(cgContext, .8, 1.);
 
     // draw version string
-    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, libvlc_get_version(), kCFStringEncodingUTF8), stylesDict);
-    textLine = CTLineCreateWithAttributedString(attRef);
-    textRect = CTLineGetImageBounds(textLine, cgContext);
-    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 25.);
-    CTLineDraw(textLine, cgContext);
-    CFRelease(textLine);
-    CFRelease(attRef);
-
-    // expose drawing model
-    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("windowless output mode using CoreGraphics"), stylesDict);
-    textLine = CTLineCreateWithAttributedString(attRef);
-    textRect = CTLineGetImageBounds(textLine, cgContext);
-    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 45.);
-    CTLineDraw(textLine, cgContext);
-    CFRelease(textLine);
-    CFRelease(attRef);
-
-    // expose arch
+    CFStringRef arch;
 #ifdef __x86_64__
-    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("Intel, 64-bit"), stylesDict);
+    arch = CFSTR("64-bit");
 #else
-    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFSTR("Intel, 32-bit"), stylesDict);
+    arch = CFSTR("32-bit");
 #endif
+
+    attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%s — windowless mode — %@"), libvlc_get_version(), arch), stylesDict);
     textLine = CTLineCreateWithAttributedString(attRef);
-    textRect = CTLineGetImageBounds(textLine, cgContext);
-    CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2), ((windowHeight - textRect.size.height) / 2) - 65.);
+    CGContextSetTextPosition(cgContext, 25., 25.);
     CTLineDraw(textLine, cgContext);
     CFRelease(textLine);
     CFRelease(attRef);
     CFRelease(stylesDict);
+
+    // draw cone
+    CGImageRef cone = createImageNamed(CFSTR("cone"));
+    CGFloat coneWidth = CGImageGetWidth(cone);
+    CGFloat coneHeight = CGImageGetHeight(cone);
+    if (windowHeight <= 320.) {
+        coneWidth = coneWidth / 2.;
+        coneHeight = coneHeight / 2.;
+    }
+    CGContextDrawImage(cgContext, CGRectMake((windowWidth - coneWidth) / 2., (windowHeight - coneHeight) / 2., coneWidth, coneHeight), cone);
+    CGImageRelease(cone);
 #else
     // draw a black rect
     CGRect rect;
