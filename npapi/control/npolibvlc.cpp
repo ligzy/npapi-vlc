@@ -422,6 +422,7 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
                         p_trackDesc = p_trackDesc->p_next;
                     }
                     psz_name = p_trackDesc->psz_name;
+                    libvlc_track_description_list_release(p_trackDesc);
 
                     /* display the name of the track chosen */
                     return invokeResultString( psz_name, result );
@@ -1355,6 +1356,7 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
                         p_spuDesc = p_spuDesc->p_next;
                     }
                     psz_name = p_spuDesc->psz_name;
+                    libvlc_track_description_list_release(p_spuDesc);
 
                     /* return the name of the track chosen */
                     return invokeResultString(psz_name, result);
