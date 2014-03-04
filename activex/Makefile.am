@@ -106,10 +106,10 @@ if HAS_WIDL_COMPILER
 WINE_SDK_PATH ?= /usr/include/wine/windows
 
 stdole2.tlb stdole2_idl.c stdole2_idl.h: $(WINE_SDK_PATH)/stdole2.idl
-	$(WIDL) -I$(WINE_SDK_PATH) -tuh -T stdole2.tlb -U stdole2_idl.c -H stdole2_idl.h $<
+	$(WIDL) -I$(WINE_SDK_PATH) -t -u -h -T stdole2.tlb -U stdole2_idl.c -H stdole2_idl.h $<
 
 axvlc.tlb axvlc_idl.c axvlc_idl.h: axvlc.idl stdole2.tlb
-	$(WIDL) -I$(WINE_SDK_PATH) -I. -tuh -T axvlc.tlb -U axvlc_idl.c -H axvlc_idl.h axvlc.idl
+	$(WIDL) -I$(WINE_SDK_PATH) -I. -t -u -h -T axvlc.tlb -U axvlc_idl.c -H axvlc_idl.h axvlc.idl
 
 clean-tlb:
 	rm -f axvlc.tlb axvlc_idl.c axvlc_idl.h stdole2.tlb stdole2_idl.c stdole2_idl.h
