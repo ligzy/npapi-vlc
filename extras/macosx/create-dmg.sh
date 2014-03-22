@@ -52,7 +52,7 @@ mkdir -p ./mount
 
 info "Moving file icons around"
 hdiutil attach -readwrite -noverify -noautoopen -mountRoot ./mount ${DMGITEMNAME}-rw.dmg
-osascript "${npapiroot}"/extras/macosx/dmg_setup.scpt "${DMGFOLDERNAME}"
+-osascript "${npapiroot}"/extras/macosx/dmg_setup.scpt "${DMGFOLDERNAME}"
 hdiutil detach ./mount/"${DMGFOLDERNAME}"
 
 info "Compressing disk-image"
