@@ -115,6 +115,11 @@ spopd
 
 info "Fetching contrib"
 
+export CFLAGS="${CFLAGS} -Wno-error=unused-command-line-argument-hard-error-in-future"
+export CPPFLAGS="${CFLAGS}"
+export CXXFLAGS="${CFLAGS}"
+export OBJCFLAGS="${CFLAGS}"
+
 spushd extras/macosx/vlc/contrib
 
 if ! [ -e ${ARCH}-npapi ]; then
