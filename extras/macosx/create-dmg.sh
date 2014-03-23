@@ -8,6 +8,19 @@ info()
     echo "[${green}build${normal}] $1"
 }
 
+BUILDBOT=no
+
+usage()
+{
+cat << EOF
+usage: $0 [options]
+
+OPTIONS
+   -h            Show this help
+   -b            Enable buildbot mode (if you don't have a window server)
+EOF
+}
+
 spushd()
 {
     pushd "$1" > /dev/null
@@ -17,6 +30,19 @@ spopd()
 {
     popd > /dev/null
 }
+
+while getopts "hb" OPTION
+do
+     case $OPTION in
+         h)
+             usage
+             exit 1
+             ;;
+         b)
+             BUILDBOT=yes
+             ;;
+     esac
+done
 
 out="/dev/null"
 
@@ -50,10 +76,12 @@ info "Creating disk-image"
 hdiutil create -srcfolder ${npapiroot}/"${DMGFOLDERNAME}" "${npapiroot}/${DMGITEMNAME}-rw.dmg" -scrub -format UDRW
 mkdir -p ./mount
 
-info "Moving file icons around"
-hdiutil attach -readwrite -noverify -noautoopen -mountRoot ./mount ${DMGITEMNAME}-rw.dmg
--osascript "${npapiroot}"/extras/macosx/dmg_setup.scpt "${DMGFOLDERNAME}"
-hdiutil detach ./mount/"${DMGFOLDERNAME}"
+if [ "$BUILDBOT" = "no" ]; then
+    info "Moving file icons around"
+    hdiutil attach -readwrite -noverify -noautoopen -mountRoot ./mount ${DMGITEMNAME}-rw.dmg
+    osascript "${npapiroot}"/extras/macosx/dmg_setup.scpt "${DMGFOLDERNAME}"
+    hdiutil detach ./mount/"${DMGFOLDERNAME}"
+fi
 
 info "Compressing disk-image"
 rm -f ${DMGITEMNAME}.dmg
