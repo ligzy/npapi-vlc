@@ -22,7 +22,6 @@ EXTRA_DIST = \
 	extras/macosx/Info.plist.in \
 	extras/macosx/build-package.sh \
 	extras/macosx/build-plugin.sh \
-	extras/macosx/build-vlc-32.sh \
 	extras/macosx/build-vlc.sh \
 	extras/macosx/create-universal-binary.sh
 
