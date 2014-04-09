@@ -124,11 +124,16 @@ AM_CPPFLAGS += -I. -I$(top_builddir) -c \
 	-DXP_UNIX -DXP_MACOSX=1 \
 	-DNO_X11=1 -DUSE_SYSTEM_CONSOLE=1 -pipe -fmessage-length=0
 
+libvlcplugin_objc_la_SOURCES = \
+	vlcplugin_mac.mm vlcplugin_mac.h
+libvlcplugin_objc_la_LDFLAGS = -static
+noinst_LTLIBRARIES = libvlcplugin_objc.la
+
 libvlcplugin_la_SOURCES += \
-	vlcplugin_mac.mm vlcplugin_mac.h \
 	vlcwindowless_base.cpp vlcwindowless_base.h \
 	vlcwindowless_mac.cpp vlcwindowless_mac.h \
 	support/npmac.cpp
+libvlcplugin_la_LIBADD += libvlcplugin_objc.la
 libvlcplugin_la_LDFLAGS += \
 	-bundle -Wl,-headerpad_max_install_names \
 	-Wl,-framework,CoreFoundation -Wl,-framework,ApplicationServices \
