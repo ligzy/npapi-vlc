@@ -34,9 +34,6 @@ libvlcplugin_la_SOURCES = \
 	../common/vlc_player.h \
 	$(SOURCES_support)
 
-EXTRA_libvlcplugin_la_SOURCES = \
-	support/npwin.cpp support/npmac.cpp support/npunix.cpp
-
 libvlcplugin_la_DEPENDENCIES =
 libvlcplugin_la_LIBADD = $(LIBVLC_LIBS)
 libvlcplugin_la_LDFLAGS = \
