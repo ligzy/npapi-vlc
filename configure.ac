@@ -276,6 +276,7 @@ AM_COND_IF([HAVE_WIN32], [
 AC_CONFIG_FILES([
   Makefile
   share/Makefile
+  common/Makefile
   npapi/Makefile
   activex/Makefile
   npapi/package/install.js

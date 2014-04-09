@@ -45,7 +45,6 @@ axvlc_la_SOURCES = \
     persiststorage.h \
     persiststreaminit.cpp \
     persiststreaminit.h \
-    ../common/position.h \
     provideclassinfo.cpp \
     provideclassinfo.h \
     connectioncontainer.cpp \
@@ -65,20 +64,13 @@ axvlc_la_SOURCES = \
     plugin.cpp \
     plugin.h \
     axvlc_idl.c \
-    axvlc_idl.h \
-    ../common/vlc_player_options.h \
-    ../common/win32_fullscreen.cpp \
-    ../common/win32_fullscreen.h \
-    ../common/win32_vlcwnd.cpp \
-    ../common/win32_vlcwnd.h \
-    ../common/vlc_player.cpp \
-    ../common/vlc_player.h
-    $(NULL)
+    axvlc_idl.h
 
 axvlc_la_DEPENDENCIES = $(srcdir)/axvlc.def $(DATA_axvlc_rc)
 axvlc_la_LDFLAGS = -Wl,$(srcdir)/axvlc.def -Wl,$(DATA_axvlc_rc) \
     -no-undefined -avoid-version -module
-axvlc_la_LIBADD = $(LIBVLC_LIBS) $(ACTIVEX_LIBS)
+axvlc_la_LIBADD = ../common/libvlcplugin_common.la \
+	$(LIBVLC_LIBS) $(ACTIVEX_LIBS)
 
 
 DATA_axvlc_rc = $(noinst_axvlc_rc_DATA)

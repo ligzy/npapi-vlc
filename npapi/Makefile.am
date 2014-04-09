@@ -27,15 +27,10 @@ libvlcplugin_la_SOURCES = \
 	control/npolibvlc.h \
 	control/nporuntime.cpp \
 	control/nporuntime.h \
-	../common/position.h \
-	support/classinfo.h \
-	../common/vlc_player_options.h \
-	../common/vlc_player.cpp \
-	../common/vlc_player.h \
-	$(SOURCES_support)
+	support/classinfo.h
 
 libvlcplugin_la_DEPENDENCIES =
-libvlcplugin_la_LIBADD = $(LIBVLC_LIBS)
+libvlcplugin_la_LIBADD = ../common/libvlcplugin_common.la $(LIBVLC_LIBS)
 libvlcplugin_la_LDFLAGS = \
 	-module -avoid-version \
 	-no-undefined
@@ -60,25 +55,23 @@ $(libvlcplugin_la_OBJECTS): npapi-sdk
 endif
 
 AM_CPPFLAGS += -DXP_UNIX -DDATA_PATH=\"$(pkgdatadir)\" $(XCB_CFLAGS)
-libvlcplugin_la_LIBADD += $(MOZILLA_LIBS) $(XCB_LIBS)
 
-SOURCES_support = \
-	support/npunix.cpp \
-	vlcwindowless_xcb.cpp \
-	vlcwindowless_xcb.h \
-	vlcwindowless_base.cpp \
-	vlcwindowless_base.h
+libvlcplugin_la_SOURCES += \
+	vlcwindowless_xcb.cpp vlcwindowless_xcb.h \
+	vlcwindowless_base.cpp vlcwindowless_base.h \
+	support/npunix.cpp
+libvlcplugin_la_LIBADD += $(MOZILLA_LIBS) $(XCB_LIBS)
 
 if WITH_GTK
 AM_CPPFLAGS += $(GTK_CFLAGS)
+
+libvlcplugin_la_SOURCES += \
+	vlcplugin_gtk.cpp vlcplugin_gtk.h
 libvlcplugin_la_LIBADD += $(GTK_LIBS)
-SOURCES_support += \
-	vlcplugin_gtk.cpp \
-	vlcplugin_gtk.h
+
 else # !WITH_GTK
-SOURCES_support += \
-	vlcplugin_xcb.cpp \
-	vlcplugin_xcb.h
+libvlcplugin_la_SOURCES += \
+	vlcplugin_xcb.cpp vlcplugin_xcb.h
 endif # !USE_GTK
 
 endif
@@ -96,18 +89,12 @@ endif
 
 AM_CPPFLAGS += -DXP_WIN -DXP_WIN32 \
 	-DXPCOM_GLUE -DHAVE_CPP_MODERN_SPECIALIZE_TEMPLATE_SYNTAX
-SOURCES_support = \
-	support/npwin.cpp \
-	vlcplugin_win.cpp \
-	vlcplugin_win.h \
-	vlcwindowless_base.cpp \
-	vlcwindowless_base.h \
-	vlcwindowless_win.cpp \
-	vlcwindowless_win.h \
-	../common/win32_fullscreen.cpp \
-	../common/win32_fullscreen.h \
-	../common/win32_vlcwnd.cpp \
-	../common/win32_vlcwnd.h
+
+libvlcplugin_la_SOURCES += \
+	vlcplugin_win.cpp vlcplugin_win.h \
+	vlcwindowless_base.cpp vlcwindowless_base.h \
+	vlcwindowless_win.cpp vlcwindowless_win.h \
+	support/npwin.cpp
 
 npvlc_la_DEPENDENCIES += $(DATA_npvlc_rc)
 npvlc_la_LDFLAGS += -Wl,--kill-at -Wl,$(DATA_npvlc_rc)
@@ -136,13 +123,11 @@ AM_CPPFLAGS += -I. -I$(top_builddir) -c \
 	-DXP_UNIX -DXP_MACOSX=1 \
 	-DNO_X11=1 -DUSE_SYSTEM_CONSOLE=1 -pipe -fmessage-length=0
 
-SOURCES_support = support/npmac.cpp \
-                  vlcplugin_mac.mm \
-                  vlcplugin_mac.h \
-                  vlcwindowless_base.cpp \
-                  vlcwindowless_base.h \
-                  vlcwindowless_mac.cpp \
-                  vlcwindowless_mac.h
+libvlcplugin_la_SOURCES += \
+	vlcplugin_mac.mm vlcplugin_mac.h \
+	vlcwindowless_base.cpp vlcwindowless_base.h \
+	vlcwindowless_mac.cpp vlcwindowless_mac.h \
+	support/npmac.cpp
 libvlcplugin_la_LDFLAGS += \
 	-bundle -Wl,-headerpad_max_install_names \
 	-Wl,-framework,CoreFoundation -Wl,-framework,ApplicationServices \
