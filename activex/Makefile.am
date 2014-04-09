@@ -2,6 +2,8 @@
 # Building the Activex plugin
 ###############################################################################
 
+AUTOMAKE_OPTIONS = subdir-objects
+
 MOSTLYCLEANFILES = axvlc.inf axvlc_rc.rc
 EXTRA_DIST = $(DIST_rsrc) $(DIST_misc)
 

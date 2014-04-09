@@ -2,6 +2,7 @@
 # Building the Mozilla plugin
 ###############################################################################
 
+AUTOMAKE_OPTIONS = subdir-objects
 EXTRA_DIST = package/npvlc_rc.rc.in package/npvlc.dll.manifest
 MOSTLYCLEANFILES =
 CLEANFILES = $(BUILT_SOURCES) \
