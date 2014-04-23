@@ -131,14 +131,14 @@ void EventObj::deliver(NPP browser)
 
     for( ev_l::iterator iter = _elist.begin(); iter != _elist.end(); ++iter )
     {
+        NPVariant *params = iter->params();
+        uint32_t   count  = iter->count();
+
         for( lr_l::iterator j = _llist.begin(); j != _llist.end(); ++j )
         {
             if( j->event_type() == iter->event_type() )
             {
                 NPVariant result;
-                NPVariant *params = iter->params();
-                uint32_t   count  = iter->count();
-
                 NPObject *listener = j->listener();
                 assert( listener );
 
