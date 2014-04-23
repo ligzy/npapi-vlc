@@ -85,7 +85,7 @@
 
 static NPNetscapeFuncs  *gNetscapeFuncs;    /* Netscape Function table */
 static const char       *gUserAgent;        /* User agent string */
-
+static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }
 /***********************************************************************
  *
  * Wrapper functions : plugin calling Netscape Navigator
@@ -106,7 +106,7 @@ NPN_Version(int* plugin_major, int* plugin_minor,
     /* Major version is in high byte */
     *netscape_major = gNetscapeFuncs->version >> 8;
     /* Minor version is in low byte */
-    *netscape_minor = gNetscapeFuncs->version & 0xFF;
+    *netscape_minor = getMinorVersion();
 }
 
 
@@ -136,7 +136,7 @@ NPN_PluginThreadAsyncCall(NPP plugin,
 {
     bool workaround = false;
 
-    const int minor = gNetscapeFuncs->version & 0xFF;
+    const int minor = getMinorVersion();
     if (gUserAgent && (strstr(gUserAgent, "Opera")))
         workaround = true;
 
@@ -298,7 +298,7 @@ void NPN_PopPopupsEnabledState(NPP instance)
 
 NPIdentifier NPN_GetStringIdentifier(const NPUTF8 *name)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
     {
         return CALL_NPN(CallNPN_GetStringIdentifierProc,
@@ -310,7 +310,7 @@ NPIdentifier NPN_GetStringIdentifier(const NPUTF8 *name)
 void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount,
                               NPIdentifier *identifiers)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
     {
         CALL_NPN(CallNPN_GetStringIdentifiersProc,gNetscapeFuncs->getstringidentifiers,
@@ -320,7 +320,7 @@ void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount,
 
 NPIdentifier NPN_GetIntIdentifier(int32_t intid)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
     {
         return CALL_NPN(CallNPN_GetIntIdentifierProc,gNetscapeFuncs->getintidentifier, intid);
@@ -330,7 +330,7 @@ NPIdentifier NPN_GetIntIdentifier(int32_t intid)
 
 bool NPN_IdentifierIsString(NPIdentifier identifier)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
     {
         return CALL_NPN(CallNPN_IdentifierIsStringProc,
@@ -342,7 +342,7 @@ bool NPN_IdentifierIsString(NPIdentifier identifier)
 
 NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
     {
         return CALL_NPN(CallNPN_UTF8FromIdentifierProc,
@@ -354,7 +354,7 @@ NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
 
 int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
     {
         return CALL_NPN(CallNPN_IntFromIdentifierProc,
@@ -366,7 +366,7 @@ int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
 
 NPObject *NPN_CreateObject(NPP npp, NPClass *aClass)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_CreateObjectProc,gNetscapeFuncs->createobject, npp, aClass);
     return NULL;
@@ -374,7 +374,7 @@ NPObject *NPN_CreateObject(NPP npp, NPClass *aClass)
 
 NPObject *NPN_RetainObject(NPObject *obj)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_RetainObjectProc,gNetscapeFuncs->retainobject, obj);
     return NULL;
@@ -382,7 +382,7 @@ NPObject *NPN_RetainObject(NPObject *obj)
 
 void NPN_ReleaseObject(NPObject *obj)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         CALL_NPN(CallNPN_ReleaseObjectProc,gNetscapeFuncs->releaseobject, obj);
 }
@@ -390,7 +390,7 @@ void NPN_ReleaseObject(NPObject *obj)
 bool NPN_Invoke(NPP npp, NPObject* obj, NPIdentifier methodName,
                 const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_InvokeProc,gNetscapeFuncs->invoke, npp, obj, methodName,
                                   args, argCount, result);
@@ -400,7 +400,7 @@ bool NPN_Invoke(NPP npp, NPObject* obj, NPIdentifier methodName,
 bool NPN_InvokeDefault(NPP npp, NPObject* obj, const NPVariant *args,
                        uint32_t argCount, NPVariant *result)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_InvokeDefaultProc,gNetscapeFuncs->invokeDefault, npp, obj,
                                          args, argCount, result);
@@ -410,7 +410,7 @@ bool NPN_InvokeDefault(NPP npp, NPObject* obj, const NPVariant *args,
 bool NPN_Evaluate(NPP npp, NPObject* obj, NPString *script,
                   NPVariant *result)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_EvaluateProc,gNetscapeFuncs->evaluate, npp, obj,
                                     script, result);
@@ -420,7 +420,7 @@ bool NPN_Evaluate(NPP npp, NPObject* obj, NPString *script,
 bool NPN_GetProperty(NPP npp, NPObject* obj, NPIdentifier propertyName,
                      NPVariant *result)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_GetPropertyProc,gNetscapeFuncs->getproperty, npp, obj,
                                        propertyName, result);
@@ -430,7 +430,7 @@ bool NPN_GetProperty(NPP npp, NPObject* obj, NPIdentifier propertyName,
 bool NPN_SetProperty(NPP npp, NPObject* obj, NPIdentifier propertyName,
                      const NPVariant *value)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_SetPropertyProc,gNetscapeFuncs->setproperty, npp, obj,
                                        propertyName, value);
@@ -439,7 +439,7 @@ bool NPN_SetProperty(NPP npp, NPObject* obj, NPIdentifier propertyName,
 
 bool NPN_RemoveProperty(NPP npp, NPObject* obj, NPIdentifier propertyName)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_RemovePropertyProc,gNetscapeFuncs->removeproperty, npp, obj,
                                           propertyName);
@@ -448,7 +448,7 @@ bool NPN_RemoveProperty(NPP npp, NPObject* obj, NPIdentifier propertyName)
 
 bool NPN_HasProperty(NPP npp, NPObject* obj, NPIdentifier propertyName)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_HasPropertyProc,gNetscapeFuncs->hasproperty, npp, obj,
                                        propertyName);
@@ -457,7 +457,7 @@ bool NPN_HasProperty(NPP npp, NPObject* obj, NPIdentifier propertyName)
 
 bool NPN_HasMethod(NPP npp, NPObject* obj, NPIdentifier methodName)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         return CALL_NPN(CallNPN_HasMethodProc,gNetscapeFuncs->hasmethod, npp,
                                      obj, methodName);
@@ -466,14 +466,14 @@ bool NPN_HasMethod(NPP npp, NPObject* obj, NPIdentifier methodName)
 
 void NPN_ReleaseVariantValue(NPVariant *variant)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         CALL_NPN(CallNPN_ReleaseVariantValueProc,gNetscapeFuncs->releasevariantvalue, variant);
 }
 
 void NPN_SetException(NPObject* obj, const NPUTF8 *message)
 {
-    int minor = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     if( minor >= 14 )
         CALL_NPN(CallNPN_SetExceptionProc,gNetscapeFuncs->setexception, obj, message);
 }
