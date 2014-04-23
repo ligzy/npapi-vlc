@@ -598,66 +598,8 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
-    int navMinorVers = nsTable->version & 0xFF;
+    gNetscapeFuncs = *nsTable;
 
-    /*
-     * Copy all the fields of Netscape function table into our
-     * copy so we can call back into Netscape later.  Note that
-     * we need to copy the fields one by one, rather than assigning
-     * the whole structure, because the Netscape function table
-     * could actually be bigger than what we expect.
-     */
-    gNetscapeFuncs.version       = nsTable->version;
-    gNetscapeFuncs.size          = nsTable->size;
-    gNetscapeFuncs.posturl       = nsTable->posturl;
-    gNetscapeFuncs.geturl        = nsTable->geturl;
-    gNetscapeFuncs.requestread   = nsTable->requestread;
-    gNetscapeFuncs.newstream     = nsTable->newstream;
-    gNetscapeFuncs.write         = nsTable->write;
-    gNetscapeFuncs.destroystream = nsTable->destroystream;
-    gNetscapeFuncs.status        = nsTable->status;
-    gNetscapeFuncs.uagent        = nsTable->uagent;
-    gNetscapeFuncs.memalloc      = nsTable->memalloc;
-    gNetscapeFuncs.memfree       = nsTable->memfree;
-    gNetscapeFuncs.memflush      = nsTable->memflush;
-    gNetscapeFuncs.reloadplugins = nsTable->reloadplugins;
-    if (navMinorVers >= NPVERS_HAS_LIVECONNECT) {
-        gNetscapeFuncs.getJavaEnv   = nsTable->getJavaEnv;
-        gNetscapeFuncs.getJavaPeer  = nsTable->getJavaPeer;
-    }
-    if (navMinorVers >= NPVERS_HAS_NOTIFICATION) {
-        gNetscapeFuncs.geturlnotify     = nsTable->geturlnotify;
-        gNetscapeFuncs.posturlnotify    = nsTable->posturlnotify;
-    }
-
-    gNetscapeFuncs.getvalue         = nsTable->getvalue;
-    gNetscapeFuncs.setvalue         = nsTable->setvalue;
-    gNetscapeFuncs.invalidaterect   = nsTable->invalidaterect;
-    gNetscapeFuncs.invalidateregion = nsTable->invalidateregion;
-    gNetscapeFuncs.forceredraw      = nsTable->forceredraw;
-    if (navMinorVers >= 14) {
-        // NPRuntime support
-        gNetscapeFuncs.getstringidentifier   = nsTable->getstringidentifier;
-        gNetscapeFuncs.getstringidentifiers  = nsTable->getstringidentifiers;
-        gNetscapeFuncs.getintidentifier      = nsTable->getintidentifier;
-        gNetscapeFuncs.identifierisstring    = nsTable->identifierisstring;
-        gNetscapeFuncs.utf8fromidentifier    = nsTable->utf8fromidentifier;
-        gNetscapeFuncs.intfromidentifier     = nsTable->intfromidentifier;
-        gNetscapeFuncs.createobject          = nsTable->createobject;
-        gNetscapeFuncs.retainobject          = nsTable->retainobject;
-        gNetscapeFuncs.releaseobject         = nsTable->releaseobject;
-        gNetscapeFuncs.invoke                = nsTable->invoke;
-        gNetscapeFuncs.invokeDefault         = nsTable->invokeDefault;
-        gNetscapeFuncs.evaluate              = nsTable->evaluate;
-        gNetscapeFuncs.getproperty           = nsTable->getproperty;
-        gNetscapeFuncs.setproperty           = nsTable->setproperty;
-        gNetscapeFuncs.removeproperty        = nsTable->removeproperty;
-        gNetscapeFuncs.hasproperty           = nsTable->hasproperty;
-        gNetscapeFuncs.hasmethod             = nsTable->hasmethod;
-        gNetscapeFuncs.releasevariantvalue   = nsTable->releasevariantvalue;
-        gNetscapeFuncs.setexception          = nsTable->setexception;
-        gNetscapeFuncs.pluginthreadasynccall = nsTable->pluginthreadasynccall;
-    }
     return NPP_Initialize();
 }
 
