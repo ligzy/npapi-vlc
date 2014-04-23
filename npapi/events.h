@@ -49,14 +49,11 @@ private:
     public:
         Listener(vlcplugin_event_t *event, NPObject *p_object, bool b_bubble):
             _event(event), _listener(p_object), _bubble(b_bubble)
-            {
+        {
                 assert(event);
                 assert(p_object);
-            }
-        Listener(): _event(NULL), _listener(NULL), _bubble(false) { }
-        ~Listener()
-            {
-            }
+        }
+
         libvlc_event_type_t event_type() const { return _event->libvlc_type; }
         NPObject *listener() const { return _listener; }
         bool bubble() const { return _bubble; }
@@ -71,12 +68,8 @@ private:
     public:
         VLCEvent(libvlc_event_type_t libvlc_event_type, NPVariant *npparams, uint32_t npcount):
             _libvlc_event_type(libvlc_event_type), _npparams(npparams), _npcount(npcount)
-            {
-            }
-        VLCEvent(): _libvlc_event_type(0), _npparams(NULL), _npcount(0) { }
-        ~VLCEvent()
-            {
-            }
+         {}
+
         libvlc_event_type_t event_type() const { return _libvlc_event_type; }
         NPVariant *params() const { return _npparams; }
         uint32_t count() const { return _npcount; }
@@ -87,16 +80,17 @@ private:
     };
 
 public:
-    EventObj(): _em(NULL), _already_in_deliver(false) { /* deferred to init() */ }
-    bool init();
-    ~EventObj();
+    EventObj();
+    virtual ~EventObj();
+
+    void unhook_manager(void *);
+    void hook_manager(libvlc_event_manager_t *, void *);
 
     void deliver(NPP browser);
     void callback(const libvlc_event_t *event, NPVariant *npparams, uint32_t count);
     bool insert(const NPString &name, NPObject *listener, bool bubble);
     bool remove(const NPString &name, NPObject *listener, bool bubble);
-    void unhook_manager(void *);
-    void hook_manager(libvlc_event_manager_t *, void *);
+
 private:
     libvlc_event_manager_t *_em; /* libvlc media_player event manager */
     vlcplugin_event_t *find_event(const NPString &name) const;

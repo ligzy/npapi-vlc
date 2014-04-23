@@ -255,9 +255,6 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
     /* new APIs */
     p_scriptClass = RuntimeNPClass<LibvlcRootNPObject>::getClass();
 
-    if( !events.init() )
-        return NPERR_GENERIC_ERROR;
-
     libvlc_media_player_t *p_md = getMD();
     if( p_md ) {
       libvlc_event_manager_t *p_em;

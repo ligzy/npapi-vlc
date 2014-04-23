@@ -110,10 +110,9 @@ static vlcplugin_event_t vlcevents[] = {
     { "MediaPlayerLengthChanged", libvlc_MediaPlayerLengthChanged, handle_changed_event },
 };
 
-bool EventObj::init()
+EventObj::EventObj() : _em(NULL), _already_in_deliver(false)
 {
     plugin_lock_init(&lock);
-    return true;
 }
 
 EventObj::~EventObj()
