@@ -175,29 +175,19 @@ void EventObj::callback(const libvlc_event_t* event,
     plugin_unlock(&lock);
 }
 
-vlcplugin_event_t *EventObj::find_event(const char *s) const
+vlcplugin_event_t *EventObj::find_event(const NPString &name) const
 {
     for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
     {
-        if( strncmp(vlcevents[i].name, s, strlen(vlcevents[i].name)) == 0 )
+        if( strncmp(vlcevents[i].name, name.UTF8Characters, strlen(vlcevents[i].name)) == 0 )
             return &vlcevents[i];
-    }
-    return NULL;
-}
-
-const char *EventObj::find_name(const libvlc_event_t *event)
-{
-    for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
-    {
-        if( vlcevents[i].libvlc_type == event->type )
-            return vlcevents[i].name;
     }
     return NULL;
 }
 
 bool EventObj::insert(const NPString &name, NPObject *listener, bool bubble)
 {
-    vlcplugin_event_t *event = find_event(name.UTF8Characters);
+    vlcplugin_event_t *event = find_event(name);
     if( !event )
         return false;
 
@@ -217,7 +207,7 @@ bool EventObj::insert(const NPString &name, NPObject *listener, bool bubble)
 
 bool EventObj::remove(const NPString &name, NPObject *listener, bool bubble)
 {
-    vlcplugin_event_t *event = find_event(name.UTF8Characters);
+    vlcplugin_event_t *event = find_event(name);
     if( !event )
         return false;
 

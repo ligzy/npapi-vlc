@@ -85,7 +85,7 @@ private:
         NPVariant *_npparams;
         uint32_t _npcount;
     };
-    libvlc_event_manager_t *_em; /* libvlc media_player event manager */
+
 public:
     EventObj(): _em(NULL), _already_in_deliver(false) { /* deferred to init() */ }
     bool init();
@@ -98,8 +98,9 @@ public:
     void unhook_manager(void *);
     void hook_manager(libvlc_event_manager_t *, void *);
 private:
-    vlcplugin_event_t *find_event(const char *s) const;
-    const char *find_name(const libvlc_event_t *event);
+    libvlc_event_manager_t *_em; /* libvlc media_player event manager */
+    vlcplugin_event_t *find_event(const NPString &name) const;
+
     typedef std::vector<Listener> lr_l;
     typedef std::vector<VLCEvent> ev_l;
     lr_l _llist; /* list of registered listeners with 'addEventListener' method */
