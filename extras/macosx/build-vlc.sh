@@ -166,7 +166,7 @@ cd ${ARCH}-build
 ../configure \
         --build=${ARCH}-apple-darwin10 \
         --disable-lua --disable-httpd --disable-vlm --disable-sout \
-        --disable-vcd --disable-dvdnav --disable-dvdread --disable-screen \
+        --disable-vcd --enable-dvdnav --enable-dvdread --disable-screen \
         --disable-debug \
         --disable-macosx \
         --disable-notify \
