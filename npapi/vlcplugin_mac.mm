@@ -33,6 +33,16 @@
 #include <QuartzCore/QuartzCore.h>
 #include <AppKit/AppKit.h>
 
+/* compilation support for 10.6 */
+#define OSX_LION NSAppKitVersionNumber >= 1115.2
+#ifndef MAC_OS_X_VERSION_10_7
+
+@interface NSView (IntroducedInLion)
+- (NSRect)convertRectToBacking:(NSRect)aRect;
+@end
+
+#endif
+
 @interface VLCNoMediaLayer : CALayer {
     VlcPluginMac *_cppPlugin;
 }
@@ -94,6 +104,12 @@
 - (CGRect)_sliderRect;
 @end
 
+@interface VLCPlaybackLayer : CALayer
+- (void)mouseButtonDown:(int)buttonNumber;
+- (void)mouseButtonUp:(int)buttonNumber;
+- (void)mouseMovedToX:(double)xValue Y:(double)yValue;
+@end
+
 @interface VLCFullscreenContentView : NSView {
     VlcPluginMac *_cppPlugin;
     NSTimeInterval _timeSinceLastMouseMove;
@@ -119,7 +135,7 @@
 @end
 
 static VLCBrowserRootLayer * browserRootLayer;
-static CALayer * playbackLayer;
+static VLCPlaybackLayer * playbackLayer;
 static VLCNoMediaLayer * noMediaLayer;
 static VLCControllerLayer * controllerLayer;
 static VLCFullscreenWindow * fullscreenWindow;
@@ -307,6 +323,10 @@ bool VlcPluginMac::handle_event(void *event)
     switch (eventType) {
         case NPCocoaEventMouseDown:
         {
+            if (playbackLayer) {
+                if ([playbackLayer respondsToSelector:@selector(mouseButtonDown:)])
+                    [playbackLayer mouseButtonDown:cocoaEvent->data.mouse.buttonNumber];
+            }
             if (cocoaEvent->data.mouse.clickCount >= 2)
                 VlcPluginMac::toggle_fullscreen();
 
@@ -319,6 +339,10 @@ bool VlcPluginMac::handle_event(void *event)
         }
         case NPCocoaEventMouseUp:
         {
+            if (playbackLayer) {
+                if ([playbackLayer respondsToSelector:@selector(mouseButtonUp:)])
+                    [playbackLayer mouseButtonUp:cocoaEvent->data.mouse.buttonNumber];
+            }
             CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
@@ -326,6 +350,13 @@ bool VlcPluginMac::handle_event(void *event)
             [controllerLayer handleMouseUp:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
 
             return true;
+        }
+        case NPCocoaEventMouseMoved:
+        {
+            if (playbackLayer) {
+                if ([playbackLayer respondsToSelector:@selector(mouseMovedToX:Y:)])
+                    [playbackLayer mouseMovedToX:cocoaEvent->data.mouse.pluginX Y:cocoaEvent->data.mouse.pluginY];
+            }
         }
         case NPCocoaEventMouseDragged:
         {
@@ -441,7 +472,7 @@ bool VlcPluginMac::handle_event(void *event)
 - (void)addVoutLayer:(CALayer *)aLayer
 {
     [CATransaction begin];
-    playbackLayer = [aLayer retain];
+    playbackLayer = (VLCPlaybackLayer *)[aLayer retain];
     playbackLayer.opaque = 1.;
     playbackLayer.hidden = NO;
     playbackLayer.bounds = noMediaLayer.bounds;
@@ -915,13 +946,25 @@ bool VlcPluginMac::handle_event(void *event)
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-    if ([theEvent type] == NSLeftMouseDown && !([theEvent modifierFlags] & NSControlKeyMask)) {
+    NSEventType eventType = [theEvent type];
+
+    if (eventType == NSLeftMouseDown && !([theEvent modifierFlags] & NSControlKeyMask)) {
         if ([theEvent clickCount] >= 2)
             self.cppPlugin->toggle_fullscreen();
         else {
             NSPoint point = [NSEvent mouseLocation];
 
             [controllerLayer handleMouseDown:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
+        }
+    }
+    if (playbackLayer) {
+        if ([playbackLayer respondsToSelector:@selector(mouseButtonDown:)]) {
+            if (eventType == NSLeftMouseDown)
+                [playbackLayer mouseButtonDown:0];
+            else if (eventType == NSRightMouseDown)
+                [playbackLayer mouseButtonDown:1];
+            else
+                [playbackLayer mouseButtonDown:2];
         }
     }
 
@@ -931,8 +974,20 @@ bool VlcPluginMac::handle_event(void *event)
 - (void)mouseUp:(NSEvent *)theEvent
 {
     NSPoint point = [NSEvent mouseLocation];
+    NSEventType eventType = [theEvent type];
 
     [controllerLayer handleMouseUp:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
+
+    if (playbackLayer) {
+        if ([playbackLayer respondsToSelector:@selector(mouseButtonUp:)]) {
+            if (eventType == NSLeftMouseUp)
+                [playbackLayer mouseButtonUp:0];
+            else if (eventType == NSRightMouseUp)
+                [playbackLayer mouseButtonUp:1];
+            else
+                [playbackLayer mouseButtonUp:2];
+        }
+    }
 
     [super mouseUp: theEvent];
 }
@@ -951,6 +1006,13 @@ bool VlcPluginMac::handle_event(void *event)
     self.cppPlugin->set_toolbar_visible(true);
     _timeSinceLastMouseMove = [NSDate timeIntervalSinceReferenceDate];
     [self performSelector:@selector(hideToolbar) withObject:nil afterDelay: 4.1];
+
+    if (playbackLayer) {
+        if ([playbackLayer respondsToSelector:@selector(mouseMovedToX:Y:)]) {
+            NSPoint ml = [theEvent locationInWindow];
+            [playbackLayer mouseMovedToX:ml.x Y:([self.window frame].size.height - ml.y)];
+        }
+    }
 
     [super mouseMoved: theEvent];
 }
