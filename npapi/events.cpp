@@ -148,7 +148,9 @@ void EventObj::deliver(NPP browser)
                 for( uint32_t n = 0; n < count; n++ )
                 {
                     if( NPVARIANT_IS_STRING(params[n]) )
+                    {
                         NPN_MemFree( (void*) NPVARIANT_TO_STRING(params[n]).UTF8Characters );
+                    }
                     else if( NPVARIANT_IS_OBJECT(params[n]) )
                     {
                         NPN_ReleaseObject( NPVARIANT_TO_OBJECT(params[n]) );
