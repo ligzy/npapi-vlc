@@ -226,31 +226,31 @@ bool EventObj::remove(const NPString &name, NPObject *listener, bool bubble)
 
 void EventObj::hook_manager( libvlc_event_manager_t *em, void *userdata )
 {
+    if( !em )
+        return;
+
     _em = em;
 
-    if( _em )
+    /* attach all libvlc events we need */
+    for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
     {
-        /* attach all libvlc events we care about */
-        for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
-        {
-            libvlc_event_attach( _em, vlcevents[i].libvlc_type,
-                                      vlcevents[i].libvlc_callback,
-                                      userdata );
-        }
+        libvlc_event_attach( _em, vlcevents[i].libvlc_type,
+                vlcevents[i].libvlc_callback,
+                userdata );
     }
 }
 
 void EventObj::unhook_manager( void *userdata )
 {
-    if( _em )
+    if( !_em )
+        return;
+
+    /* detach all libvlc events */
+    for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
     {
-        /* detach all libvlc events we cared about */
-        for( size_t i = 0; i < ARRAY_SIZE(vlcevents); i++ )
-        {
-            libvlc_event_detach( _em, vlcevents[i].libvlc_type,
-                                      vlcevents[i].libvlc_callback,
-                                      userdata );
-        }
+        libvlc_event_detach( _em, vlcevents[i].libvlc_type,
+                vlcevents[i].libvlc_callback,
+                userdata );
     }
 }
 
