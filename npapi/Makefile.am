@@ -112,7 +112,8 @@ endif
 if HAVE_DARWIN
 
 if FETCH_NPAPI
-$(npvlc_la_OBJECTS): npapi-sdk
+$(npvlc_la_OBJECTS): npapi-sdk libvlcplugin_objc.la
+$(libvlcplugin_objc_la_SOURCES): npapi-sdk
 endif
 
 # MacOS X
