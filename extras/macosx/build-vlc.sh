@@ -182,14 +182,12 @@ cd ${ARCH}-build
         --disable-a52 \
         --enable-realrtsp \
         --enable-libass \
-        --enable-macosx-audio \
         --disable-macosx-avfoundation \
         --disable-macosx-dialog-provider \
         --disable-macosx-eyetv \
         --disable-macosx-qtkit \
         --disable-macosx-quartztext \
         --disable-macosx-vlc-app \
-        --enable-macosx-vout \
         --disable-skins2 \
         --disable-xcb \
         --disable-caca \
@@ -201,7 +199,6 @@ cd ${ARCH}-build
         --disable-mad \
         --disable-sdl \
         --disable-sdl-image \
-        --enable-coregraphicslayer-vout \
         --with-macosx-sdk=$SDKROOT \
         --with-macosx-version-min=${MINIMAL_OSX_VERSION} \
         ${CONFIG_OPTIONS} \
