@@ -65,17 +65,6 @@
 #ifdef USE_GTK
 # include <gtk/gtk.h>
 #endif
-/*
- * Define PLUGIN_TRACE to have the wrapper functions print
- * messages to stderr whenever they are called.
- */
-
-#ifdef PLUGIN_TRACE
-#include <stdio.h>
-#define PLUGINDEBUGSTR(msg) fprintf(stderr, "%s\n", msg)
-#else
-#define PLUGINDEBUGSTR(msg)
-#endif
 
 /***********************************************************************
  *

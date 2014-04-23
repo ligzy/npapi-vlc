@@ -79,4 +79,16 @@
 
 #include "locking.h"
 
+/*
+ * Define PLUGIN_TRACE to have the wrapper functions print
+ * messages to stderr whenever they are called.
+ */
+
+#ifdef PLUGIN_TRACE
+# include <stdio.h>
+# define PLUGINDEBUGSTR(msg) fprintf(stderr, "%s\n", msg)
+#else
+# define PLUGINDEBUGSTR(msg)
+#endif
+
 #endif /* __VLCPLUGIN_H__ */
