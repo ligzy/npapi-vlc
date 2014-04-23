@@ -47,7 +47,8 @@
 # include "config.h"
 #endif
 
-#define XP_UNIX 1
+#include "../common.h"
+#include "../vlcshell.h"
 
 #include <npapi.h>
 #if (((NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR) < 20)
@@ -59,8 +60,6 @@
 #endif
 
 #include <cstring>
-#include "../common.h"
-#include "../vlcshell.h"
 
 #ifdef USE_GTK
 # include <gtk/gtk.h>
