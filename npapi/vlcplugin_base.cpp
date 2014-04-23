@@ -37,7 +37,7 @@
 #include "vlcplugin_base.h"
 #include "vlcplugin.h"
 
-#include "control/npolibvlc.h"
+#include "npruntime/npolibvlc.h"
 
 #include <cctype>
 

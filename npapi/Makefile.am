@@ -24,10 +24,10 @@ libvlcplugin_la_SOURCES = \
 	vlcplugin.h \
 	vlcplugin_base.cpp \
 	vlcplugin_base.h \
-	control/npolibvlc.cpp \
-	control/npolibvlc.h \
-	control/nporuntime.cpp \
-	control/nporuntime.h \
+	npruntime/npolibvlc.cpp \
+	npruntime/npolibvlc.h \
+	npruntime/nporuntime.cpp \
+	npruntime/nporuntime.h \
 	support/classinfo.h
 
 libvlcplugin_la_DEPENDENCIES =
