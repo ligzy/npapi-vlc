@@ -30,21 +30,23 @@
 # include "config.h"
 #endif
 
+#include "../common.h"
 #include "../vlcplugin.h"
+#include "../vlcshell.h"
 
+#include <npapi.h>
 #if (((NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR) < 20)
 #include "npupp.h"
 #else
 #include <npfunctions.h>
 #endif
 
-#include "../vlcshell.h"
 
 //\\// DEFINE
 #define NP_EXPORT
 
 //\\// GLOBAL DATA
-NPNetscapeFuncs* gNetscapeFuncs = 0;
+static NPNetscapeFuncs* gNetscapeFuncs;
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\.
 ////\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//.

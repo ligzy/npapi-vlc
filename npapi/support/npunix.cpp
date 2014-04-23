@@ -1,53 +1,34 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
- *
- * Mozilla/Firefox plugin for VLC
+/*****************************************************************************
+ * npunix.cpp: Unix NPAPI plugin for VLC
+ *****************************************************************************
  * Copyright (C) 2009, Jean-Paul Saman <jpsaman@videolan.org>
+ * Copyright (C) 2012-2013 Felix Paul Kühne <fkuehne # videolan # org>
+ * $Id:$
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Authors: Jean-Paul Saman <jpsaman@videolan.org>
+ *          Felix Paul Kühne <fkuehne # videolan # org>
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * The Original Code is mozilla.org code.
- *
- * The Initial Developer of the Original Code is
- * Netscape Communications Corporation.
- * Portions created by the Initial Developer are Copyright (C) 1998
- * the Initial Developer. All Rights Reserved.
- *
- * Contributor(s):
- *   Stephen Mak <smak@sun.com>
- *
- */
-
-/*
- * npunix.c
- *
- * Netscape Client Plugin API
- * - Wrapper function to interface with the Netscape Navigator
- *
- * dp Suresh <dp@netscape.com>
- *
- *----------------------------------------------------------------------
- * PLUGIN DEVELOPERS:
- *  YOU WILL NOT NEED TO EDIT THIS FILE.
- *----------------------------------------------------------------------
- */
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ *****************************************************************************/
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 
 #include "../common.h"
+#include "../vlcplugin.h"
 #include "../vlcshell.h"
 
 #include <npapi.h>
