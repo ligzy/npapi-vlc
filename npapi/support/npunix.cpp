@@ -158,7 +158,15 @@ NPN_GetURL(NPP instance, const char* url, const char* window)
 NPError
 NPN_GetURLNotify(NPP instance, const char* url, const char* window, void* notifyData)
 {
-    return CALL_NPN(CallNPN_GetURLNotifyProc, gNetscapeFuncs->geturlnotify, instance, url, window, notifyData);
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_NOTIFICATION)
+        err = CALL_NPN(CallNPN_GetURLNotifyProc, gNetscapeFuncs->geturlnotify, instance, url, window, notifyData);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
 }
 
 NPError
@@ -173,23 +181,40 @@ NPError
 NPN_PostURLNotify(NPP instance, const char* url, const char* window, uint32_t len,
                   const char* buf, NPBool file, void* notifyData)
 {
-    return CALL_NPN(CallNPN_PostURLNotifyProc, gNetscapeFuncs->posturlnotify,
-            instance, url, window, len, buf, file, notifyData);
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_NOTIFICATION) {
+        err = CALL_NPN(CallNPN_PostURLNotifyProc, gNetscapeFuncs->posturlnotify, instance, url,
+                                                        window, len, buf, file, notifyData);
+    }
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
 }
 
 NPError
 NPN_RequestRead(NPStream* stream, NPByteRange* rangeList)
 {
-    return CALL_NPN(CallNPN_RequestReadProc,gNetscapeFuncs->requestread,
+    return CALL_NPN(CallNPN_RequestReadProc, gNetscapeFuncs->requestread,
                     stream, rangeList);
 }
 
 NPError
 NPN_NewStream(NPP instance, NPMIMEType type, const char *window,
-          NPStream** stream_ptr)
+          NPStream** stream)
 {
-    return CALL_NPN(CallNPN_NewStreamProc, gNetscapeFuncs->newstream, instance,
-                    type, window, stream_ptr);
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_STREAMOUTPUT)
+        err = CALL_NPN(CallNPN_NewStreamProc, gNetscapeFuncs->newstream,
+                instance, type, window, stream);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
 }
 
 int32_t
@@ -209,33 +234,34 @@ NPN_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 void
 NPN_Status(NPP instance, const char* message)
 {
-    CALL_NPN(CallNPN_StatusProc,gNetscapeFuncs->status, instance, message);
+    CALL_NPN(CallNPN_StatusProc, gNetscapeFuncs->status, instance, message);
 }
 
 const char*
 NPN_UserAgent(NPP instance)
 {
-    return CALL_NPN(CallNPN_UserAgentProc,gNetscapeFuncs->uagent, instance);
+    return CALL_NPN(CallNPN_UserAgentProc, gNetscapeFuncs->uagent, instance);
 }
 
-void *NPN_MemAlloc(uint32_t size)
+void*
+NPN_MemAlloc(uint32_t size)
 {
-    return CALL_NPN(CallNPN_MemAllocProc,gNetscapeFuncs->memalloc, size);
+    return CALL_NPN(CallNPN_MemAllocProc, gNetscapeFuncs->memalloc, size);
 }
 
 void NPN_MemFree(void* ptr)
 {
-    CALL_NPN(CallNPN_MemFreeProc,gNetscapeFuncs->memfree, ptr);
+    CALL_NPN(CallNPN_MemFreeProc, gNetscapeFuncs->memfree, ptr);
 }
 
 uint32_t NPN_MemFlush(uint32_t size)
 {
-    return CALL_NPN(CallNPN_MemFlushProc,gNetscapeFuncs->memflush, size);
+    return CALL_NPN(CallNPN_MemFlushProc, gNetscapeFuncs->memflush, size);
 }
 
 void NPN_ReloadPlugins(NPBool reloadPages)
 {
-    CALL_NPN(CallNPN_ReloadPluginsProc,gNetscapeFuncs->reloadplugins, reloadPages);
+    CALL_NPN(CallNPN_ReloadPluginsProc, gNetscapeFuncs->reloadplugins, reloadPages);
 }
 
 void
