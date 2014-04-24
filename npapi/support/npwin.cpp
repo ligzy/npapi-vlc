@@ -367,9 +367,7 @@ void NPN_SetException(NPObject *npobj, const NPUTF8 *message)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-    {
         gNetscapeFuncs->setexception(npobj, message);
-    }
 }
 
 /* causes the specified URL to be fetched and streamed in
