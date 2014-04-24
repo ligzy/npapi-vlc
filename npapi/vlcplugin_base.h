@@ -73,25 +73,23 @@ public:
         { return *static_cast<const vlc_player_options*>(this); }
 
     NPError             init(int argc, char* const argn[], char* const argv[]);
-    libvlc_instance_t*  getVLC()
-                            { return libvlc_instance; };
+
     libvlc_media_player_t* getMD()
     {
-        if( !get_player().is_open() )
+        if( !is_open() )
         {
              libvlc_printerr("no mediaplayer");
         }
         return get_player().get_mp();
     }
-    NPP                 getBrowser()
-                            { return p_browser; };
+
+    NPP                 getBrowser() { return p_browser; };
     char*               getAbsoluteURL(const char *url);
-    NPWindow&           getWindow()
-                            { return npwindow; };
+
+    NPWindow&           getWindow()  { return npwindow; };
     virtual void        setWindow(const NPWindow &window);
 
-    NPClass*            getScriptClass()
-                            { return p_scriptClass; };
+    NPClass*            getScriptClass() { return p_scriptClass; };
 
     NPuint16_t  i_npmode; /* either NP_EMBED or NP_FULL */
 

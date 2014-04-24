@@ -337,8 +337,6 @@ NPError NPP_SetWindow( NPP instance, NPWindow* window )
         return NPERR_NO_ERROR;
     }
 
-    p_plugin->getVLC();
-
     /*
      * PLUGIN DEVELOPERS:
      *  Before setting window to point to the
