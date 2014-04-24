@@ -44,18 +44,13 @@
 #endif
 
 
-#ifdef USE_GTK
-# include <gtk/gtk.h>
-#endif
-
 /***********************************************************************
  * Globals
  ***********************************************************************/
 #pragma mark -
 #pragma mark Globals
 
-NPNetscapeFuncs  *gNetscapeFuncs;    /* Netscape Function table */
-static const char       *gUserAgent;        /* User agent string */
+extern NPNetscapeFuncs  *gNetscapeFuncs; /* Netscape Function table */
 static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }
 /***********************************************************************
  *
@@ -67,57 +62,183 @@ static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }
  *
  ***********************************************************************/
 
-/* in many browsers NPN_PluginThreadAsyncCall is missing/broken */
-
-/* GTK workaround */
-#ifdef USE_GTK
-struct AsyncCallWorkaroundData
+void
+NPN_Version(int* plugin_major, int* plugin_minor,
+         int* netscape_major, int* netscape_minor)
 {
-    void (*func)(void *);
-    void *data;
-};
+    *plugin_major = NP_VERSION_MAJOR;
+    *plugin_minor = NP_VERSION_MINOR;
 
-static gboolean AsyncCallWorkaroundCallback(void *userData)
-{
-    AsyncCallWorkaroundData *data = (AsyncCallWorkaroundData *) userData;
-    data->func(data->data);
-    delete data;
-    return false;
+    /* Major version is in high byte */
+    *netscape_major = gNetscapeFuncs->version >> 8;
+    /* Minor version is in low byte */
+    *netscape_minor = getMinorVersion();
 }
-#endif
+
+NPError
+NPN_GetValue(NPP instance, NPNVariable variable, void *r_value)
+{
+    return CALL_NPN(CallNPN_GetValueProc, gNetscapeFuncs->getvalue,
+                    instance, variable, r_value);
+}
+
+NPError
+NPN_SetValue(NPP instance, NPPVariable variable, void *value)
+{
+    return CALL_NPN(CallNPN_SetValueProc, gNetscapeFuncs->setvalue,
+                    instance, variable, value);
+}
+
+NPError
+NPN_GetURL(NPP instance, const char* url, const char* window)
+{
+    return CALL_NPN(CallNPN_GetURLProc, gNetscapeFuncs->geturl, instance, url, window);
+}
+
+NPError
+NPN_GetURLNotify(NPP instance, const char* url, const char* window, void* notifyData)
+{
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_NOTIFICATION)
+        err = CALL_NPN(CallNPN_GetURLNotifyProc, gNetscapeFuncs->geturlnotify, instance, url, window, notifyData);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
+}
+
+NPError
+NPN_PostURL(NPP instance, const char* url, const char* window,
+         uint32_t len, const char* buf, NPBool file)
+{
+    return CALL_NPN(CallNPN_PostURLProc, gNetscapeFuncs->posturl, instance,
+                    url, window, len, buf, file);
+}
+
+NPError
+NPN_PostURLNotify(NPP instance, const char* url, const char* window, uint32_t len,
+                  const char* buf, NPBool file, void* notifyData)
+{
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_NOTIFICATION) {
+        err = CALL_NPN(CallNPN_PostURLNotifyProc, gNetscapeFuncs->posturlnotify, instance, url,
+                                                        window, len, buf, file, notifyData);
+    }
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
+}
+
+NPError
+NPN_RequestRead(NPStream* stream, NPByteRange* rangeList)
+{
+    return CALL_NPN(CallNPN_RequestReadProc, gNetscapeFuncs->requestread,
+                    stream, rangeList);
+}
+
+NPError
+NPN_NewStream(NPP instance, NPMIMEType type, const char *window,
+          NPStream** stream)
+{
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_STREAMOUTPUT)
+        err = CALL_NPN(CallNPN_NewStreamProc, gNetscapeFuncs->newstream,
+                instance, type, window, stream);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
+}
+
+int32_t
+NPN_Write(NPP instance, NPStream* stream, int32_t len, void* buffer)
+{
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_STREAMOUTPUT)
+        err = CALL_NPN(CallNPN_WriteProc, gNetscapeFuncs->write, instance, stream, len, buffer);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
+}
+
+NPError
+NPN_DestroyStream(NPP instance, NPStream* stream, NPError reason)
+{
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_STREAMOUTPUT)
+        err = CALL_NPN(CallNPN_DestroyStreamProc, gNetscapeFuncs->destroystream, instance, stream, reason);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
+}
 
 void
-NPN_PluginThreadAsyncCall(NPP plugin,
-                          void (*func)(void *),
-                          void *userData)
+NPN_Status(NPP instance, const char* message)
 {
-    bool workaround = false;
-
-    const int minor = getMinorVersion();
-    if (gUserAgent && (strstr(gUserAgent, "Opera")))
-        workaround = true;
-
-    if (!gNetscapeFuncs->pluginthreadasynccall)
-        workaround = true;
-
-    if (workaround) {
-#       ifdef USE_GTK
-            AsyncCallWorkaroundData *data = new AsyncCallWorkaroundData;
-            data->func = func;
-            data->data = userData;
-            g_idle_add(AsyncCallWorkaroundCallback, (void *)data);
-            return;
-#       endif
-    }
-
-#   if (((NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR) >= 20)
-        return (*gNetscapeFuncs->pluginthreadasynccall)(plugin, func, userData);
-#   endif
-
-    // otherwise nothing we can do...
-    fprintf(stderr, "WARNING: could not call NPN_PluginThreadAsyncCall\n");
+    CALL_NPN(CallNPN_StatusProc, gNetscapeFuncs->status, instance, message);
 }
 
+const char*
+NPN_UserAgent(NPP instance)
+{
+    return CALL_NPN(CallNPN_UserAgentProc, gNetscapeFuncs->uagent, instance);
+}
+
+void*
+NPN_MemAlloc(uint32_t size)
+{
+    return CALL_NPN(CallNPN_MemAllocProc, gNetscapeFuncs->memalloc, size);
+}
+
+void NPN_MemFree(void* ptr)
+{
+    CALL_NPN(CallNPN_MemFreeProc, gNetscapeFuncs->memfree, ptr);
+}
+
+uint32_t NPN_MemFlush(uint32_t size)
+{
+    return CALL_NPN(CallNPN_MemFlushProc, gNetscapeFuncs->memflush, size);
+}
+
+void NPN_ReloadPlugins(NPBool reloadPages)
+{
+    CALL_NPN(CallNPN_ReloadPluginsProc, gNetscapeFuncs->reloadplugins, reloadPages);
+}
+
+void
+NPN_InvalidateRect(NPP instance, NPRect *invalidRect)
+{
+    CALL_NPN(CallNPN_InvalidateRectProc, gNetscapeFuncs->invalidaterect, instance,
+        invalidRect);
+}
+
+void
+NPN_InvalidateRegion(NPP instance, NPRegion invalidRegion)
+{
+    CALL_NPN(CallNPN_InvalidateRegionProc, gNetscapeFuncs->invalidateregion, instance,
+        invalidRegion);
+}
+
+void
+NPN_ForceRedraw(NPP instance)
+{
+    CALL_NPN(CallNPN_ForceRedrawProc, gNetscapeFuncs->forceredraw, instance);
+}
+
+#if 0
 void NPN_PushPopupsEnabledState(NPP instance, NPBool enabled)
 {
     CALL_NPN(CallNPN_PushPopupsEnabledStateProc, gNetscapeFuncs->pushpopupsenabledstate,
@@ -129,7 +250,182 @@ void NPN_PopPopupsEnabledState(NPP instance)
     CALL_NPN(CallNPN_PopPopupsEnabledStateProc, gNetscapeFuncs->poppopupsenabledstate,
         instance);
 }
+#endif
 
+NPIdentifier NPN_GetStringIdentifier(const NPUTF8 *name)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+    {
+        return CALL_NPN(CallNPN_GetStringIdentifierProc,
+                        gNetscapeFuncs->getstringidentifier, name);
+    }
+    return NULL;
+}
+
+void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount,
+                              NPIdentifier *identifiers)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        CALL_NPN(CallNPN_GetStringIdentifiersProc, gNetscapeFuncs->getstringidentifiers,
+                                         names, nameCount, identifiers);
+}
+
+NPIdentifier NPN_GetIntIdentifier(int32_t intid)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_GetIntIdentifierProc, gNetscapeFuncs->getintidentifier, intid);
+    return NULL;
+}
+
+bool NPN_IdentifierIsString(NPIdentifier identifier)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+    {
+        return CALL_NPN(CallNPN_IdentifierIsStringProc,
+                        gNetscapeFuncs->identifierisstring,
+                        identifier);
+    }
+    return false;
+}
+
+NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_UTF8FromIdentifierProc,
+                            gNetscapeFuncs->utf8fromidentifier,
+                            identifier);
+    return NULL;
+}
+
+int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_IntFromIdentifierProc,
+                        gNetscapeFuncs->intfromidentifier,
+                        identifier);
+    return 0;
+}
+
+NPObject *NPN_CreateObject(NPP instance, NPClass *aClass)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_CreateObjectProc, gNetscapeFuncs->createobject, instance, aClass);
+    return NULL;
+}
+
+NPObject *NPN_RetainObject(NPObject *npobj)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_RetainObjectProc, gNetscapeFuncs->retainobject, npobj);
+    return NULL;
+}
+
+void NPN_ReleaseObject(NPObject *npobj)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        CALL_NPN(CallNPN_ReleaseObjectProc, gNetscapeFuncs->releaseobject, npobj);
+}
+
+bool NPN_Invoke(NPP instance, NPObject *npobj, NPIdentifier methodName,
+                const NPVariant *args, uint32_t argCount, NPVariant *result)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_InvokeProc, gNetscapeFuncs->invoke, instance, npobj, methodName,
+                        args, argCount, result);
+    return false;
+}
+
+bool NPN_InvokeDefault(NPP instance, NPObject *npobj, const NPVariant *args,
+                       uint32_t argCount, NPVariant *result)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_InvokeDefaultProc, gNetscapeFuncs->invokeDefault, instance, npobj,
+                        args, argCount, result);
+    return false;
+}
+
+bool NPN_Evaluate(NPP instance, NPObject *npobj, NPString *script, NPVariant *result)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_EvaluateProc, gNetscapeFuncs->evaluate, instance, npobj,
+                        script, result);
+    return false;
+}
+
+bool NPN_GetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName,
+                     NPVariant *result)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_GetPropertyProc, gNetscapeFuncs->getproperty, instance, npobj,
+                        propertyName, result);
+    return false;
+}
+
+bool NPN_SetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName,
+                     const NPVariant *value)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_SetPropertyProc, gNetscapeFuncs->setproperty, instance, npobj,
+                        propertyName, value);
+    return false;
+}
+
+bool NPN_RemoveProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_RemovePropertyProc, gNetscapeFuncs->removeproperty, instance, npobj,
+                        propertyName);
+    return false;
+}
+
+bool NPN_HasProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_HasPropertyProc, gNetscapeFuncs->hasproperty, instance, npobj,
+                        propertyName);
+    return false;
+}
+
+bool NPN_HasMethod(NPP instance, NPObject *npobj, NPIdentifier methodName)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_HasMethodProc, gNetscapeFuncs->hasmethod, instance,
+                        npobj, methodName);
+    return false;
+}
+
+void NPN_ReleaseVariantValue(NPVariant *variant)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        CALL_NPN(CallNPN_ReleaseVariantValueProc, gNetscapeFuncs->releasevariantvalue, variant);
+}
+
+void NPN_SetException(NPObject *npobj, const NPUTF8 *message)
+{
+    int minor = getMinorVersion();
+    if( minor >= 14 )
+        CALL_NPN(CallNPN_SetExceptionProc, gNetscapeFuncs->setexception, npobj, message);
+}
+
+#if 0
 /***********************************************************************
  *
  * Wrapper functions : Netscape Navigator -> plugin
@@ -424,3 +720,4 @@ NP_Shutdown(void)
     NPP_Shutdown();
     return NPERR_NO_ERROR;
 }
+#endif

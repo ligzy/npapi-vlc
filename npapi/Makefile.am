@@ -60,7 +60,7 @@ AM_CPPFLAGS += -DXP_UNIX -DDATA_PATH=\"$(pkgdatadir)\" $(XCB_CFLAGS)
 libvlcplugin_la_SOURCES += \
 	vlcwindowless_xcb.cpp vlcwindowless_xcb.h \
 	vlcwindowless_base.cpp vlcwindowless_base.h \
-	support/npunix.cpp
+	support/npunix.cpp support/npcommon.cpp
 libvlcplugin_la_LIBADD += $(MOZILLA_LIBS) $(XCB_LIBS)
 
 if WITH_GTK
