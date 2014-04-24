@@ -39,8 +39,6 @@
 #include "npfunctions.h"
 #define CALL_NPN(unused, FN, ...) ((*FN)(__VA_ARGS__))
 
-#define PLUGIN_TO_HOST_GLUE(name, fp) (fp)
-#define HOST_TO_PLUGIN_GLUE(name, fp) (fp)
 
 
 #pragma mark -
