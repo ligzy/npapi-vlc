@@ -718,6 +718,7 @@ NP_Shutdown(void)
 {
     PLUGINDEBUGSTR("NP_Shutdown");
     NPP_Shutdown();
+    gNetscapeFuncs = NULL;
     return NPERR_NO_ERROR;
 }
 #endif
