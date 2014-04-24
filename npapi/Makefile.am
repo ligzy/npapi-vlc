@@ -28,8 +28,7 @@ libvlcplugin_la_SOURCES = \
 	npruntime/npolibvlc.cpp \
 	npruntime/npolibvlc.h \
 	npruntime/nporuntime.cpp \
-	npruntime/nporuntime.h \
-	support/classinfo.h
+	npruntime/nporuntime.h
 
 libvlcplugin_la_DEPENDENCIES =
 libvlcplugin_la_LIBADD = ../common/libvlcplugin_common.la $(LIBVLC_LIBS)
