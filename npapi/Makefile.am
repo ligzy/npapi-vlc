@@ -95,7 +95,7 @@ libvlcplugin_la_SOURCES += \
 	vlcplugin_win.cpp vlcplugin_win.h \
 	vlcwindowless_base.cpp vlcwindowless_base.h \
 	vlcwindowless_win.cpp vlcwindowless_win.h \
-	support/npwin.cpp
+	support/npwin.cpp support/npcommon.cpp
 
 npvlc_la_DEPENDENCIES += $(DATA_npvlc_rc)
 npvlc_la_LDFLAGS += -Wl,--kill-at -Wl,$(DATA_npvlc_rc)
