@@ -23,17 +23,21 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include <string.h>
 #include <stddef.h>
-
-#include "npapi.h"
-#include "npfunctions.h"
-#define CALL_NPN(unused, FN, ...) ((*FN)(__VA_ARGS__))
+#include <cstring>
 
 #include "../common.h"
+#include "../vlcplugin.h"
 #include "../vlcshell.h"
+
+#include <npapi.h>
+#include "npfunctions.h"
+#define CALL_NPN(unused, FN, ...) ((*FN)(__VA_ARGS__))
 
 #define PLUGIN_TO_HOST_GLUE(name, fp) (fp)
 #define HOST_TO_PLUGIN_GLUE(name, fp) (fp)
@@ -42,8 +46,8 @@
 #pragma mark -
 #pragma mark Globals
 
+static NPNetscapeFuncs  *gNetscapeFuncs;    /* Netscape Function table */
 short               gResFile;           // Refnum of the plugin’s resource file
-static NPNetscapeFuncs     *gNetscapeFuncs;      // Function table for procs in Netscape called by plugin
 static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }
 
 

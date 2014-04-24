@@ -27,6 +27,10 @@
 # include "config.h"
 #endif
 
+#include <string.h>
+#include <stddef.h>
+#include <cstring>
+
 #include "../common.h"
 #include "../vlcplugin.h"
 #include "../vlcshell.h"
@@ -40,7 +44,6 @@
 #define CALL_NPN(unused, FN, ...) ((*FN)(__VA_ARGS__))
 #endif
 
-#include <cstring>
 
 #ifdef USE_GTK
 # include <gtk/gtk.h>
@@ -51,6 +54,8 @@
  * Globals
  *
  ***********************************************************************/
+#pragma mark -
+#pragma mark Globals
 
 static NPNetscapeFuncs  *gNetscapeFuncs;    /* Netscape Function table */
 static const char       *gUserAgent;        /* User agent string */
