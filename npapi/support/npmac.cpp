@@ -674,7 +674,7 @@ NP_Initialize(NPNetscapeFuncs* nsTable)
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
-    gNetscapeFuncs = *nsTable;
+    gNetscapeFuncs = nsTable;
 
     return NPP_Initialize();
 }
