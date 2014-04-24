@@ -80,7 +80,7 @@ public:
         {
              libvlc_printerr("no mediaplayer");
         }
-        return get_player().get_mp();
+        return get_mp();
     }
 
     NPP                 getBrowser() { return p_browser; };
@@ -99,56 +99,56 @@ public:
 
     void playlist_play()
     {
-        get_player().play();
+        play();
     }
     void playlist_play_item(int idx)
     {
-        get_player().play(idx);
+        play(idx);
     }
     void playlist_stop()
     {
-        get_player().stop();
+        stop();
     }
     void playlist_next()
     {
-        get_player().next();
+        next();
     }
     void playlist_prev()
     {
-        get_player().prev();
+        prev();
     }
     void playlist_pause()
     {
-        get_player().pause();
+        pause();
     }
     void playlist_togglePause()
     {
-        get_player().togglePause();
+        togglePause();
     }
     int playlist_isplaying()
     {
-        return get_player().is_playing();
+        return is_playing();
     }
     int playlist_add( const char * mrl)
     {
-        return get_player().add_item(mrl);
+        return add_item(mrl);
     }
     int playlist_add_extended_untrusted( const char *mrl, const char *,
                     int optc, const char **optv )
     {
-        return get_player().add_item(mrl, optc, optv);
+        return add_item(mrl, optc, optv);
     }
     int playlist_delete_item( int idx)
     {
-        return get_player().delete_item(idx);
+        return delete_item(idx);
     }
     void playlist_clear()
     {
-        get_player().clear_items() ;
+        clear_items() ;
     }
     int  playlist_count()
     {
-        return get_player().items_count();
+        return items_count();
     }
     bool playlist_select(int);
 

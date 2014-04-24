@@ -308,7 +308,7 @@ bool  VlcPluginBase::player_has_vout()
 {
     bool r = false;
     if( playlist_isplaying() )
-        r = libvlc_media_player_has_vout(get_player().get_mp())!=0;
+        r = libvlc_media_player_has_vout(get_mp())!=0;
     return r;
 }
 
