@@ -1,30 +1,27 @@
-/* -*- Mode: C++; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*-
- *
- * Mozilla/Firefox plugin for VLC
+/*****************************************************************************
+ * npunix.cpp: Unix NPAPI plugin for VLC
+ *****************************************************************************
  * Copyright (C) 2009, Jean-Paul Saman <jpsaman@videolan.org>
+ * Copyright (C) 2012-2013 Felix Paul Kühne <fkuehne # videolan # org>
+ * $Id:$
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * Authors: Jean-Paul Saman <jpsaman@videolan.org>
+ *          Felix Paul Kühne <fkuehne # videolan # org>
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * The Original Code is Mozilla Communicator client code.
- *
- * The Initial Developer of the Original Code is
- * Netscape Communications Corporation.
- * Portions created by the Initial Developer are Copyright (C) 1998
- * the Initial Developer. All Rights Reserved.
- *
- */
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
+ *****************************************************************************/
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -127,9 +124,9 @@ NP_Initialize(NPNetscapeFuncs* pFuncs)
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
 
     // We have to defer these assignments until gNetscapeFuncs is set
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
 
-    if( navMinorVers >= NPVERS_HAS_NOTIFICATION ) {
+    if( minor >= NPVERS_HAS_NOTIFICATION ) {
         g_pluginFuncs->urlnotify = NPP_URLNotify;
     }
     // NPP_Initialize is a standard (cross-platform) initialize function.
@@ -219,37 +216,34 @@ void NPN_ForceRedraw(NPP instance)
 
 NPIdentifier NPN_GetStringIdentifier(const NPUTF8 *name)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
+    int minor = getMinorVersion();
+    if( minor >= 14 )
     {
         return gNetscapeFuncs->getstringidentifier(name);
     }
     return NULL;
 }
 
-void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount, NPIdentifier *identifiers)
+void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount,
+                              NPIdentifier *identifiers)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         gNetscapeFuncs->getstringidentifiers(names, nameCount, identifiers);
-    }
 }
 
 NPIdentifier NPN_GetIntIdentifier(int32_t intid)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->getintidentifier(intid);
-    }
     return NULL;
 }
 
 bool NPN_IdentifierIsString(NPIdentifier identifier)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
+    int minor = getMinorVersion();
+    if( minor >= 14 )
     {
         return gNetscapeFuncs->identifierisstring(identifier);
     }
@@ -258,146 +252,118 @@ bool NPN_IdentifierIsString(NPIdentifier identifier)
 
 NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->utf8fromidentifier(identifier);
-    }
     return NULL;
 }
 
 int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->intfromidentifier(identifier);
-    }
     return 0;
 }
 
 NPObject *NPN_CreateObject(NPP instance, NPClass *aClass)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->createobject(instance, aClass);
-    }
     return NULL;
 }
 
 NPObject *NPN_RetainObject(NPObject *npobj)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->retainobject(npobj);
-    }
     return NULL;
 }
 
 void NPN_ReleaseObject(NPObject *npobj)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         gNetscapeFuncs->releaseobject(npobj);
-    }
 }
 
 bool NPN_Invoke(NPP instance, NPObject *npobj, NPIdentifier methodName, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->invoke(instance, npobj, methodName, args, argCount, result);
-    }
     return false;
 }
 
 bool NPN_InvokeDefault(NPP instance, NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->invokeDefault(instance, npobj, args, argCount, result);
-    }
     return false;
 }
 
 bool NPN_Evaluate(NPP instance, NPObject *npobj, NPString *script, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->evaluate(instance, npobj, script, result);
-    }
     return false;
 }
 
 bool NPN_GetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->getproperty(instance, npobj, propertyName, result);
-    }
     return false;
 }
 
 bool NPN_SetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName, const NPVariant *value)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->setproperty(instance, npobj, propertyName, value);
-    }
     return false;
 }
 
 bool NPN_RemoveProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->removeproperty(instance, npobj, propertyName);
-    }
     return false;
 }
 
 bool NPN_HasProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->hasproperty(instance, npobj, propertyName);
-    }
     return false;
 }
 
 bool NPN_HasMethod(NPP instance, NPObject *npobj, NPIdentifier methodName)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         return gNetscapeFuncs->hasmethod(instance, npobj, methodName);
-    }
     return false;
 }
 
 void NPN_ReleaseVariantValue(NPVariant *variant)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
-    {
+    int minor = getMinorVersion();
+    if( minor >= 14 )
         gNetscapeFuncs->releasevariantvalue(variant);
-    }
 }
 
 void NPN_SetException(NPObject *npobj, const NPUTF8 *message)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
-    if( navMinorVers >= 14 )
+    int minor = getMinorVersion();
+    if( minor >= 14 )
     {
         gNetscapeFuncs->setexception(npobj, message);
     }
@@ -408,9 +374,9 @@ void NPN_SetException(NPObject *npobj, const NPUTF8 *message)
 NPError NPN_GetURLNotify(NPP instance, const char *url, const char *target, void* notifyData)
 
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     NPError err;
-    if( navMinorVers >= NPVERS_HAS_NOTIFICATION ) {
+    if( minor >= NPVERS_HAS_NOTIFICATION ) {
         err = gNetscapeFuncs->geturlnotify(instance, url, target, notifyData);
     }
     else {
@@ -426,9 +392,9 @@ NPError NPN_GetURL(NPP instance, const char *url, const char *target)
 
 NPError NPN_PostURLNotify(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file, void* notifyData)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     NPError err;
-    if( navMinorVers >= NPVERS_HAS_NOTIFICATION ) {
+    if( minor >= NPVERS_HAS_NOTIFICATION ) {
         err = gNetscapeFuncs->posturlnotify(instance, url, window, len, buf, file, notifyData);
     }
     else {
@@ -458,10 +424,10 @@ NPError NPN_RequestRead(NPStream* stream, NPByteRange* rangeList)
 NPError NPN_NewStream(NPP instance, NPMIMEType type,
                       const char* target, NPStream** stream)
 {
-    int navMinorVersion = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     NPError err;
 
-    if( navMinorVersion >= NPVERS_HAS_STREAMOUTPUT ) {
+    if( minor >= NPVERS_HAS_STREAMOUTPUT ) {
         err = gNetscapeFuncs->newstream(instance, type, target, stream);
     }
     else {
@@ -475,10 +441,10 @@ NPError NPN_NewStream(NPP instance, NPMIMEType type,
 int32_t NPN_Write(NPP instance, NPStream *stream,
                 int32_t len, void *buffer)
 {
-    int navMinorVersion = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     int32_t result;
 
-    if( navMinorVersion >= NPVERS_HAS_STREAMOUTPUT ) {
+    if( minor >= NPVERS_HAS_STREAMOUTPUT ) {
         result = gNetscapeFuncs->write(instance, stream, len, buffer);
     }
     else {
@@ -492,10 +458,10 @@ int32_t NPN_Write(NPP instance, NPStream *stream,
  */
 NPError NPN_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 {
-    int navMinorVersion = gNetscapeFuncs->version & 0xFF;
+    int minor = getMinorVersion();
     NPError err;
 
-    if( navMinorVersion >= NPVERS_HAS_STREAMOUTPUT ) {
+    if( minor >= NPVERS_HAS_STREAMOUTPUT ) {
         err = gNetscapeFuncs->destroystream(instance, stream, reason);
     }
     else {
