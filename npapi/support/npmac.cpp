@@ -62,7 +62,8 @@ void NPN_Version(int* plugin_major, int* plugin_minor, int* netscape_major, int*
     *netscape_minor = getMinorVersion();    // Minor version is in low byte
 }
 
-NPError NPN_GetURLNotify(NPP instance, const char* url, const char* window, void* notifyData)
+NPError
+NPN_GetURLNotify(NPP instance, const char* url, const char* window, void* notifyData)
 {
     int navMinorVers = getMinorVersion();
     NPError err;
@@ -75,12 +76,14 @@ NPError NPN_GetURLNotify(NPP instance, const char* url, const char* window, void
     return err;
 }
 
-NPError NPN_GetURL(NPP instance, const char* url, const char* window)
+NPError
+NPN_GetURL(NPP instance, const char* url, const char* window)
 {
     return CALL_NPN(CallNPN_GetURLProc, gNetscapeFuncs->geturl, instance, url, window);
 }
 
-NPError NPN_PostURLNotify(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file, void* notifyData)
+NPError
+NPN_PostURLNotify(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file, void* notifyData)
 {
     int navMinorVers = getMinorVersion();
     NPError err;
@@ -95,17 +98,22 @@ NPError NPN_PostURLNotify(NPP instance, const char* url, const char* window, uin
     return err;
 }
 
-NPError NPN_PostURL(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file)
+NPError
+NPN_PostURL(NPP instance, const char* url, const char* window,
+         uint32_t len, const char* buf, NPBool file)
 {
-    return CALL_NPN(CallNPN_PostURLProc, gNetscapeFuncs->posturl, instance, url, window, len, buf, file);
+    return CALL_NPN(CallNPN_PostURLProc, gNetscapeFuncs->posturl, instance,
+                    url, window, len, buf, file);
 }
 
-NPError NPN_RequestRead(NPStream* stream, NPByteRange* rangeList)
+NPError
+NPN_RequestRead(NPStream* stream, NPByteRange* rangeList)
 {
     return CALL_NPN(CallNPN_RequestReadProc, gNetscapeFuncs->requestread, stream, rangeList);
 }
 
-NPError NPN_NewStream(NPP instance, NPMIMEType type, const char* window, NPStream** stream)
+NPError
+NPN_NewStream(NPP instance, NPMIMEType type, const char* window, NPStream** stream)
 {
     int navMinorVers = getMinorVersion();
     NPError err;
@@ -131,7 +139,8 @@ int32_t NPN_Write(NPP instance, NPStream* stream, int32_t len, void* buffer)
     return err;
 }
 
-NPError NPN_DestroyStream(NPP instance, NPStream* stream, NPError reason)
+NPError
+NPN_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 {
     int navMinorVers = getMinorVersion();
     NPError err;
@@ -179,12 +188,14 @@ void NPN_PluginThreadAsyncCall(NPP instance, void (*func)(void *), void *userDat
     CALL_NPN(CallNPN_PluginThreadAsyncCallProc, gNetscapeFuncs->pluginthreadasynccall, instance, func, userData);
 }
 
-NPError NPN_GetValue(NPP instance, NPNVariable variable, void *value)
+NPError
+NPN_GetValue(NPP instance, NPNVariable variable, void *value)
 {
     return CALL_NPN(CallNPN_GetValueProc, gNetscapeFuncs->getvalue, instance, variable, value);
 }
 
-NPError NPN_SetValue(NPP instance, NPPVariable variable, void *value)
+NPError
+NPN_SetValue(NPP instance, NPPVariable variable, void *value)
 {
     return CALL_NPN(CallNPN_SetValueProc, gNetscapeFuncs->setvalue, instance, variable, value);
 }
@@ -370,15 +381,23 @@ void NPN_SetException(NPObject *npobj, const NPUTF8 *message)
 #pragma mark -
 #pragma mark Private Functions
 
-NPError     Private_Initialize(void);
+NPError
+    Private_Initialize(void);
 void        Private_Shutdown(void);
-NPError     Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
-NPError     Private_Destroy(NPP instance, NPSavedData** save);
-NPError     Private_SetWindow(NPP instance, NPWindow* window);
-NPError     Private_GetValue( NPP instance, NPPVariable variable, void *value);
-NPError     Private_SetValue( NPP instance, NPPVariable variable, void *value);
-NPError     Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
-NPError     Private_DestroyStream(NPP instance, NPStream* stream, NPError reason);
+NPError
+    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
+NPError
+    Private_Destroy(NPP instance, NPSavedData** save);
+NPError
+    Private_SetWindow(NPP instance, NPWindow* window);
+NPError
+    Private_GetValue( NPP instance, NPPVariable variable, void *value);
+NPError
+    Private_SetValue( NPP instance, NPPVariable variable, void *value);
+NPError
+    Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype);
+NPError
+    Private_DestroyStream(NPP instance, NPStream* stream, NPError reason);
 int32_t     Private_WriteReady(NPP instance, NPStream* stream);
 int32_t     Private_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
 void        Private_StreamAsFile(NPP instance, NPStream* stream, const char* fname);
@@ -387,7 +406,8 @@ int16_t     Private_HandleEvent(NPP instance, void* event);
 void        Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData);
 
 
-NPError Private_Initialize(void)
+NPError
+Private_Initialize(void)
 {
     NPError err;
     err = NPP_Initialize();
@@ -405,7 +425,8 @@ static bool boolValue(const char *value) {
             !strcasecmp(value, "yes") );
 }
 
-NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
+NPError
+   Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
 {
     /* find out, if the plugin should run in windowless mode.
      * if yes, choose the CoreGraphics drawing model */
@@ -468,7 +489,8 @@ NPError    Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16
     return ret;
 }
 
-NPError Private_Destroy(NPP instance, NPSavedData** save)
+NPError
+Private_Destroy(NPP instance, NPSavedData** save)
 {
     NPError err;
     err = NPP_Destroy(instance, save);
@@ -476,7 +498,8 @@ NPError Private_Destroy(NPP instance, NPSavedData** save)
     return err;
 }
 
-NPError Private_SetWindow(NPP instance, NPWindow* window)
+NPError
+Private_SetWindow(NPP instance, NPWindow* window)
 {
     NPError err;
     err = NPP_SetWindow(instance, window);
@@ -484,7 +507,8 @@ NPError Private_SetWindow(NPP instance, NPWindow* window)
     return err;
 }
 
-NPError Private_GetValue( NPP instance, NPPVariable variable, void *value)
+NPError
+Private_GetValue( NPP instance, NPPVariable variable, void *value)
 {
     NPError err;
     err = NPP_GetValue(instance, variable, value);
@@ -492,7 +516,8 @@ NPError Private_GetValue( NPP instance, NPPVariable variable, void *value)
     return err;
 }
 
-NPError Private_SetValue( NPP instance, NPNVariable variable, void *value)
+NPError
+Private_SetValue( NPP instance, NPNVariable variable, void *value)
 {
     NPError err;
     err = NPP_SetValue(instance, variable, value);
@@ -500,7 +525,8 @@ NPError Private_SetValue( NPP instance, NPNVariable variable, void *value)
     return err;
 }
 
-NPError Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
+NPError
+Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
 {
     NPError err;
     err = NPP_NewStream(instance, type, stream, seekable, stype);
@@ -529,7 +555,8 @@ void Private_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
     NPP_StreamAsFile(instance, stream, fname);
 }
 
-NPError Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
+NPError
+Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 {
     NPError err;
     err = NPP_DestroyStream(instance, stream, reason);
@@ -572,7 +599,8 @@ extern "C" {
 ** netscape plugins functions when using Mach-O binary
 */
 
-NPError NP_Initialize(NPNetscapeFuncs* nsTable)
+NPError
+NP_Initialize(NPNetscapeFuncs* nsTable)
 {
     /* validate input parameters */
 
@@ -608,7 +636,8 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
     return NPP_Initialize();
 }
 
-NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
+NPError
+NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
 {
     int navMinorVers = getMinorVersion();
 
@@ -648,7 +677,8 @@ NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
     return NPERR_NO_ERROR;
 }
 
-NPError NP_Shutdown(void)
+NPError
+NP_Shutdown(void)
 {
     NPP_Shutdown();
     return NPERR_NO_ERROR;
