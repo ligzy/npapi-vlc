@@ -461,8 +461,10 @@ static bool boolValue(const char *value) {
             !strcasecmp(value, "yes") );
 }
 
+/* function implementations */
 NPError
-   Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode, int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
+Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
+        int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
 {
     /* find out, if the plugin should run in windowless mode.
      * if yes, choose the CoreGraphics drawing model */
