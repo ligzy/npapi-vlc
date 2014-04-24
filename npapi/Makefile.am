@@ -60,7 +60,7 @@ AM_CPPFLAGS += -DXP_UNIX -DDATA_PATH=\"$(pkgdatadir)\" $(XCB_CFLAGS)
 libvlcplugin_la_SOURCES += \
 	vlcwindowless_xcb.cpp vlcwindowless_xcb.h \
 	vlcwindowless_base.cpp vlcwindowless_base.h \
-	support/npunix.cpp support/npcommon.cpp
+	npcontrol/npunix.cpp npcontrol/npcommon.cpp
 libvlcplugin_la_LIBADD += $(MOZILLA_LIBS) $(XCB_LIBS)
 
 if WITH_GTK
@@ -95,7 +95,7 @@ libvlcplugin_la_SOURCES += \
 	vlcplugin_win.cpp vlcplugin_win.h \
 	vlcwindowless_base.cpp vlcwindowless_base.h \
 	vlcwindowless_win.cpp vlcwindowless_win.h \
-	support/npwin.cpp support/npcommon.cpp
+	npcontrol/npwin.cpp npcontrol/npcommon.cpp
 
 npvlc_la_DEPENDENCIES += $(DATA_npvlc_rc)
 npvlc_la_LDFLAGS += -Wl,--kill-at -Wl,$(DATA_npvlc_rc)
@@ -133,7 +133,7 @@ noinst_LTLIBRARIES = libvlcplugin_objc.la
 libvlcplugin_la_SOURCES += \
 	vlcwindowless_base.cpp vlcwindowless_base.h \
 	vlcwindowless_mac.cpp vlcwindowless_mac.h \
-	support/npmac.cpp support/npcommon.cpp
+	npcontrol/npmac.cpp npcontrol/npcommon.cpp
 libvlcplugin_la_LIBADD += libvlcplugin_objc.la
 libvlcplugin_la_LDFLAGS += \
 	-bundle -Wl,-headerpad_max_install_names \
