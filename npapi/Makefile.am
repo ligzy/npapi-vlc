@@ -133,7 +133,7 @@ noinst_LTLIBRARIES = libvlcplugin_objc.la
 libvlcplugin_la_SOURCES += \
 	vlcwindowless_base.cpp vlcwindowless_base.h \
 	vlcwindowless_mac.cpp vlcwindowless_mac.h \
-	support/npmac.cpp
+	support/npmac.cpp support/npcommon.cpp
 libvlcplugin_la_LIBADD += libvlcplugin_objc.la
 libvlcplugin_la_LDFLAGS += \
 	-bundle -Wl,-headerpad_max_install_names \
