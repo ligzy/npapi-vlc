@@ -522,7 +522,7 @@ Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
     PLUGINDEBUGSTR("New");
     gUserAgent = NPN_UserAgent(instance);
     ret = NPP_New(pluginType, instance, mode, argc, argn, argv, saved);
-    return ret; 
+    return ret;
 }
 
 NPError
@@ -542,6 +542,20 @@ Private_SetWindow(NPP instance, NPWindow* window)
 }
 
 NPError
+Private_GetValue(NPP instance, NPPVariable variable, void *r_value)
+{
+    PLUGINDEBUGSTR("GetValue");
+    return NPP_GetValue(instance, variable, r_value);
+}
+
+NPError
+Private_SetValue(NPP instance, NPNVariable variable, void *r_value)
+{
+    PLUGINDEBUGSTR("SetValue");
+    return NPP_SetValue(instance, variable, r_value);
+}
+
+NPError
 Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream,
             NPBool seekable, uint16_t* stype)
 {
@@ -554,7 +568,7 @@ Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream,
 int32_t
 Private_WriteReady(NPP instance, NPStream* stream)
 {
-    unsigned int result;
+    int32_t result;
     PLUGINDEBUGSTR("WriteReady");
     result = NPP_WriteReady(instance, stream);
     return result;
@@ -589,8 +603,7 @@ Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 }
 
 void
-Private_URLNotify(NPP instance, const char* url,
-                NPReason reason, void* notifyData)
+Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
 {
     PLUGINDEBUGSTR("URLNotify");
     NPP_URLNotify(instance, url, reason, notifyData);
@@ -606,22 +619,10 @@ Private_Print(NPP instance, NPPrint* platformPrint)
 int16_t
 Private_HandleEvent(NPP instance, NPEvent *event)
 {
+    int16_t result;
     PLUGINDEBUGSTR("HandleEvent");
-    NPP_HandleEvent(instance, event);
-}
-
-NPError
-Private_GetValue(NPP instance, NPPVariable variable, void *r_value)
-{
-    PLUGINDEBUGSTR("GetValue");
-    return NPP_GetValue(instance, variable, r_value);
-}
-
-NPError
-Private_SetValue(NPP instance, NPNVariable variable, void *r_value)
-{
-    PLUGINDEBUGSTR("SetValue");
-    return NPP_SetValue(instance, variable, r_value);
+    result = NPP_HandleEvent(instance, event);
+    return result;
 }
 
 /*********************************************************************** 

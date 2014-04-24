@@ -523,53 +523,49 @@ NPError
 NPError
 Private_Destroy(NPP instance, NPSavedData** save)
 {
-    NPError err;
-    err = NPP_Destroy(instance, save);
-
-    return err;
+    PLUGINDEBUGSTR("Destroy");
+    return NPP_Destroy(instance, save);
 }
 
 NPError
 Private_SetWindow(NPP instance, NPWindow* window)
 {
     NPError err;
+    PLUGINDEBUGSTR("SetWindow");
     err = NPP_SetWindow(instance, window);
-
     return err;
 }
 
 NPError
-Private_GetValue( NPP instance, NPPVariable variable, void *value)
+Private_GetValue(NPP instance, NPPVariable variable, void *r_value)
 {
-    NPError err;
-    err = NPP_GetValue(instance, variable, value);
-
-    return err;
+    PLUGINDEBUGSTR("GetValue");
+    return NPP_GetValue(instance, variable, r_value);
 }
 
 NPError
-Private_SetValue( NPP instance, NPNVariable variable, void *value)
+Private_SetValue(NPP instance, NPNVariable variable, void *r_value)
 {
-    NPError err;
-    err = NPP_SetValue(instance, variable, value);
-
-    return err;
+    PLUGINDEBUGSTR("SetValue");
+    return NPP_SetValue(instance, variable, r_value);
 }
 
 NPError
-Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream, NPBool seekable, uint16_t* stype)
+Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream,
+            NPBool seekable, uint16_t* stype)
 {
     NPError err;
+    PLUGINDEBUGSTR("NewStream");
     err = NPP_NewStream(instance, type, stream, seekable, stype);
-
     return err;
 }
 
-int32_t Private_WriteReady(NPP instance, NPStream* stream)
+int32_t
+Private_WriteReady(NPP instance, NPStream* stream)
 {
     int32_t result;
+    PLUGINDEBUGSTR("WriteReady");
     result = NPP_WriteReady(instance, stream);
-
     return result;
 }
 
@@ -601,17 +597,27 @@ Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
     return err;
 }
 
-int16_t Private_HandleEvent(NPP instance, void* event)
+void
+Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
 {
-    int16_t result;
-    result = NPP_HandleEvent(instance, event);
-
-    return result;
+    PLUGINDEBUGSTR("URLNotify");
+    NPP_URLNotify(instance, url, reason, notifyData);
 }
 
-void Private_Print(NPP instance, NPPrint* platformPrint)
+void
+Private_Print(NPP instance, NPPrint* platformPrint)
 {
+    PLUGINDEBUGSTR("Print");
     NPP_Print(instance, platformPrint);
+}
+
+int16_t
+Private_HandleEvent(NPP instance, void* event)
+{
+    int16_t result;
+    PLUGINDEBUGSTR("HandleEvent");
+    result = NPP_HandleEvent(instance, event);
+    return result;
 }
 
 void Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
