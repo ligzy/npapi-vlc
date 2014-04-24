@@ -220,15 +220,29 @@ NPN_NewStream(NPP instance, NPMIMEType type, const char *window,
 int32_t
 NPN_Write(NPP instance, NPStream* stream, int32_t len, void* buffer)
 {
-    return CALL_NPN(CallNPN_WriteProc,gNetscapeFuncs->write, instance,
-                    stream, len, buffer);
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_STREAMOUTPUT)
+        err = CALL_NPN(CallNPN_WriteProc, gNetscapeFuncs->write, instance, stream, len, buffer);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
 }
 
 NPError
 NPN_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 {
-    return CALL_NPN(CallNPN_DestroyStreamProc,gNetscapeFuncs->destroystream,
-                        instance, stream, reason);
+    int minor = getMinorVersion();
+    NPError err;
+
+    if (minor >= NPVERS_HAS_STREAMOUTPUT)
+        err = CALL_NPN(CallNPN_DestroyStreamProc, gNetscapeFuncs->destroystream, instance, stream, reason);
+    else
+        err = NPERR_INCOMPATIBLE_VERSION_ERROR;
+
+    return err;
 }
 
 void
@@ -267,32 +281,32 @@ void NPN_ReloadPlugins(NPBool reloadPages)
 void
 NPN_InvalidateRect(NPP instance, NPRect *invalidRect)
 {
-    CALL_NPN(CallNPN_InvalidateRectProc,gNetscapeFuncs->invalidaterect, instance,
+    CALL_NPN(CallNPN_InvalidateRectProc, gNetscapeFuncs->invalidaterect, instance,
         invalidRect);
 }
 
 void
 NPN_InvalidateRegion(NPP instance, NPRegion invalidRegion)
 {
-    CALL_NPN(CallNPN_InvalidateRegionProc,gNetscapeFuncs->invalidateregion, instance,
+    CALL_NPN(CallNPN_InvalidateRegionProc, gNetscapeFuncs->invalidateregion, instance,
         invalidRegion);
 }
 
 void
 NPN_ForceRedraw(NPP instance)
 {
-    CALL_NPN(CallNPN_ForceRedrawProc,gNetscapeFuncs->forceredraw, instance);
+    CALL_NPN(CallNPN_ForceRedrawProc, gNetscapeFuncs->forceredraw, instance);
 }
 
 void NPN_PushPopupsEnabledState(NPP instance, NPBool enabled)
 {
-    CALL_NPN(CallNPN_PushPopupsEnabledStateProc,gNetscapeFuncs->pushpopupsenabledstate,
+    CALL_NPN(CallNPN_PushPopupsEnabledStateProc, gNetscapeFuncs->pushpopupsenabledstate,
         instance, enabled);
 }
 
 void NPN_PopPopupsEnabledState(NPP instance)
 {
-    CALL_NPN(CallNPN_PopPopupsEnabledStateProc,gNetscapeFuncs->poppopupsenabledstate,
+    CALL_NPN(CallNPN_PopPopupsEnabledStateProc, gNetscapeFuncs->poppopupsenabledstate,
         instance);
 }
 
@@ -379,80 +393,79 @@ void NPN_ReleaseObject(NPObject *npobj)
         CALL_NPN(CallNPN_ReleaseObjectProc, gNetscapeFuncs->releaseobject, npobj);
 }
 
-bool NPN_Invoke(NPP npp, NPObject* obj, NPIdentifier methodName,
+bool NPN_Invoke(NPP instance, NPObject *npobj, NPIdentifier methodName,
                 const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_InvokeProc,gNetscapeFuncs->invoke, npp, obj, methodName,
-                                  args, argCount, result);
+        return CALL_NPN(CallNPN_InvokeProc, gNetscapeFuncs->invoke, instance, npobj, methodName,
+                        args, argCount, result);
     return false;
 }
 
-bool NPN_InvokeDefault(NPP npp, NPObject* obj, const NPVariant *args,
+bool NPN_InvokeDefault(NPP instance, NPObject *npobj, const NPVariant *args,
                        uint32_t argCount, NPVariant *result)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_InvokeDefaultProc,gNetscapeFuncs->invokeDefault, npp, obj,
-                                         args, argCount, result);
+        return CALL_NPN(CallNPN_InvokeDefaultProc, gNetscapeFuncs->invokeDefault, instance, npobj,
+                        args, argCount, result);
     return false;
 }
 
-bool NPN_Evaluate(NPP npp, NPObject* obj, NPString *script,
-                  NPVariant *result)
+bool NPN_Evaluate(NPP instance, NPObject *npobj, NPString *script, NPVariant *result)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_EvaluateProc,gNetscapeFuncs->evaluate, npp, obj,
-                                    script, result);
+        return CALL_NPN(CallNPN_EvaluateProc, gNetscapeFuncs->evaluate, instance, npobj,
+                        script, result);
     return false;
 }
 
-bool NPN_GetProperty(NPP npp, NPObject* obj, NPIdentifier propertyName,
+bool NPN_GetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName,
                      NPVariant *result)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_GetPropertyProc,gNetscapeFuncs->getproperty, npp, obj,
-                                       propertyName, result);
+        return CALL_NPN(CallNPN_GetPropertyProc, gNetscapeFuncs->getproperty, instance, npobj,
+                        propertyName, result);
     return false;
 }
 
-bool NPN_SetProperty(NPP npp, NPObject* obj, NPIdentifier propertyName,
+bool NPN_SetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName,
                      const NPVariant *value)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_SetPropertyProc,gNetscapeFuncs->setproperty, npp, obj,
-                                       propertyName, value);
+        return CALL_NPN(CallNPN_SetPropertyProc, gNetscapeFuncs->setproperty, instance, npobj,
+                        propertyName, value);
     return false;
 }
 
-bool NPN_RemoveProperty(NPP npp, NPObject* obj, NPIdentifier propertyName)
+bool NPN_RemoveProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_RemovePropertyProc,gNetscapeFuncs->removeproperty, npp, obj,
-                                          propertyName);
+        return CALL_NPN(CallNPN_RemovePropertyProc, gNetscapeFuncs->removeproperty, instance, npobj,
+                        propertyName);
     return false;
 }
 
-bool NPN_HasProperty(NPP npp, NPObject* obj, NPIdentifier propertyName)
+bool NPN_HasProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_HasPropertyProc,gNetscapeFuncs->hasproperty, npp, obj,
-                                       propertyName);
+        return CALL_NPN(CallNPN_HasPropertyProc, gNetscapeFuncs->hasproperty, instance, npobj,
+                        propertyName);
     return false;
 }
 
-bool NPN_HasMethod(NPP npp, NPObject* obj, NPIdentifier methodName)
+bool NPN_HasMethod(NPP instance, NPObject *npobj, NPIdentifier methodName)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_HasMethodProc,gNetscapeFuncs->hasmethod, npp,
-                                     obj, methodName);
+        return CALL_NPN(CallNPN_HasMethodProc, gNetscapeFuncs->hasmethod, instance,
+                        npobj, methodName);
     return false;
 }
 
@@ -460,14 +473,14 @@ void NPN_ReleaseVariantValue(NPVariant *variant)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        CALL_NPN(CallNPN_ReleaseVariantValueProc,gNetscapeFuncs->releasevariantvalue, variant);
+        CALL_NPN(CallNPN_ReleaseVariantValueProc, gNetscapeFuncs->releasevariantvalue, variant);
 }
 
-void NPN_SetException(NPObject* obj, const NPUTF8 *message)
+void NPN_SetException(NPObject *npobj, const NPUTF8 *message)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        CALL_NPN(CallNPN_SetExceptionProc,gNetscapeFuncs->setexception, obj, message);
+        CALL_NPN(CallNPN_SetExceptionProc, gNetscapeFuncs->setexception, npobj, message);
 }
 
 /***********************************************************************
@@ -551,9 +564,10 @@ int32_t
 Private_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len,
         void* buffer)
 {
-    unsigned int result;
+    int32_t result;
     PLUGINDEBUGSTR("Write");
     result = NPP_Write(instance, stream, offset, len, buffer);
+
     return result;
 }
 
@@ -564,13 +578,13 @@ Private_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
     NPP_StreamAsFile(instance, stream, fname);
 }
 
-
 NPError
 Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 {
     NPError err;
     PLUGINDEBUGSTR("DestroyStream");
     err = NPP_DestroyStream(instance, stream, reason);
+
     return err;
 }
 
