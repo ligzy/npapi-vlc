@@ -42,8 +42,11 @@
 //\\// DEFINE
 #define NP_EXPORT
 
-//\\// GLOBAL DATA
-static NPNetscapeFuncs* gNetscapeFuncs;
+/***********************************************************************
+ * Globals
+ ***********************************************************************/
+static NPNetscapeFuncs  *gNetscapeFuncs;    /* Netscape Function table */
+static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\.
 ////\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//.
