@@ -620,11 +620,6 @@ Private_HandleEvent(NPP instance, void* event)
     return result;
 }
 
-void Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
-{
-    NPP_URLNotify(instance, url, reason, notifyData);
-}
-
 #pragma mark -
 #pragma mark Initialization & Run
 
