@@ -125,8 +125,8 @@ spushd extras/macosx/vlc/contrib
 if ! [ -e ${ARCH}-npapi ]; then
 mkdir ${ARCH}-npapi
 cd ${ARCH}-npapi
-../bootstrap --build=${ARCH}-apple-darwin10 --disable-disc \
- --disable-sout --disable-gpl --disable-sdl --disable-sparkle \
+../bootstrap --build=${ARCH}-apple-darwin10 \
+ --disable-sout --disable-sdl --disable-sparkle \
  --disable-bghudappkit --disable-growl --disable-goom \
  --disable-SDL_image --disable-lua --disable-chromaprint \
  --disable-caca --disable-upnp --disable-vncserver \
