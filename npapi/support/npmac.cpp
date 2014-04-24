@@ -44,6 +44,7 @@
 
 short               gResFile;           // Refnum of the plugin’s resource file
 static NPNetscapeFuncs     *gNetscapeFuncs;      // Function table for procs in Netscape called by plugin
+static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }
 
 
 #pragma mark -
@@ -54,12 +55,12 @@ void NPN_Version(int* plugin_major, int* plugin_minor, int* netscape_major, int*
     *plugin_major = NP_VERSION_MAJOR;
     *plugin_minor = NP_VERSION_MINOR;
     *netscape_major = gNetscapeFuncs->version >> 8;      // Major version is in high byte
-    *netscape_minor = gNetscapeFuncs->version & 0xFF;    // Minor version is in low byte
+    *netscape_minor = getMinorVersion();    // Minor version is in low byte
 }
 
 NPError NPN_GetURLNotify(NPP instance, const char* url, const char* window, void* notifyData)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     NPError err;
 
     if (navMinorVers >= NPVERS_HAS_NOTIFICATION)
@@ -77,7 +78,7 @@ NPError NPN_GetURL(NPP instance, const char* url, const char* window)
 
 NPError NPN_PostURLNotify(NPP instance, const char* url, const char* window, uint32_t len, const char* buf, NPBool file, void* notifyData)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     NPError err;
 
     if (navMinorVers >= NPVERS_HAS_NOTIFICATION) {
@@ -102,7 +103,7 @@ NPError NPN_RequestRead(NPStream* stream, NPByteRange* rangeList)
 
 NPError NPN_NewStream(NPP instance, NPMIMEType type, const char* window, NPStream** stream)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     NPError err;
 
     if (navMinorVers >= NPVERS_HAS_STREAMOUTPUT)
@@ -115,7 +116,7 @@ NPError NPN_NewStream(NPP instance, NPMIMEType type, const char* window, NPStrea
 
 int32_t NPN_Write(NPP instance, NPStream* stream, int32_t len, void* buffer)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     NPError err;
 
     if (navMinorVers >= NPVERS_HAS_STREAMOUTPUT)
@@ -128,7 +129,7 @@ int32_t NPN_Write(NPP instance, NPStream* stream, int32_t len, void* buffer)
 
 NPError NPN_DestroyStream(NPP instance, NPStream* stream, NPError reason)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     NPError err;
 
     if (navMinorVers >= NPVERS_HAS_STREAMOUTPUT)
@@ -201,7 +202,7 @@ void NPN_ForceRedraw(NPP instance)
 
 NPIdentifier NPN_GetStringIdentifier(const NPUTF8 *name)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_GetStringIdentifierProc, gNetscapeFuncs->getstringidentifier, name);
 
@@ -210,14 +211,14 @@ NPIdentifier NPN_GetStringIdentifier(const NPUTF8 *name)
 
 void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount, NPIdentifier *identifiers)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         CALL_NPN(CallNPN_GetStringIdentifiersProc, gNetscapeFuncs->getstringidentifiers, names, nameCount, identifiers);
 }
 
 NPIdentifier NPN_GetIntIdentifier(int32_t intid)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_GetIntIdentifierProc, gNetscapeFuncs->getintidentifier, intid);
 
@@ -226,7 +227,7 @@ NPIdentifier NPN_GetIntIdentifier(int32_t intid)
 
 bool NPN_IdentifierIsString(NPIdentifier identifier)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_IdentifierIsStringProc, gNetscapeFuncs->identifierisstring, identifier);
 
@@ -235,7 +236,7 @@ bool NPN_IdentifierIsString(NPIdentifier identifier)
 
 NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_UTF8FromIdentifierProc, gNetscapeFuncs->utf8fromidentifier, identifier);
 
@@ -244,7 +245,7 @@ NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
 
 int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_IntFromIdentifierProc, gNetscapeFuncs->intfromidentifier, identifier);
 
@@ -253,7 +254,7 @@ int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
 
 NPObject *NPN_CreateObject(NPP instance, NPClass *aClass)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_CreateObjectProc, gNetscapeFuncs->createobject, instance, aClass);
 
@@ -262,7 +263,7 @@ NPObject *NPN_CreateObject(NPP instance, NPClass *aClass)
 
 NPObject *NPN_RetainObject(NPObject *npobj)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_RetainObjectProc, gNetscapeFuncs->retainobject, npobj);
 
@@ -271,14 +272,14 @@ NPObject *NPN_RetainObject(NPObject *npobj)
 
 void NPN_ReleaseObject(NPObject *npobj)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         CALL_NPN(CallNPN_ReleaseObjectProc, gNetscapeFuncs->releaseobject, npobj);
 }
 
 bool NPN_Invoke(NPP instance, NPObject *npobj, NPIdentifier methodName, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_InvokeProc, gNetscapeFuncs->invoke, instance, npobj, methodName, args, argCount, result);
 
@@ -287,7 +288,7 @@ bool NPN_Invoke(NPP instance, NPObject *npobj, NPIdentifier methodName, const NP
 
 bool NPN_InvokeDefault(NPP instance, NPObject *npobj, const NPVariant *args, uint32_t argCount, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_InvokeDefaultProc, gNetscapeFuncs->invokeDefault, instance, npobj, args, argCount, result);
 
@@ -296,7 +297,7 @@ bool NPN_InvokeDefault(NPP instance, NPObject *npobj, const NPVariant *args, uin
 
 bool NPN_Evaluate(NPP instance, NPObject *npobj, NPString *script, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_EvaluateProc, gNetscapeFuncs->evaluate, instance, npobj, script, result);
 
@@ -305,7 +306,7 @@ bool NPN_Evaluate(NPP instance, NPObject *npobj, NPString *script, NPVariant *re
 
 bool NPN_GetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName, NPVariant *result)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_GetPropertyProc, gNetscapeFuncs->getproperty, instance, npobj, propertyName, result);
 
@@ -314,7 +315,7 @@ bool NPN_GetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName, N
 
 bool NPN_SetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName, const NPVariant *value)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_SetPropertyProc, gNetscapeFuncs->setproperty, instance, npobj, propertyName, value);
 
@@ -323,7 +324,7 @@ bool NPN_SetProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName, c
 
 bool NPN_RemoveProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_RemovePropertyProc, gNetscapeFuncs->removeproperty, instance, npobj, propertyName);
 
@@ -332,7 +333,7 @@ bool NPN_RemoveProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName
 
 bool NPN_HasProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_HasPropertyProc, gNetscapeFuncs->hasproperty, instance, npobj, propertyName);
 
@@ -341,7 +342,7 @@ bool NPN_HasProperty(NPP instance, NPObject *npobj, NPIdentifier propertyName)
 
 bool NPN_HasMethod(NPP instance, NPObject *npobj, NPIdentifier methodName)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         return CALL_NPN(CallNPN_HasMethodProc, gNetscapeFuncs->hasmethod, instance, npobj, methodName);
 
@@ -350,14 +351,14 @@ bool NPN_HasMethod(NPP instance, NPObject *npobj, NPIdentifier methodName)
 
 void NPN_ReleaseVariantValue(NPVariant *variant)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         CALL_NPN(CallNPN_ReleaseVariantValueProc, gNetscapeFuncs->releasevariantvalue, variant);
 }
 
 void NPN_SetException(NPObject *npobj, const NPUTF8 *message)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
     if (navMinorVers >= 14)
         CALL_NPN(CallNPN_SetExceptionProc, gNetscapeFuncs->setexception, npobj, message);
 }
@@ -605,7 +606,7 @@ NPError NP_Initialize(NPNetscapeFuncs* nsTable)
 
 NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
 {
-    int navMinorVers = gNetscapeFuncs->version & 0xFF;
+    int navMinorVers = getMinorVersion();
 
     if (pluginFuncs == NULL)
         return NPERR_INVALID_FUNCTABLE_ERROR;
