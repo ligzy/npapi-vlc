@@ -126,8 +126,8 @@ if ! [ -e ${ARCH}-npapi ]; then
 mkdir ${ARCH}-npapi
 cd ${ARCH}-npapi
 ../bootstrap --build=${ARCH}-apple-darwin10 \
- --disable-sout --disable-sdl --disable-sparkle \
- --disable-bghudappkit --disable-growl --disable-goom \
+ --disable-sout --disable-cddb --disable-bluray --disable-sdl \
+ --disable-sparkle --disable-bghudappkit --disable-growl --disable-goom \
  --disable-SDL_image --disable-lua --disable-chromaprint \
  --disable-caca --disable-upnp --disable-vncserver \
  --disable-ncurses
