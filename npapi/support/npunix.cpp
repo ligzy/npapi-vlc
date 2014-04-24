@@ -312,19 +312,15 @@ void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount,
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-    {
-        CALL_NPN(CallNPN_GetStringIdentifiersProc,gNetscapeFuncs->getstringidentifiers,
+        CALL_NPN(CallNPN_GetStringIdentifiersProc, gNetscapeFuncs->getstringidentifiers,
                                          names, nameCount, identifiers);
-    }
 }
 
 NPIdentifier NPN_GetIntIdentifier(int32_t intid)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-    {
-        return CALL_NPN(CallNPN_GetIntIdentifierProc,gNetscapeFuncs->getintidentifier, intid);
-    }
+        return CALL_NPN(CallNPN_GetIntIdentifierProc, gNetscapeFuncs->getintidentifier, intid);
     return NULL;
 }
 
@@ -344,11 +340,9 @@ NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-    {
         return CALL_NPN(CallNPN_UTF8FromIdentifierProc,
                             gNetscapeFuncs->utf8fromidentifier,
                             identifier);
-    }
     return NULL;
 }
 
@@ -356,35 +350,33 @@ int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-    {
         return CALL_NPN(CallNPN_IntFromIdentifierProc,
                         gNetscapeFuncs->intfromidentifier,
                         identifier);
-    }
     return 0;
 }
 
-NPObject *NPN_CreateObject(NPP npp, NPClass *aClass)
+NPObject *NPN_CreateObject(NPP instance, NPClass *aClass)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_CreateObjectProc,gNetscapeFuncs->createobject, npp, aClass);
+        return CALL_NPN(CallNPN_CreateObjectProc, gNetscapeFuncs->createobject, instance, aClass);
     return NULL;
 }
 
-NPObject *NPN_RetainObject(NPObject *obj)
+NPObject *NPN_RetainObject(NPObject *npobj)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        return CALL_NPN(CallNPN_RetainObjectProc,gNetscapeFuncs->retainobject, obj);
+        return CALL_NPN(CallNPN_RetainObjectProc, gNetscapeFuncs->retainobject, npobj);
     return NULL;
 }
 
-void NPN_ReleaseObject(NPObject *obj)
+void NPN_ReleaseObject(NPObject *npobj)
 {
     int minor = getMinorVersion();
     if( minor >= 14 )
-        CALL_NPN(CallNPN_ReleaseObjectProc,gNetscapeFuncs->releaseobject, obj);
+        CALL_NPN(CallNPN_ReleaseObjectProc, gNetscapeFuncs->releaseobject, npobj);
 }
 
 bool NPN_Invoke(NPP npp, NPObject* obj, NPIdentifier methodName,

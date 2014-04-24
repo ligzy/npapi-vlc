@@ -214,9 +214,10 @@ NPN_SetValue(NPP instance, NPPVariable variable, void *value)
 }
 
 void
-NPN_InvalidateRect(NPP instance, NPRect *rect)
+NPN_InvalidateRect(NPP instance, NPRect *invalidRect)
 {
-    CALL_NPN(CallNPN_InvalidateRectProc, gNetscapeFuncs->invalidaterect, instance, rect);
+    CALL_NPN(CallNPN_InvalidateRectProc,gNetscapeFuncs->invalidaterect, instance,
+        invalidRect);
 }
 
 void
@@ -233,77 +234,83 @@ void NPN_ForceRedraw(NPP instance)
 NPIdentifier NPN_GetStringIdentifier(const NPUTF8 *name)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
-        return CALL_NPN(CallNPN_GetStringIdentifierProc, gNetscapeFuncs->getstringidentifier, name);
-
+    if( minor >= 14 )
+    {
+        return CALL_NPN(CallNPN_GetStringIdentifierProc,
+                        gNetscapeFuncs->getstringidentifier, name);
+    }
     return NULL;
 }
 
-void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount, NPIdentifier *identifiers)
+void NPN_GetStringIdentifiers(const NPUTF8 **names, int32_t nameCount,
+                              NPIdentifier *identifiers)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
-        CALL_NPN(CallNPN_GetStringIdentifiersProc, gNetscapeFuncs->getstringidentifiers, names, nameCount, identifiers);
+    if( minor >= 14 )
+        CALL_NPN(CallNPN_GetStringIdentifiersProc, gNetscapeFuncs->getstringidentifiers,
+                                         names, nameCount, identifiers);
 }
 
 NPIdentifier NPN_GetIntIdentifier(int32_t intid)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
+    if( minor >= 14 )
         return CALL_NPN(CallNPN_GetIntIdentifierProc, gNetscapeFuncs->getintidentifier, intid);
-
     return NULL;
 }
 
 bool NPN_IdentifierIsString(NPIdentifier identifier)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
-        return CALL_NPN(CallNPN_IdentifierIsStringProc, gNetscapeFuncs->identifierisstring, identifier);
-
+    if( minor >= 14 )
+    {
+        return CALL_NPN(CallNPN_IdentifierIsStringProc,
+                        gNetscapeFuncs->identifierisstring,
+                        identifier);
+    }
     return false;
 }
 
 NPUTF8 *NPN_UTF8FromIdentifier(NPIdentifier identifier)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
-        return CALL_NPN(CallNPN_UTF8FromIdentifierProc, gNetscapeFuncs->utf8fromidentifier, identifier);
-
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_UTF8FromIdentifierProc,
+                            gNetscapeFuncs->utf8fromidentifier,
+                            identifier);
     return NULL;
 }
 
 int32_t NPN_IntFromIdentifier(NPIdentifier identifier)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
-        return CALL_NPN(CallNPN_IntFromIdentifierProc, gNetscapeFuncs->intfromidentifier, identifier);
-
+    if( minor >= 14 )
+        return CALL_NPN(CallNPN_IntFromIdentifierProc,
+                        gNetscapeFuncs->intfromidentifier,
+                        identifier);
     return 0;
 }
 
 NPObject *NPN_CreateObject(NPP instance, NPClass *aClass)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
+    if( minor >= 14 )
         return CALL_NPN(CallNPN_CreateObjectProc, gNetscapeFuncs->createobject, instance, aClass);
-
     return NULL;
 }
 
 NPObject *NPN_RetainObject(NPObject *npobj)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
+    if( minor >= 14 )
         return CALL_NPN(CallNPN_RetainObjectProc, gNetscapeFuncs->retainobject, npobj);
-
     return NULL;
 }
 
 void NPN_ReleaseObject(NPObject *npobj)
 {
     int minor = getMinorVersion();
-    if (minor >= 14)
+    if( minor >= 14 )
         CALL_NPN(CallNPN_ReleaseObjectProc, gNetscapeFuncs->releaseobject, npobj);
 }
 
@@ -695,6 +702,7 @@ NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
 NPError
 NP_Shutdown(void)
 {
+    PLUGINDEBUGSTR("NP_Shutdown");
     NPP_Shutdown();
     return NPERR_NO_ERROR;
 }
