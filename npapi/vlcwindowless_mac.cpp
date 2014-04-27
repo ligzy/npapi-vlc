@@ -36,11 +36,14 @@ static CGImageRef createImageNamed(CFStringRef name)
         return NULL;
 
     CGImageSourceRef imageSource = CGImageSourceCreateWithURL(url, NULL);
-    if (!imageSource)
+    if (!imageSource) {
+        CFRelease(url);
         return NULL;
+    }
 
     CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
     CFRelease(imageSource);
+    CFRelease(url);
 
     return image;
 }
@@ -128,7 +131,9 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
         arch = CFSTR("32-bit");
     #endif
 
-        attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%s — windowless mode — %@"), libvlc_get_version(), arch), stylesDict);
+        CFStringRef versionText = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%s — windowless mode — %@"), libvlc_get_version(), arch);
+        attRef = CFAttributedStringCreate(kCFAllocatorDefault, versionText, stylesDict);
+        CFRelease(versionText);
         textLine = CTLineCreateWithAttributedString(attRef);
         CGContextSetTextPosition(cgContext, 25., 25.);
         CTLineDraw(textLine, cgContext);
@@ -155,7 +160,9 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
                                         2, NULL, NULL);
         const char *text = get_options().get_bg_text().c_str();
         if (text != NULL) {
-            attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
+            CFStringRef customText = CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8);
+            attRef = CFAttributedStringCreate(kCFAllocatorDefault, customText, stylesDict);
+            CFRelease(customText);
             textLine = CTLineCreateWithAttributedString(attRef);
             CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
             CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.) + (coneHeight / 2.) + textRect.size.height + 50.);
@@ -184,7 +191,9 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
                                                             (const void **)&keys,
                                                             (const void **)&values,
                                                             2, NULL, NULL);
-            CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8), stylesDict);
+            CFStringRef customText = CFStringCreateWithCString(kCFAllocatorDefault, text, kCFStringEncodingUTF8);
+            CFAttributedStringRef attRef = CFAttributedStringCreate(kCFAllocatorDefault, customText, stylesDict);
+            CFRelease(customText);
             CTLineRef textLine = CTLineCreateWithAttributedString(attRef);
             CGRect textRect = CTLineGetImageBounds(textLine, cgContext);
             CGContextSetTextPosition(cgContext, ((windowWidth - textRect.size.width) / 2.), (windowHeight / 2.));
