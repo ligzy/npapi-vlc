@@ -280,8 +280,32 @@ LibvlcAudioNPObject::getProperty(int index, NPVariant &result)
             }
             case ID_audio_track:
             {
-                int track = libvlc_audio_get_track(p_md);
-                INT32_TO_NPVARIANT(track, result);
+                /* get the current internal audio track ID */
+                int actualTrack = libvlc_audio_get_track(p_md);
+
+                if (actualTrack == -1) {
+                    INT32_TO_NPVARIANT(actualTrack, result);
+                    return INVOKERESULT_NO_ERROR;
+                }
+
+                int audioTrackCount = libvlc_audio_get_track_count(p_md);
+                if (audioTrackCount < 0) {
+                    INT32_TO_NPVARIANT(actualTrack, result);
+                    return INVOKERESULT_NO_ERROR;
+                }
+
+                libvlc_track_description_t *currentTrack = libvlc_audio_get_track_description(p_md);
+                int fakeTrackIndex = 0;
+                while (currentTrack) {
+                    if (actualTrack == currentTrack->i_id)
+                        break;
+
+                    currentTrack = currentTrack->p_next;
+                    fakeTrackIndex++;
+                }
+                libvlc_track_description_list_release(currentTrack);
+
+                INT32_TO_NPVARIANT(fakeTrackIndex, result);
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_audio_count:
@@ -337,7 +361,36 @@ LibvlcAudioNPObject::setProperty(int index, const NPVariant &value)
             case ID_audio_track:
                 if( isNumberValue(value) )
                 {
-                    libvlc_audio_set_track(p_md, numberValue(value));
+                    int fakeTrackIndex = numberValue(value);
+                    if (fakeTrackIndex == -1) {
+                        /* the user doesn't want any audio
+                         * let's allow a short cut */
+                        libvlc_audio_set_track(p_md, -1);
+                        return INVOKERESULT_NO_ERROR;
+                    }
+
+                    /* bounds checking */
+                    int count = libvlc_audio_get_track_count(p_md);
+                    if (fakeTrackIndex >= count || count == 0)
+                        return INVOKERESULT_INVALID_VALUE;
+
+                    libvlc_track_description_t *currentTrack = libvlc_audio_get_track_description(p_md);
+
+                    for (unsigned int x = 0; x < fakeTrackIndex+1; x++) {
+                        if (x == fakeTrackIndex)
+                            break;
+
+                        if (currentTrack->p_next)
+                            currentTrack = currentTrack->p_next;
+                        else {
+                            libvlc_track_description_list_release(currentTrack);
+                            return INVOKERESULT_INVALID_VALUE;
+                        }
+                    }
+                    int actualTrack = currentTrack->i_id;
+                    libvlc_track_description_list_release(currentTrack);
+
+                    libvlc_audio_set_track(p_md, actualTrack);
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
@@ -394,46 +447,30 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
             {
                 if( argCount == 1)
                 {
+                    int fakeTrackIndex = isNumberValue(args[0]);
                     char *psz_name;
-                    int i_trackID, i_limit, i;
-                    libvlc_track_description_t *p_trackDesc;
 
-                    /* get tracks description */
-                    p_trackDesc = libvlc_audio_get_track_description(p_md);
-                    if( !p_trackDesc )
-                        return INVOKERESULT_GENERIC_ERROR;
-
-                    /* get the number of track available */
-                    i_limit = libvlc_audio_get_track_count(p_md);
-
-                    /* check if a number is given by the user
-                     * and get the track number */
-                    if( isNumberValue(args[0]) )
-                        i_trackID = numberValue(args[0]);
-                    else {
-                        libvlc_track_description_list_release(p_trackDesc);
+                    /* bounds checking */
+                    int count = libvlc_audio_get_track_count(p_md);
+                    if (fakeTrackIndex >= count || count == 0 || fakeTrackIndex < -1)
                         return INVOKERESULT_INVALID_VALUE;
-                    }
 
-                    /* if bad number is given return invalid value */
-                    if (i_trackID < 0) {
-                        libvlc_track_description_list_release(p_trackDesc);
-                        return INVOKERESULT_INVALID_VALUE;
-                    }
+                    libvlc_track_description_t *currentTrack = libvlc_audio_get_track_description(p_md);
 
-                    /* get the good trackDesc */
-                    for (i = 0; i < i_limit; i++)
-                    {
-                        if (p_trackDesc->i_id == i_trackID)
+                    for (unsigned int x = 0; x < fakeTrackIndex+1; x++) {
+                        if (x == fakeTrackIndex)
                             break;
 
-                        p_trackDesc = p_trackDesc->p_next;
+                        currentTrack = currentTrack->p_next;
                     }
-                    psz_name = p_trackDesc->psz_name;
-                    libvlc_track_description_list_release(p_trackDesc);
+                    psz_name = strdup(currentTrack->psz_name);
+                    libvlc_track_description_list_release(currentTrack);
 
                     /* display the name of the track chosen */
-                    return invokeResultString( psz_name, result );
+                    if (psz_name != NULL)
+                        return invokeResultString( psz_name, result );
+                    else
+                        return INVOKERESULT_GENERIC_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
             }
@@ -1258,10 +1295,32 @@ LibvlcSubtitleNPObject::getProperty(int index, NPVariant &result)
         {
             case ID_subtitle_track:
             {
-                /* get the current subtitle ID */
-                int i_spu = libvlc_video_get_spu(p_md);
-                /* return it */
-                INT32_TO_NPVARIANT(i_spu, result);
+                /* get the current internal subtitles track ID */
+                int actualTrack = libvlc_video_get_spu(p_md);
+
+                if (actualTrack == -1) {
+                    INT32_TO_NPVARIANT(actualTrack, result);
+                    return INVOKERESULT_NO_ERROR;
+                }
+
+                int spuTrackCount = libvlc_video_get_spu_count(p_md);
+                if (spuTrackCount < 0) {
+                    INT32_TO_NPVARIANT(actualTrack, result);
+                    return INVOKERESULT_NO_ERROR;
+                }
+
+                libvlc_track_description_t *currentTrack = libvlc_video_get_spu_description(p_md);
+                int fakeTrackIndex = 0;
+                while (currentTrack) {
+                    if (actualTrack == currentTrack->i_id)
+                        break;
+
+                    currentTrack = currentTrack->p_next;
+                    fakeTrackIndex++;
+                }
+                libvlc_track_description_list_release(currentTrack);
+
+                INT32_TO_NPVARIANT(fakeTrackIndex, result);
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_subtitle_count:
@@ -1294,9 +1353,36 @@ LibvlcSubtitleNPObject::setProperty(int index, const NPVariant &value)
             {
                 if( isNumberValue(value) )
                 {
-                    /* set the new subtitle track to show */
-                    libvlc_video_set_spu(p_md, numberValue(value));
+                    int fakeTrackIndex = numberValue(value);
+                    if (fakeTrackIndex == -1) {
+                        /* the user doesn't want any subs
+                         * let's allow a short cut */
+                        libvlc_audio_set_track(p_md, -1);
+                        return INVOKERESULT_NO_ERROR;
+                    }
 
+                    /* bounds checking */
+                    int count = libvlc_video_get_spu_count(p_md);
+                    if (fakeTrackIndex >= count || count == 0)
+                        return INVOKERESULT_INVALID_VALUE;
+
+                    libvlc_track_description_t *currentTrack = libvlc_video_get_spu_description(p_md);
+
+                    for (unsigned int x = 0; x < fakeTrackIndex+1; x++) {
+                        if (x == fakeTrackIndex)
+                            break;
+
+                        if (currentTrack->p_next)
+                            currentTrack = currentTrack->p_next;
+                        else {
+                            libvlc_track_description_list_release(currentTrack);
+                            return INVOKERESULT_INVALID_VALUE;
+                        }
+                    }
+                    int actualTrack = currentTrack->i_id;
+                    libvlc_track_description_list_release(currentTrack);
+
+                    libvlc_video_set_spu(p_md, actualTrack);
                     return INVOKERESULT_NO_ERROR;
                 }
                 return INVOKERESULT_INVALID_VALUE;
@@ -1335,46 +1421,30 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
             {
                 if (argCount == 1)
                 {
+                    int fakeTrackIndex = isNumberValue(args[0]);
                     char *psz_name;
-                    int i_spuID, i_limit, i;
-                    libvlc_track_description_t *p_spuDesc;
 
-                    /* get subtitles description */
-                    p_spuDesc = libvlc_video_get_spu_description(p_md);
-                    if( !p_spuDesc )
-                        return INVOKERESULT_GENERIC_ERROR;
-
-                    /* get the number of subtitle available */
-                    i_limit = libvlc_video_get_spu_count(p_md);
-
-                    /* check if a number is given by the user
-                     * and get the subtitle number */
-                    if( isNumberValue(args[0]) )
-                        i_spuID = numberValue(args[0]);
-                    else {
-                        libvlc_track_description_list_release(p_spuDesc);
+                    /* bounds checking */
+                    int count = libvlc_video_get_spu_count(p_md);
+                    if (fakeTrackIndex >= count || count == 0 || fakeTrackIndex < -1)
                         return INVOKERESULT_INVALID_VALUE;
-                    }
 
-                    /* if bad number is given return invalid value */
-                    if (i_spuID < 0) {
-                        libvlc_track_description_list_release(p_spuDesc);
-                        return INVOKERESULT_INVALID_VALUE;
-                    }
+                    libvlc_track_description_t *currentTrack = libvlc_video_get_spu_description(p_md);
 
-                    /* get the good spuDesc */
-                    for (i = 0; i < i_limit; i++)
-                    {
-                        if (p_spuDesc->i_id == i_spuID)
+                    for (unsigned int x = 0; x < fakeTrackIndex+1; x++) {
+                        if (x == fakeTrackIndex)
                             break;
 
-                        p_spuDesc = p_spuDesc->p_next;
+                        currentTrack = currentTrack->p_next;
                     }
-                    psz_name = p_spuDesc->psz_name;
-                    libvlc_track_description_list_release(p_spuDesc);
+                    psz_name = strdup(currentTrack->psz_name);
+                    libvlc_track_description_list_release(currentTrack);
 
-                    /* return the name of the track chosen */
-                    return invokeResultString(psz_name, result);
+                    /* display the name of the track chosen */
+                    if (psz_name != NULL)
+                        return invokeResultString( psz_name, result );
+                    else
+                        return INVOKERESULT_GENERIC_ERROR;
                 }
                 return INVOKERESULT_NO_SUCH_METHOD;
             }
