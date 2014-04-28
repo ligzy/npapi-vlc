@@ -445,9 +445,9 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
                 return INVOKERESULT_NO_SUCH_METHOD;
             case ID_audio_description:
             {
-                if( argCount == 1)
+                if( argCount == 1 && isNumberValue(args[0]))
                 {
-                    int fakeTrackIndex = isNumberValue(args[0]);
+                    int fakeTrackIndex = numberValue(args[0]);
                     char *psz_name;
 
                     /* bounds checking */
@@ -1419,9 +1419,9 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
         {
             case ID_subtitle_description:
             {
-                if (argCount == 1)
+                if (argCount == 1 && isNumberValue(args[0]))
                 {
-                    int fakeTrackIndex = isNumberValue(args[0]);
+                    int fakeTrackIndex = numberValue(args[0]);
                     char *psz_name;
 
                     /* bounds checking */
