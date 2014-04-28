@@ -338,7 +338,8 @@ bool VlcPluginMac::handle_event(void *event)
             CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
-            [controllerLayer handleMouseDown:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+            if (controllerLayer)
+                [controllerLayer handleMouseDown:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
 
             return true;
         }
@@ -352,7 +353,8 @@ bool VlcPluginMac::handle_event(void *event)
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
 
-            [controllerLayer handleMouseUp:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+            if (controllerLayer)
+                [controllerLayer handleMouseUp:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
 
             return true;
         }
@@ -369,7 +371,8 @@ bool VlcPluginMac::handle_event(void *event)
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
 
-            [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+            if (controllerLayer)
+                [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
 
             return true;
         }
