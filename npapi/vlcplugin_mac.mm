@@ -174,11 +174,16 @@ VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
 
 VlcPluginMac::~VlcPluginMac()
 {
-    [fullscreenWindow release];
-    [playbackLayer release];
-    [noMediaLayer release];
-    [controllerLayer release];
-    [browserRootLayer release];
+    if (fullscreenWindow)
+        [fullscreenWindow release];
+    if (playbackLayer)
+        [playbackLayer release];
+    if (noMediaLayer)
+        [noMediaLayer release];
+    if (controllerLayer)
+        [controllerLayer release];
+    if (browserRootLayer)
+        [browserRootLayer release];
 }
 
 void VlcPluginMac::set_player_window()
