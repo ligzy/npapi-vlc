@@ -283,11 +283,6 @@ LibvlcAudioNPObject::getProperty(int index, NPVariant &result)
                 /* get the current internal audio track ID */
                 int actualTrack = libvlc_audio_get_track(p_md);
 
-                if (actualTrack == -1) {
-                    INT32_TO_NPVARIANT(actualTrack, result);
-                    return INVOKERESULT_NO_ERROR;
-                }
-
                 int audioTrackCount = libvlc_audio_get_track_count(p_md);
                 if (audioTrackCount < 0) {
                     INT32_TO_NPVARIANT(actualTrack, result);
@@ -362,12 +357,6 @@ LibvlcAudioNPObject::setProperty(int index, const NPVariant &value)
                 if( isNumberValue(value) )
                 {
                     int fakeTrackIndex = numberValue(value);
-                    if (fakeTrackIndex == -1) {
-                        /* the user doesn't want any audio
-                         * let's allow a short cut */
-                        libvlc_audio_set_track(p_md, -1);
-                        return INVOKERESULT_NO_ERROR;
-                    }
 
                     /* bounds checking */
                     int count = libvlc_audio_get_track_count(p_md);
@@ -452,7 +441,7 @@ LibvlcAudioNPObject::invoke(int index, const NPVariant *args,
 
                     /* bounds checking */
                     int count = libvlc_audio_get_track_count(p_md);
-                    if (fakeTrackIndex >= count || count == 0 || fakeTrackIndex < -1)
+                    if (fakeTrackIndex >= count || count == 0 || fakeTrackIndex < 0)
                         return INVOKERESULT_INVALID_VALUE;
 
                     libvlc_track_description_t *currentTrack = libvlc_audio_get_track_description(p_md);
@@ -1298,11 +1287,6 @@ LibvlcSubtitleNPObject::getProperty(int index, NPVariant &result)
                 /* get the current internal subtitles track ID */
                 int actualTrack = libvlc_video_get_spu(p_md);
 
-                if (actualTrack == -1) {
-                    INT32_TO_NPVARIANT(actualTrack, result);
-                    return INVOKERESULT_NO_ERROR;
-                }
-
                 int spuTrackCount = libvlc_video_get_spu_count(p_md);
                 if (spuTrackCount < 0) {
                     INT32_TO_NPVARIANT(actualTrack, result);
@@ -1354,12 +1338,6 @@ LibvlcSubtitleNPObject::setProperty(int index, const NPVariant &value)
                 if( isNumberValue(value) )
                 {
                     int fakeTrackIndex = numberValue(value);
-                    if (fakeTrackIndex == -1) {
-                        /* the user doesn't want any subs
-                         * let's allow a short cut */
-                        libvlc_audio_set_track(p_md, -1);
-                        return INVOKERESULT_NO_ERROR;
-                    }
 
                     /* bounds checking */
                     int count = libvlc_video_get_spu_count(p_md);
@@ -1426,7 +1404,7 @@ LibvlcSubtitleNPObject::invoke(int index, const NPVariant *args,
 
                     /* bounds checking */
                     int count = libvlc_video_get_spu_count(p_md);
-                    if (fakeTrackIndex >= count || count == 0 || fakeTrackIndex < -1)
+                    if (fakeTrackIndex >= count || count == 0 || fakeTrackIndex < 0)
                         return INVOKERESULT_INVALID_VALUE;
 
                     libvlc_track_description_t *currentTrack = libvlc_video_get_spu_description(p_md);
