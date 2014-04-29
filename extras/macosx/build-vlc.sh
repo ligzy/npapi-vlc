@@ -270,7 +270,6 @@ logger
 visual
 fb
 aout_file
-yuv
 dummy
 invert
 sepia
