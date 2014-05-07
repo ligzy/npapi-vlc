@@ -102,7 +102,7 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
         keys[0] = kCTFontAttributeName;
         keys[1] = kCTForegroundColorFromContextAttributeName;
         CFTypeRef values[2];
-        values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
+        values[0] = CTFontCreateWithName(CFSTR("HelveticaNeue-Light"),18,NULL);
         values[1] = kCFBooleanTrue;
         CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
                                                         (const void **)&keys,
@@ -185,7 +185,7 @@ void VlcWindowlessMac::drawNoPlayback(CGContextRef cgContext)
             keys[0] = kCTFontAttributeName;
             keys[1] = kCTForegroundColorFromContextAttributeName;
             CFTypeRef values[2];
-            values[0] = CTFontCreateWithName(CFSTR("Helvetica Neue Light"),18,NULL);
+            values[0] = CTFontCreateWithName(CFSTR("HelveticaNeue-Light"),18,NULL);
             values[1] = kCFBooleanTrue;
             CFDictionaryRef stylesDict = CFDictionaryCreate(kCFAllocatorDefault,
                                                             (const void **)&keys,
