@@ -79,6 +79,15 @@ STDMETHODIMP VLCPersistPropertyBag::Load(LPPROPERTYBAG pPropBag, LPERRORLOG pErr
                 _p_instance->setMRL(V_BSTR(&value));
                 VariantClear(&value);
             }
+            else
+            {
+                V_VT(&value) = VT_BSTR;
+                if( S_OK == pPropBag->Read(OLESTR("target"), &value, pErrorLog) )
+                {
+                    _p_instance->setMRL(V_BSTR(&value));
+                    VariantClear(&value);
+                }
+            }
         }
     }
 
@@ -106,6 +115,18 @@ STDMETHODIMP VLCPersistPropertyBag::Load(LPPROPERTYBAG pPropBag, LPERRORLOG pErr
     {
         _p_instance->setShowToolbar(V_BOOL(&value) != VARIANT_FALSE);
         VariantClear(&value);
+    }
+    else
+    {
+        /*
+        ** try alternative syntax
+        */
+        V_VT(&value) = VT_BOOL;
+        if( S_OK == pPropBag->Read(OLESTR("controls"), &value, pErrorLog) )
+        {
+            _p_instance->setShowToolbar(V_BOOL(&value) != VARIANT_FALSE);
+            VariantClear(&value);
+        }
     }
 
     SIZEL size = _p_instance->getExtent();
@@ -217,6 +238,27 @@ STDMETHODIMP VLCPersistPropertyBag::Load(LPPROPERTYBAG pPropBag, LPERRORLOG pErr
     {
         _p_instance->get_options().set_enable_fs(V_BOOL(&value) != VARIANT_FALSE);
         VariantClear(&value);
+    }
+    else
+    {
+        /*
+        ** try alternative syntax
+        */
+        V_VT(&value) = VT_BOOL;
+        if( S_OK == pPropBag->Read(OLESTR("allowfullscreen"), &value, pErrorLog) )
+        {
+            _p_instance->get_options().set_enable_fs(V_BOOL(&value) != VARIANT_FALSE);
+            VariantClear(&value);
+        }
+        else
+        {
+            V_VT(&value) = VT_BOOL;
+            if( S_OK == pPropBag->Read(OLESTR("fullscreen"), &value, pErrorLog) )
+            {
+                _p_instance->get_options().set_enable_fs(V_BOOL(&value) != VARIANT_FALSE);
+                VariantClear(&value);
+            }
+        }
     }
 
     return _p_instance->onLoad();
