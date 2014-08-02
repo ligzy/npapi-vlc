@@ -3,6 +3,7 @@
     <em:id>vlc-plugin@videolan.org</em:id>
     <em:name>VLC Web Plugin</em:name>
     <em:version>@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_REVISION@@VERSION_EXTRA@</em:version>
+    <em:unpack>true</em:unpack>
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
