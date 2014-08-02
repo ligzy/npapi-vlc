@@ -167,7 +167,8 @@ NPError VlcPluginBase::init(int argc, char* const argn[], char* const argv[])
             set_autoplay(boolValue(argv[i]));
         }
         else if( !strcmp( argn[i], "fullscreen" )
-              || !strcmp( argn[i], "allowfullscreen" ) )
+              || !strcmp( argn[i], "allowfullscreen" )
+              || !strcmp( argn[i], "fullscreenenabled" ) )
         {
             set_enable_fs( boolValue(argv[i]) );
         }
