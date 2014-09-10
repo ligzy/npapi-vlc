@@ -63,6 +63,7 @@ AC_CHECK_TOOL(DLLTOOL, dlltool, :)
 dnl Check for compiler properties
 AC_C_CONST
 
+WIDLFLAGS=""
 dnl
 dnl  Check the operating system
 dnl
@@ -114,6 +115,14 @@ AS_IF([test "${SYS}" = "mingw32"],[
     AC_CHECK_PROGS(MIDL, [midl], no)
     AC_CHECK_TOOL(WIDL, [widl], no)
 
+    case "${host}" in
+        amd64*|x86_64*)
+            WIDLFLAGS=" -m64"
+        ;;
+        *)
+            WIDLFLAGS=" -m32"
+        ;;
+    esac
     AC_LANG_PUSH(C++)
     AC_CHECK_HEADER(ole2.h,,[AC_MSG_ERROR([required OLE header ole2.h is missing from your system])])
     AC_CHECK_HEADER(olectl.h,,[AC_MSG_ERROR([required OLE header olectl.h is missing from your system])])
@@ -124,6 +133,7 @@ AS_IF([test "${SYS}" = "mingw32"],[
     WIDL="no"
 ])
 
+AC_SUBST(WIDLFLAGS)
 AM_CONDITIONAL(HAS_MIDL_COMPILER, test "${MIDL}" != "no")
 AM_CONDITIONAL(HAS_WIDL_COMPILER, test "${WIDL}" != "no")
 
