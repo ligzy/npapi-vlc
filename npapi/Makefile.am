@@ -36,6 +36,10 @@ libvlcplugin_la_LDFLAGS = \
 	-module -avoid-version \
 	-no-undefined
 
+if HAVE_WIN32
+libvlcplugin_la_LDFLAGS += -Wc,--static -Wc,-static-libgcc
+endif
+
 npvlc_la_SOURCES = $(libvlcplugin_la_SOURCES)
 npvlc_la_DEPENDENCIES = $(libvlcplugin_la_DEPENDENCIES)
 npvlc_la_LIBADD = $(libvlcplugin_la_LIBADD)

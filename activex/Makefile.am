@@ -70,7 +70,8 @@ axvlc_la_SOURCES = \
 
 axvlc_la_DEPENDENCIES = $(srcdir)/axvlc.def $(DATA_axvlc_rc)
 axvlc_la_LDFLAGS = -Wl,$(srcdir)/axvlc.def -Wl,$(DATA_axvlc_rc) \
-    -no-undefined -avoid-version -module
+    -no-undefined -avoid-version -module \
+    -Wc,--static -Wc,-static-libgcc
 axvlc_la_LIBADD = ../common/libvlcplugin_common.la \
 	$(LIBVLC_LIBS) $(ACTIVEX_LIBS)
 
