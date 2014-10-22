@@ -125,7 +125,7 @@ cd ${ARCH}-npapi
  --disable-sparkle --disable-bghudappkit --disable-growl --disable-goom \
  --disable-SDL_image --disable-lua --disable-chromaprint \
  --disable-caca --disable-upnp --disable-vncserver \
- --disable-ncurses
+ --disable-ncurses --disable-protobuf
 make fetch
 make .gettext && make
 fi
