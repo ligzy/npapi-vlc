@@ -10,7 +10,7 @@ info()
 
 ARCH="x86_64"
 MINIMAL_OSX_VERSION="10.6"
-OSX_VERSION="10.8"
+OSX_VERSION="10.9"
 SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_VERSION.sdk
 VERBOSE=no
 
