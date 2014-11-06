@@ -200,23 +200,26 @@ void VlcPluginMac::toggle_fullscreen()
     this->update_controls();
 
     if (get_fullscreen() != 0) {
-        if (!fullscreenWindow) {
-            /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the
-             * existance of a parent window. This is solved in 10.6 and we should remove the window once we require it. */
-            fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(0., 0., npwindow.width, npwindow.height)];
-            [fullscreenWindow setLevel: CGShieldingWindowLevel()];
-            fullscreenView = [fullscreenWindow customContentView];
+        /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the
+         * existance of a parent window. This is solved in 10.6 and we should remove the window once we require it. */
+        fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(0., 0., npwindow.width, npwindow.height)];
+        [fullscreenWindow setLevel: CGShieldingWindowLevel()];
+        fullscreenView = [fullscreenWindow customContentView];
 
-            /* CAVE: the order of these methods is important, since we want a layer-hosting view instead of
-             * a layer-backed view, which you'd get if you do it the other way around */
-            [fullscreenView setLayer: [CALayer layer]];
-            [fullscreenView setWantsLayer:YES];
-            [fullscreenView setCppPlugin: this];
-        }
+        /* CAVE: the order of these methods is important, since we want a layer-hosting view instead of
+         * a layer-backed view, which you'd get if you do it the other way around */
+        [fullscreenView setLayer: [CALayer layer]];
+        [fullscreenView setWantsLayer:YES];
+        [fullscreenView setCppPlugin: this];
 
         [noMediaLayer removeFromSuperlayer];
         [playbackLayer removeFromSuperlayer];
         [controllerLayer removeFromSuperlayer];
+
+        if (!fullscreenView)
+            return;
+        if (![fullscreenView layer])
+            return;
 
         [[fullscreenView layer] addSublayer: noMediaLayer];
         [[fullscreenView layer] addSublayer: playbackLayer];
@@ -239,6 +242,7 @@ void VlcPluginMac::toggle_fullscreen()
         [browserRootLayer addSublayer: playbackLayer];
         [browserRootLayer addSublayer: controllerLayer];
         [fullscreenWindow orderOut: nil];
+        [fullscreenWindow release];
     }
 }
 
@@ -488,8 +492,25 @@ bool VlcPluginMac::handle_event(void *event)
     playbackLayer = (VLCPlaybackLayer *)[aLayer retain];
     playbackLayer.opaque = 1.;
     playbackLayer.hidden = NO;
-    playbackLayer.bounds = noMediaLayer.bounds;
-    [self insertSublayer:playbackLayer below:controllerLayer];
+
+    if (libvlc_get_fullscreen(_cppPlugin->getMD()) != 0) {
+        /* work-around a 32bit runtime limitation where we can't cast
+         * NSRect to CGRect */
+        NSRect fullscreenViewFrame = fullscreenView.frame;
+        playbackLayer.bounds = CGRectMake(fullscreenViewFrame.origin.x,
+                                          fullscreenViewFrame.origin.y,
+                                          fullscreenViewFrame.size.width,
+                                          fullscreenViewFrame.size.height);
+        playbackLayer.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
+
+        [controllerLayer removeFromSuperlayer];
+        [[fullscreenView layer] addSublayer: playbackLayer];
+        [[fullscreenView layer] addSublayer: controllerLayer];
+        [[fullscreenView layer] setNeedsDisplay];
+    } else {
+        playbackLayer.bounds = noMediaLayer.bounds;
+        [self insertSublayer:playbackLayer below:controllerLayer];
+    }
     [self setNeedsDisplay];
     [playbackLayer setNeedsDisplay];
     CGRect frame = playbackLayer.bounds;
