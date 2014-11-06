@@ -174,15 +174,15 @@ VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
 
 VlcPluginMac::~VlcPluginMac()
 {
-    if (fullscreenWindow)
+    if (fullscreenWindow != NULL)
         [fullscreenWindow release];
-    if (playbackLayer)
+    if (playbackLayer != NULL)
         [playbackLayer release];
-    if (noMediaLayer)
+    if (noMediaLayer != NULL)
         [noMediaLayer release];
-    if (controllerLayer)
+    if (controllerLayer != NULL)
         [controllerLayer release];
-    if (browserRootLayer)
+    if (browserRootLayer != NULL)
         [browserRootLayer release];
 }
 
@@ -225,6 +225,11 @@ void VlcPluginMac::toggle_fullscreen()
 
         [[fullscreenWindow contentView] enterFullScreenMode: [NSScreen mainScreen] withOptions: [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithInt: 0], NSFullScreenModeAllScreens, nil]];
     } else {
+        if (!fullscreenWindow)
+            return;
+        if (!fullscreenWindow.contentView)
+            return;
+
         [[fullscreenWindow contentView] exitFullScreenModeWithOptions: nil];
         [noMediaLayer removeFromSuperlayer];
         [playbackLayer removeFromSuperlayer];
