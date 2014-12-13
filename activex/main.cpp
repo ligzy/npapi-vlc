@@ -175,6 +175,8 @@ STDAPI DllUnregisterServer(VOID)
 
     SHDeleteKey(HKEY_CLASSES_ROOT, TEXT(PROGID_STR));
 
+    SHDeleteKey(HKEY_CLASSES_ROOT, TEXT("MIME\\Database\\Content Type\\application/x-vlc-plugin"));
+
     UnregisterProgID(CLSID_VLCPlugin, 2);
     UnregisterProgID(CLSID_VLCPlugin2, 1);
 
@@ -221,6 +223,17 @@ static HRESULT RegisterClassID(HKEY hParent, REFCLSID rclsid, unsigned int versi
 
                 keyClose(keySetDef(keyCreate(hProgKey, TEXT("CurVer")),
                                    progId));
+            }
+            
+            // register the mime type for the type attribute
+            hProgKey = keyCreate(HKEY_CLASSES_ROOT, TEXT("MIME\\Database\\Content Type\\application/x-vlc-plugin"));
+            if( NULL != hProgKey )
+            {
+                // default key value
+                keySetDef(hProgKey, description);
+
+                keyClose(keySet(hProgKey, TEXT("CLSID"),
+                                szCLSID, sizeof(szCLSID)));
             }
         }
         hClassKey = keyCreate(hParent, szCLSID);
