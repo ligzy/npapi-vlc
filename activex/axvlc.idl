@@ -343,7 +343,7 @@ library AXVLC
         HRESULT isPlaying([out, retval] VARIANT_BOOL* playing);
 
         [propget, helpstring("Returns index of current item in playlist.")]
-        HRESULT currentItem([out, retval] int* index);
+        HRESULT currentItem([out, retval] long* index);
 
         [helpstring("Add a playlist item.")]
         HRESULT add([in] BSTR uri, [in, optional] VARIANT name, [in, optional] VARIANT options, [out, retval] long* itemId);
