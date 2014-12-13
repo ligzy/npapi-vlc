@@ -471,6 +471,16 @@ STDMETHODIMP VLCPlaylist::get_isPlaying(VARIANT_BOOL* isPlaying)
     return S_OK;
 };
 
+STDMETHODIMP VLCPlaylist::get_currentItem(long* index)
+{
+    if( NULL == index )
+        return E_POINTER;
+
+    *index = Instance()->get_player().current_item();
+
+    return S_OK;
+};
+
 STDMETHODIMP VLCPlaylist::add(BSTR uri, VARIANT name, VARIANT options, long* item)
 {
     if( NULL == item )

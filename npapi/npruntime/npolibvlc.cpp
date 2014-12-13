@@ -860,6 +860,7 @@ const NPUTF8 * const LibvlcPlaylistNPObject::propertyNames[] =
 {
     "itemCount", /* deprecated */
     "isPlaying",
+    "currentItem",
     "items",
 };
 COUNTNAMES(LibvlcPlaylistNPObject,propertyCount,propertyNames);
@@ -868,6 +869,7 @@ enum LibvlcPlaylistNPObjectPropertyIds
 {
     ID_playlist_itemcount,
     ID_playlist_isplaying,
+    ID_playlist_currentitem,
     ID_playlist_items,
 };
 
@@ -891,6 +893,12 @@ LibvlcPlaylistNPObject::getProperty(int index, NPVariant &result)
             {
                 int val = p_plugin->playlist_isplaying();
                 BOOLEAN_TO_NPVARIANT(val, result);
+                return INVOKERESULT_NO_ERROR;
+            }
+            case ID_playlist_currentitem:
+            {
+                int val = p_plugin->playlist_currentitem();
+                INT32_TO_NPVARIANT(val, result);
                 return INVOKERESULT_NO_ERROR;
             }
             case ID_playlist_items:

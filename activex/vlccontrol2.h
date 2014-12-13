@@ -268,6 +268,7 @@ public:
     // IVLCPlaylist methods
     STDMETHODIMP get_itemCount(long*);
     STDMETHODIMP get_isPlaying(VARIANT_BOOL*);
+    STDMETHODIMP get_currentItem(long*);
     STDMETHODIMP add(BSTR, VARIANT, VARIANT, long*);
     STDMETHODIMP play();
     STDMETHODIMP playItem(long);

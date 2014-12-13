@@ -1581,6 +1581,9 @@ IVLCPlaylist : public IDispatch
     virtual HRESULT STDMETHODCALLTYPE get_isPlaying(
         VARIANT_BOOL *playing) = 0;
 
+    virtual HRESULT STDMETHODCALLTYPE get_currentItem(
+        LONG *index) = 0;
+
     virtual HRESULT STDMETHODCALLTYPE add(
         BSTR uri,
         VARIANT name,
@@ -1676,6 +1679,10 @@ typedef struct IVLCPlaylistVtbl {
         IVLCPlaylist* This,
         VARIANT_BOOL *playing);
 
+    HRESULT (STDMETHODCALLTYPE *get_currentItem)(
+        IVLCPlaylist* This,
+        LONG *index);
+
     HRESULT (STDMETHODCALLTYPE *add)(
         IVLCPlaylist* This,
         BSTR uri,
@@ -1735,6 +1742,7 @@ interface IVLCPlaylist {
 /*** IVLCPlaylist methods ***/
 #define IVLCPlaylist_get_itemCount(This,count) (This)->lpVtbl->get_itemCount(This,count)
 #define IVLCPlaylist_get_isPlaying(This,playing) (This)->lpVtbl->get_isPlaying(This,playing)
+#define IVLCPlaylist_get_currentItem(This,index) (This)->lpVtbl->get_currentItem(This,index)
 #define IVLCPlaylist_add(This,uri,name,options,itemId) (This)->lpVtbl->add(This,uri,name,options,itemId)
 #define IVLCPlaylist_play(This) (This)->lpVtbl->play(This)
 #define IVLCPlaylist_playItem(This,itemId) (This)->lpVtbl->playItem(This,itemId)
@@ -1762,6 +1770,14 @@ HRESULT STDMETHODCALLTYPE IVLCPlaylist_get_isPlaying_Proxy(
     IVLCPlaylist* This,
     VARIANT_BOOL *playing);
 void __RPC_STUB IVLCPlaylist_get_isPlaying_Stub(
+    IRpcStubBuffer* This,
+    IRpcChannelBuffer* pRpcChannelBuffer,
+    PRPC_MESSAGE pRpcMessage,
+    DWORD* pdwStubPhase);
+HRESULT STDMETHODCALLTYPE IVLCPlaylist_get_currentItem_Proxy(
+    IVLCPlaylist* This,
+    LONG *index);
+void __RPC_STUB IVLCPlaylist_get_currentItem_Stub(
     IRpcStubBuffer* This,
     IRpcChannelBuffer* pRpcChannelBuffer,
     PRPC_MESSAGE pRpcMessage,

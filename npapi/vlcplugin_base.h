@@ -129,6 +129,10 @@ public:
     {
         return is_playing();
     }
+    int playlist_currentitem()
+    {
+        return current_item();
+    }
     int playlist_add( const char * mrl)
     {
         return add_item(mrl);
