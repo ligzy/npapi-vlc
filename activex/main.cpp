@@ -147,6 +147,12 @@ static void UnregisterProgID(REFCLSID rclsid, unsigned int version)
         SHDeleteKey(hClsIDKey, szCLSID);
         RegCloseKey(hClsIDKey);
     }
+
+    if( ERROR_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats"), 0, KEY_WRITE, &hClsIDKey) )
+    {
+        SHDeleteKey(hClsIDKey, szCLSID);
+        RegCloseKey(hClsIDKey);
+    }
 };
 
 STDAPI DllUnregisterServer(VOID)
@@ -234,6 +240,25 @@ static HRESULT RegisterClassID(HKEY hParent, REFCLSID rclsid, unsigned int versi
 
                 keyClose(keySet(hProgKey, TEXT("CLSID"),
                                 szCLSID, sizeof(szCLSID)));
+            }
+
+            // entry for addons list
+            hProgKey = keyCreate(HKEY_CURRENT_USER, TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\Ext\\Stats"));
+            if( NULL != hProgKey )
+            {
+                HKEY hSubKey = keyCreate(hProgKey, szCLSID);
+                if( NULL != hSubKey )
+                {
+                    HKEY hSubKey2 = keyCreate(hSubKey, TEXT("iexplore"));
+                    if( NULL != hSubKey2 )
+                    {
+                        keyClose(keyCreate(hSubKey2, TEXT("AllowedDomains\\*")));
+
+                        DWORD value = 1;
+                        keyClose(keySet(hSubKey2, TEXT("Type"),
+                                        (const BYTE*)&value, sizeof(value), REG_DWORD));
+                    }
+                }
             }
         }
         hClassKey = keyCreate(hParent, szCLSID);
