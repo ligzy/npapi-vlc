@@ -226,7 +226,7 @@ library AXVLC
             [id(DISPID_MediaPlayerTimeChangedEvent), helpstring("Time changed")]
             void MediaPlayerTimeChanged([in] long time);
             [id(DISPID_MediaPlayerPositionChangedEvent), helpstring("Position changed")]
-            void MediaPlayerPositionChanged([in] long position);
+            void MediaPlayerPositionChanged([in] float position);
             [id(DISPID_MediaPlayerSeekableChangedEvent), helpstring("Seek changed")]
             void MediaPlayerSeekableChanged([in] VARIANT_BOOL seekable);
             [id(DISPID_MediaPlayerPausableChangedEvent), helpstring("Pause setting changed")]

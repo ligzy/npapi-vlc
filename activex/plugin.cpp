@@ -1139,8 +1139,8 @@ void VLCPlugin::fireOnMediaPlayerPositionChangedEvent(float position)
     params.cArgs = 1;
     params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
     memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
-    params.rgvarg[0].vt = VT_I4;
-    params.rgvarg[0].lVal = static_cast<LONG>(position);
+    params.rgvarg[0].vt = VT_R4;
+    params.rgvarg[0].fltVal = position;
     params.rgdispidNamedArgs = NULL;
     params.cNamedArgs = 0;
     vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerPositionChangedEvent, &params);
