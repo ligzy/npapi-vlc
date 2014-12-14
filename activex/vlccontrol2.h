@@ -411,6 +411,7 @@ public:
     STDMETHODIMP get_StartTime(long *seconds);
     STDMETHODIMP put_StartTime(long seconds);
     STDMETHODIMP get_VersionInfo(BSTR *version);
+    STDMETHODIMP versionInfo(BSTR *version);
     STDMETHODIMP get_Visible(VARIANT_BOOL *visible);
     STDMETHODIMP put_Visible(VARIANT_BOOL visible);
     STDMETHODIMP get_Volume(long *volume);

@@ -657,6 +657,9 @@ library AXVLC
         [propget, helpstring("Returns VLC Version.")]
         HRESULT VersionInfo([out, retval] BSTR* version);
 
+        [helpstring("Returns VLC Version.")]
+        HRESULT versionInfo([out, retval] BSTR* version);
+
         [id(DISPID_Visible), propget, helpstring("Returns/sets a value that determines whether viewing area is visible or hidden.")]
         HRESULT Visible([out, retval] VARIANT_BOOL* visible);
         [id(DISPID_Visible), propput, helpstring("Returns/sets a value that determines whether viewing area is visible or hidden.")]

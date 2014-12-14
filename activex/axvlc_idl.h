@@ -3634,6 +3634,9 @@ IVLCControl2 : public IDispatch
     virtual HRESULT STDMETHODCALLTYPE get_VersionInfo(
         BSTR *version) = 0;
 
+    virtual HRESULT STDMETHODCALLTYPE versionInfo(
+        BSTR *version) = 0;
+
     virtual HRESULT STDMETHODCALLTYPE get_Visible(
         VARIANT_BOOL *visible) = 0;
 
@@ -3777,6 +3780,10 @@ typedef struct IVLCControl2Vtbl {
         IVLCControl2* This,
         BSTR *version);
 
+    HRESULT (STDMETHODCALLTYPE *versionInfo)(
+        IVLCControl2* This,
+        BSTR *version);
+
     HRESULT (STDMETHODCALLTYPE *get_Visible)(
         IVLCControl2* This,
         VARIANT_BOOL *visible);
@@ -3869,6 +3876,7 @@ interface IVLCControl2 {
 #define IVLCControl2_get_MRL(This,mrl) (This)->lpVtbl->get_MRL(This,mrl)
 #define IVLCControl2_put_MRL(This,mrl) (This)->lpVtbl->put_MRL(This,mrl)
 #define IVLCControl2_get_VersionInfo(This,version) (This)->lpVtbl->get_VersionInfo(This,version)
+#define IVLCControl2_versionInfo(This,version) (This)->lpVtbl->versionInfo(This,version)
 #define IVLCControl2_get_Visible(This,visible) (This)->lpVtbl->get_Visible(This,visible)
 #define IVLCControl2_put_Visible(This,visible) (This)->lpVtbl->put_Visible(This,visible)
 #define IVLCControl2_get_Volume(This,volume) (This)->lpVtbl->get_Volume(This,volume)
@@ -3973,6 +3981,14 @@ HRESULT STDMETHODCALLTYPE IVLCControl2_get_VersionInfo_Proxy(
     IVLCControl2* This,
     BSTR *version);
 void __RPC_STUB IVLCControl2_get_VersionInfo_Stub(
+    IRpcStubBuffer* This,
+    IRpcChannelBuffer* pRpcChannelBuffer,
+    PRPC_MESSAGE pRpcMessage,
+    DWORD* pdwStubPhase);
+HRESULT STDMETHODCALLTYPE IVLCControl2_versionInfo_Proxy(
+    IVLCControl2* This,
+    BSTR *version);
+void __RPC_STUB IVLCControl2_versionInfo_Stub(
     IRpcStubBuffer* This,
     IRpcChannelBuffer* pRpcChannelBuffer,
     PRPC_MESSAGE pRpcMessage,
