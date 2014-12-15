@@ -280,6 +280,9 @@ public:
     void fireOnMediaPlayerPositionChangedEvent(float position);
     void fireOnMediaPlayerSeekableChangedEvent(VARIANT_BOOL seekable);
     void fireOnMediaPlayerPausableChangedEvent(VARIANT_BOOL pausable);
+    void fireOnMediaPlayerMediaChangedEvent();
+    void fireOnMediaPlayerTitleChangedEvent(int title);
+    void fireOnMediaPlayerLengthChangedEvent(long length);
 
     // controlling IUnknown interface
     LPUNKNOWN pUnkOuter;

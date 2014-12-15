@@ -1009,6 +1009,12 @@ void VLCPlugin::fireOnStopEvent(void)
 /*
  * Async events
  */
+void VLCPlugin::fireOnMediaPlayerMediaChangedEvent()
+{
+    DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerMediaChangedEvent, &dispparamsNoArgs);
+};
+
 void VLCPlugin::fireOnMediaPlayerNothingSpecialEvent()
 {
     DISPPARAMS dispparamsNoArgs = {NULL, NULL, 0, 0};
@@ -1081,6 +1087,9 @@ static void handle_input_state_event(const libvlc_event_t* event, void *param)
     VLCPlugin *plugin = (VLCPlugin*)param;
     switch( event->type )
     {
+        case libvlc_MediaPlayerMediaChanged:
+            plugin->fireOnMediaPlayerMediaChangedEvent();
+            break;        
         case libvlc_MediaPlayerNothingSpecial:
             plugin->fireOnMediaPlayerNothingSpecialEvent();
             break;
@@ -1192,6 +1201,44 @@ static void handle_pausable_changed_event(const libvlc_event_t* event, void *par
 }
 #undef B
 
+void VLCPlugin::fireOnMediaPlayerTitleChangedEvent(int title)
+{
+    DISPPARAMS params;
+    params.cArgs = 1;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[0].vt = VT_I2;
+    params.rgvarg[0].iVal = title;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerTitleChangedEvent, &params);
+};
+
+static void handle_title_changed_event(const libvlc_event_t* event, void *param)
+{
+    VLCPlugin *plugin = (VLCPlugin*)param;
+    plugin->fireOnMediaPlayerTitleChangedEvent(event->u.media_player_title_changed.new_title);
+}
+
+void VLCPlugin::fireOnMediaPlayerLengthChangedEvent(long length)
+{
+    DISPPARAMS params;
+    params.cArgs = 1;
+    params.rgvarg = (VARIANTARG *) CoTaskMemAlloc(sizeof(VARIANTARG) * params.cArgs) ;
+    memset(params.rgvarg, 0, sizeof(VARIANTARG) * params.cArgs);
+    params.rgvarg[0].vt = VT_I4;
+    params.rgvarg[0].lVal = length;
+    params.rgdispidNamedArgs = NULL;
+    params.cNamedArgs = 0;
+    vlcConnectionPointContainer->fireEvent(DISPID_MediaPlayerLengthChangedEvent, &params);
+};
+
+static void handle_length_changed_event(const libvlc_event_t* event, void *param)
+{
+    VLCPlugin *plugin = (VLCPlugin*)param;
+    plugin->fireOnMediaPlayerLengthChangedEvent(event->u.media_player_length_changed.new_length);
+}
+
 /* */
 
 void VLCPlugin::set_player_window()
@@ -1218,7 +1265,7 @@ void VLCPlugin::on_player_action(vlc_player_action_e pa)
 }
 
 static vlcplugin_event_t vlcevents[] = {
-    //{ libvlc_MediaPlayerMediaChanged, handle_input_state_event },         // unused
+    { libvlc_MediaPlayerMediaChanged, handle_input_state_event },
     { libvlc_MediaPlayerNothingSpecial, handle_input_state_event },
     { libvlc_MediaPlayerOpening, handle_input_state_event },
     { libvlc_MediaPlayerBuffering, handle_input_state_event },
@@ -1233,8 +1280,8 @@ static vlcplugin_event_t vlcevents[] = {
     { libvlc_MediaPlayerPositionChanged, handle_position_changed_event },
     { libvlc_MediaPlayerSeekableChanged, handle_seekable_changed_event },
     { libvlc_MediaPlayerPausableChanged, handle_pausable_changed_event },
-    //{ libvlc_MediaPlayerTitleChanged, handle_input_state_event },         // unused
-    //{ libvlc_MediaPlayerLengthChanged, handle_input_state_event },        // unused
+    { libvlc_MediaPlayerTitleChanged, handle_title_changed_event },
+    { libvlc_MediaPlayerLengthChanged, handle_length_changed_event },
 };
 
 void VLCPlugin::player_register_events()

@@ -185,6 +185,9 @@ library AXVLC
     const int DISPID_MediaPlayerPositionChangedEvent = 211;
     const int DISPID_MediaPlayerSeekableChangedEvent = 212;
     const int DISPID_MediaPlayerPausableChangedEvent = 213;
+    const int DISPID_MediaPlayerMediaChangedEvent = 214;
+    const int DISPID_MediaPlayerTitleChangedEvent = 215;
+    const int DISPID_MediaPlayerLengthChangedEvent = 216;
 
     [
       uuid(DF48072F-5EF8-434e-9B40-E2F3AE759B5F),
@@ -231,6 +234,12 @@ library AXVLC
             void MediaPlayerSeekableChanged([in] VARIANT_BOOL seekable);
             [id(DISPID_MediaPlayerPausableChangedEvent), helpstring("Pause setting changed")]
             void MediaPlayerPausableChanged([in] VARIANT_BOOL pausable);
+            [id(DISPID_MediaPlayerMediaChangedEvent), helpstring("Media changed")]
+            void MediaPlayerMediaChanged();
+            [id(DISPID_MediaPlayerTitleChangedEvent), helpstring("Title changed")]
+            void MediaPlayerTitleChanged([in] int title);
+            [id(DISPID_MediaPlayerLengthChangedEvent), helpstring("Length changed")]
+            void MediaPlayerLengthChanged([in] long length);
     };
 
     [
