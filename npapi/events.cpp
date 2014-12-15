@@ -38,6 +38,7 @@ static void handle_input_event(const libvlc_event_t* event, void *param)
     VlcPluginBase *plugin = (VlcPluginBase*)param;
     switch( event->type )
     {
+        case libvlc_MediaPlayerMediaChanged:
         case libvlc_MediaPlayerNothingSpecial:
         case libvlc_MediaPlayerOpening:
         case libvlc_MediaPlayerPlaying:
