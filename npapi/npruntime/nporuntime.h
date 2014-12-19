@@ -82,7 +82,7 @@ public:
     {
         return NPVARIANT_IS_INT32(v)
             || NPVARIANT_IS_DOUBLE(v)
-            || NPVARIANT_IS_DOUBLE(v);
+            || NPVARIANT_IS_STRING(v);
     };
 
     static int intValue(const NPVariant &v)
