@@ -35,6 +35,7 @@
 //#include it indirectly via <npfunctions.h>
 #include <npfunctions.h>
 #include <npruntime.h>
+#include <stdlib.h>
 
 static void RuntimeNPClassDeallocate(NPObject *npobj);
 static void RuntimeNPClassInvalidate(NPObject *npobj);
@@ -53,20 +54,60 @@ public:
     /*
     ** utility functions
     */
+    static bool isBoolValue(const NPVariant &v)
+    {
+        return NPVARIANT_IS_BOOLEAN(v)
+            || isNumberValue(v);
+    };
+
+    static bool boolValue(const NPVariant &v)
+    {
+        if( NPVARIANT_IS_BOOLEAN(v) )
+        {
+            return NPVARIANT_TO_BOOLEAN(v);
+        }
+        if( NPVARIANT_IS_STRING(v) )
+        {
+            if(!strcasecmp(stringValue(NPVARIANT_TO_STRING(v)), "true"))
+                return true;
+        }
+        if( isNumberValue(v) )
+        {
+            return doubleValue(v) != 0;
+        }
+        return false;
+    };
 
     static bool isNumberValue(const NPVariant &v)
     {
         return NPVARIANT_IS_INT32(v)
+            || NPVARIANT_IS_DOUBLE(v)
             || NPVARIANT_IS_DOUBLE(v);
     };
 
-    static int numberValue(const NPVariant &v)
+    static int intValue(const NPVariant &v)
     {
         switch( v.type ) {
             case NPVariantType_Int32:
                 return NPVARIANT_TO_INT32(v);
             case NPVariantType_Double:
                 return(int)NPVARIANT_TO_DOUBLE(v);
+            case NPVariantType_String:
+                return atoi( stringValue(NPVARIANT_TO_STRING(v)) );
+            default:
+                return 0;
+        }
+    };
+
+    static double doubleValue(const NPVariant &v)
+    {
+        switch( v.type ) {
+            case NPVariantType_Int32:
+                return(double)NPVARIANT_TO_INT32(v);
+            case NPVariantType_Double:
+                return NPVARIANT_TO_DOUBLE(v);
+            case NPVariantType_String:
+                return atof( stringValue(NPVARIANT_TO_STRING(v)) );
             default:
                 return 0;
         }
