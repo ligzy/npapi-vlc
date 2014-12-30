@@ -79,7 +79,7 @@ static void handle_changed_event(const libvlc_event_t* event, void *param)
             BOOLEAN_TO_NPVARIANT(event->u.media_player_pausable_changed.new_pausable, npparam[0]);
             break;
         case libvlc_MediaPlayerTitleChanged:
-            DOUBLE_TO_NPVARIANT(event->u.media_player_title_changed.new_title, npparam[0]);
+            INT32_TO_NPVARIANT(event->u.media_player_title_changed.new_title, npparam[0]);
             break;
         case libvlc_MediaPlayerLengthChanged:
             DOUBLE_TO_NPVARIANT(event->u.media_player_length_changed.new_length, npparam[0]);
