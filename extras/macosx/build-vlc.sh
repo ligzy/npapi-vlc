@@ -127,7 +127,8 @@ cd ${ARCH}-npapi
  --disable-caca --disable-upnp --disable-vncserver \
  --disable-ncurses --disable-protobuf
 make fetch
-make .gettext && AUTOPOINT=true make
+core_count=`sysctl -n machdep.cpu.core_count`
+make .gettext && AUTOPOINT=true make -j $core_count
 fi
 
 spopd
