@@ -127,7 +127,7 @@ cd ${ARCH}-npapi
  --disable-caca --disable-upnp --disable-vncserver \
  --disable-ncurses --disable-protobuf
 make fetch
-make .gettext && make
+make .gettext && AUTOPOINT=true make
 fi
 
 spopd
