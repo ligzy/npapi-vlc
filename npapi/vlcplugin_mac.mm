@@ -134,15 +134,15 @@
 - (CGDirectDisplayID)displayID;
 @end
 
-static VLCBrowserRootLayer * browserRootLayer;
-static VLCPlaybackLayer * playbackLayer;
-static VLCNoMediaLayer * noMediaLayer;
-static VLCControllerLayer * controllerLayer;
-static VLCFullscreenWindow * fullscreenWindow;
-static VLCFullscreenContentView * fullscreenView;
-static CGImageRef createImageNamed(NSString *);
+VLCBrowserRootLayer * browserRootLayer;
+VLCPlaybackLayer * playbackLayer;
+VLCNoMediaLayer * noMediaLayer;
+VLCControllerLayer * controllerLayer;
+VLCFullscreenWindow * fullscreenWindow;
+VLCFullscreenContentView * fullscreenView;
+CGImageRef createImageNamed(NSString *);
 
-static CGImageRef createImageNamed(NSString *name)
+CGImageRef createImageNamed(NSString *name)
 {
     CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("org.videolan.vlc-npapi-plugin")), (CFStringRef)name, CFSTR("png"), NULL);
 
