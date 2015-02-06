@@ -33,7 +33,7 @@
 /*****************************************************************************
  * Event Object
  *****************************************************************************/
-static void handle_input_event(const libvlc_event_t* event, void *param)
+void handle_input_event(const libvlc_event_t* event, void *param)
 {
     VlcPluginBase *plugin = (VlcPluginBase*)param;
     switch( event->type )
@@ -55,7 +55,7 @@ static void handle_input_event(const libvlc_event_t* event, void *param)
     }
 }
 
-static void handle_changed_event(const libvlc_event_t* event, void *param)
+void handle_changed_event(const libvlc_event_t* event, void *param)
 {
     uint32_t   npcount = 1;
     NPVariant *npparam = (NPVariant *) NPN_MemAlloc( sizeof(NPVariant) * npcount );
