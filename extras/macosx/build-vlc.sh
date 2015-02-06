@@ -119,6 +119,7 @@ spushd extras/macosx/vlc/contrib
 
 if ! [ -e ${ARCH}-npapi ]; then
 mkdir ${ARCH}-npapi
+fi
 cd ${ARCH}-npapi
 ../bootstrap --build=${ARCH}-apple-darwin10 \
  --disable-sout --disable-cddb --disable-bluray --disable-sdl \
@@ -129,7 +130,6 @@ cd ${ARCH}-npapi
 make fetch
 core_count=`sysctl -n machdep.cpu.core_count`
 make .gettext && AUTOPOINT=true make -j $core_count
-fi
 
 spopd
 
