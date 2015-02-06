@@ -26,9 +26,9 @@
 
 #define SHOW_BRANDING 1
 
-static CGImageRef createImageNamed(CFStringRef);
+CGImageRef createImageNamed(CFStringRef);
 
-static CGImageRef createImageNamed(CFStringRef name)
+CGImageRef createImageNamed(CFStringRef name)
 {
     CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("org.videolan.vlc-npapi-plugin")), name, CFSTR("png"), NULL);
 
@@ -264,8 +264,8 @@ bool VlcWindowlessMac::handle_event(void *event)
         float left = 0;
         float top  = 0;
 
-        static const size_t kComponentsPerPixel = 4;
-        static const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
+        const size_t kComponentsPerPixel = 4;
+        const size_t kBitsPerComponent = sizeof(unsigned char) * 8;
         CGRect rect;
 
         if (m_media_width != 0 && m_media_height != 0) {
