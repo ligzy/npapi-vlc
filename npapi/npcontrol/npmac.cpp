@@ -2,7 +2,7 @@
  * npmac.cpp: Safari/Mozilla/Firefox plugin for VLC
  *****************************************************************************
  * Copyright (C) 2009, Jean-Paul Saman <jpsaman@videolan.org>
- * Copyright (C) 2012-2013 Felix Paul Kühne <fkuehne # videolan # org>
+ * Copyright (C) 2012-2015 Felix Paul Kühne <fkuehne # videolan # org>
  * $Id:$
  *
  * Authors: Jean-Paul Saman <jpsaman@videolan.org>
@@ -58,9 +58,6 @@ void NPN_PluginThreadAsyncCall(NPP instance, void (*func)(void *), void *userDat
     CALL_NPN(CallNPN_PluginThreadAsyncCallProc, gNetscapeFuncs->pluginthreadasynccall, instance, func, userData);
 }
 
-
-
-
 #pragma mark -
 #pragma mark Private Functions
 
@@ -78,36 +75,6 @@ void NPN_PluginThreadAsyncCall(NPP instance, void (*func)(void *), void *userDat
 /* Function prototypes */
 NPError Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
         int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
-NPError Private_Destroy(NPP instance, NPSavedData** save);
-NPError Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream,
-                          NPBool seekable, uint16_t* stype);
-int32_t Private_WriteReady(NPP instance, NPStream* stream);
-int32_t Private_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len, void* buffer);
-void    Private_StreamAsFile(NPP instance, NPStream* stream, const char* fname);
-NPError Private_DestroyStream(NPP instance, NPStream* stream, NPError reason);
-void    Private_Print(NPP instance, NPPrint* platformPrint);
-void    Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData);
-int16_t Private_HandleEvent(NPP instance, void* event);
-NPError Private_GetValue(NPP instance, NPPVariable variable, void *r_value);
-NPError Private_SetValue(NPP instance, NPNVariable variable, void *r_value);
-NPError Private_SetWindow(NPP instance, NPWindow* window);
-
-NPError  Private_Initialize(void);
-void     Private_Shutdown(void);
-
-
-NPError
-Private_Initialize(void)
-{
-    NPError err;
-    err = NPP_Initialize();
-    return err;
-}
-
-void Private_Shutdown(void)
-{
-    NPP_Shutdown();
-}
 
 static bool boolValue(const char *value) {
     return ( !strcmp(value, "1") ||
@@ -179,106 +146,6 @@ Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
     NPError ret = NPP_New(pluginType, instance, mode, argc, argn, argv, saved);
 
     return ret;
-}
-
-NPError
-Private_Destroy(NPP instance, NPSavedData** save)
-{
-    PLUGINDEBUGSTR("Destroy");
-    return NPP_Destroy(instance, save);
-}
-
-NPError
-Private_SetWindow(NPP instance, NPWindow* window)
-{
-    NPError err;
-    PLUGINDEBUGSTR("SetWindow");
-    err = NPP_SetWindow(instance, window);
-    return err;
-}
-
-NPError
-Private_GetValue(NPP instance, NPPVariable variable, void *r_value)
-{
-    PLUGINDEBUGSTR("GetValue");
-    return NPP_GetValue(instance, variable, r_value);
-}
-
-NPError
-Private_SetValue(NPP instance, NPNVariable variable, void *r_value)
-{
-    PLUGINDEBUGSTR("SetValue");
-    return NPP_SetValue(instance, variable, r_value);
-}
-
-NPError
-Private_NewStream(NPP instance, NPMIMEType type, NPStream* stream,
-            NPBool seekable, uint16_t* stype)
-{
-    NPError err;
-    PLUGINDEBUGSTR("NewStream");
-    err = NPP_NewStream(instance, type, stream, seekable, stype);
-    return err;
-}
-
-int32_t
-Private_WriteReady(NPP instance, NPStream* stream)
-{
-    int32_t result;
-    PLUGINDEBUGSTR("WriteReady");
-    result = NPP_WriteReady(instance, stream);
-    return result;
-}
-
-int32_t
-Private_Write(NPP instance, NPStream* stream, int32_t offset, int32_t len,
-        void* buffer)
-{
-    int32_t result;
-    PLUGINDEBUGSTR("Write");
-    result = NPP_Write(instance, stream, offset, len, buffer);
-
-    return result;
-}
-
-void
-Private_StreamAsFile(NPP instance, NPStream* stream, const char* fname)
-{
-    PLUGINDEBUGSTR("StreamAsFile");
-    NPP_StreamAsFile(instance, stream, fname);
-}
-
-NPError
-Private_DestroyStream(NPP instance, NPStream* stream, NPError reason)
-{
-    NPError err;
-    PLUGINDEBUGSTR("DestroyStream");
-    err = NPP_DestroyStream(instance, stream, reason);
-
-    return err;
-}
-
-void
-Private_URLNotify(NPP instance, const char* url, NPReason reason, void* notifyData)
-{
-    PLUGINDEBUGSTR("URLNotify");
-    NPP_URLNotify(instance, url, reason, notifyData);
-}
-
-void
-Private_Print(NPP instance, NPPrint* platformPrint)
-{
-    PLUGINDEBUGSTR("Print");
-    NPP_Print(instance, platformPrint);
-}
-
-int16_t
-Private_HandleEvent(NPP instance, void* event)
-{
-    int16_t result;
-    PLUGINDEBUGSTR("HandleEvent");
-    result = NPP_HandleEvent(instance, event);
-    return result;
 }
 
 #pragma mark -
@@ -353,23 +220,22 @@ NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
      * implement.
      */
 
-    pluginFuncs->version    = (NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR;
-    pluginFuncs->size       = sizeof(NPPluginFuncs);
-    pluginFuncs->newp       = (NPP_NewProcPtr)(Private_New);
-    pluginFuncs->destroy    = (NPP_DestroyProcPtr)(Private_Destroy);
-    pluginFuncs->setwindow  = (NPP_SetWindowProcPtr)(Private_SetWindow);
-    pluginFuncs->newstream  = (NPP_NewStreamProcPtr)(Private_NewStream);
-    pluginFuncs->destroystream = (NPP_DestroyStreamProcPtr)(Private_DestroyStream);
-    pluginFuncs->asfile     = (NPP_StreamAsFileProcPtr)(Private_StreamAsFile);
-    pluginFuncs->writeready = (NPP_WriteReadyProcPtr)(Private_WriteReady);
-    pluginFuncs->write      = (NPP_WriteProcPtr)(Private_Write);
-    pluginFuncs->print      = (NPP_PrintProcPtr)(Private_Print);
-    pluginFuncs->event      = (NPP_HandleEventProcPtr)(Private_HandleEvent);
-    pluginFuncs->getvalue   = (NPP_GetValueProcPtr)(Private_GetValue);
-    pluginFuncs->setvalue   = (NPP_SetValueProcPtr)(Private_SetValue);
+    pluginFuncs->version       = (NP_VERSION_MAJOR << 8) | NP_VERSION_MINOR;
+    pluginFuncs->newp          = (NPP_NewProcPtr)(Private_New);
+    pluginFuncs->destroy       = NPP_Destroy;
+    pluginFuncs->setwindow     = NPP_SetWindow;
+    pluginFuncs->newstream     = NPP_NewStream;
+    pluginFuncs->destroystream = NPP_DestroyStream;
+    pluginFuncs->asfile        = NPP_StreamAsFile;
+    pluginFuncs->writeready    = NPP_WriteReady;
+    pluginFuncs->write         = NPP_Write;
+    pluginFuncs->print         = NPP_Print;
+    pluginFuncs->event         = NPP_HandleEvent;
+    pluginFuncs->getvalue      = NPP_GetValue;
+    pluginFuncs->setvalue      = NPP_SetValue;
 
     if (minor >= NPVERS_HAS_NOTIFICATION)
-        pluginFuncs->urlnotify = Private_URLNotify;
+        pluginFuncs->urlnotify = NPP_URLNotify;
 
     pluginFuncs->javaClass = NULL;
 
