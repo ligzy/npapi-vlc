@@ -12,6 +12,7 @@ OSX_VERSION="10.9"
 ARCH="x86_64"
 MINIMAL_OSX_VERSION="10.6"
 SDKROOT=`xcode-select -print-path`/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$OSX_VERSION.sdk
+UNSTABLE=no
 
 usage()
 {
@@ -20,6 +21,7 @@ usage: $0 [-v] [-d]
 
 OPTIONS
    -v            Be more verbose
+   -u            Use unstable libvlc
    -k <sdk>      Use the specified sdk (default: $SDKROOT for $ARCH)
    -a <arch>     Use the specified arch (default: $ARCH)
 EOF
@@ -42,7 +44,7 @@ info()
      echo "[${green}info${normal}] $1"
 }
 
-while getopts "hva:k:" OPTION
+while getopts "hvua:k:" OPTION
 do
      case $OPTION in
          h)
@@ -51,6 +53,9 @@ do
              ;;
          v)
              VERBOSE=yes
+             ;;
+         u)
+             UNSTABLE=yes
              ;;
          a)
              ARCH=$OPTARG
@@ -95,7 +100,11 @@ info "Preparing build dirs"
 spushd extras/macosx
 
 if ! [ -e vlc ]; then
+if [ "$UNSTABLE" = "yes" ]; then
 git clone git://git.videolan.org/vlc.git vlc
+else
+git clone git://git.videolan.org/vlc/vlc-2.2.git vlc
+fi
 fi
 
 spopd #extras/macosx
