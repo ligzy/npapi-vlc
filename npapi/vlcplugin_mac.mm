@@ -51,16 +51,20 @@ CGImageRef createImageNamed(NSString *);
 #pragma mark - objc class interfaces
 
 @interface VLCNoMediaLayer : CALayer
+{
+    VlcPluginMac *_cppPlugin;
+}
 
-@property (readwrite) VlcPluginMac * cppPlugin;
+@property (readwrite) VlcPluginMac *cppPlugin;
 
 @end
 
 @interface VLCBrowserRootLayer : CALayer {
     NSTimer *_interfaceUpdateTimer;
+    VlcPluginMac *_cppPlugin;
 }
 
-@property (readwrite) VlcPluginMac * cppPlugin;
+@property (readwrite) VlcPluginMac *cppPlugin;
 
 - (void)startUIUpdateTimer;
 
@@ -85,11 +89,16 @@ CGImageRef createImageNamed(NSString *);
     BOOL _wasPlayingBeforeMouseDown;
     BOOL _isScrubbing;
     CGFloat _mouseDownXDelta;
+
+    double _mediaPosition;
+    BOOL _isPlaying;
+    BOOL _isFullscreen;
+    VlcPluginMac *_cppPlugin;
 }
 @property (readwrite) double mediaPosition;
 @property (readwrite) BOOL isPlaying;
 @property (readwrite) BOOL isFullscreen;
-@property (readwrite) VlcPluginMac * cppPlugin;
+@property (readwrite) VlcPluginMac *cppPlugin;
 
 - (void)handleMouseDown:(CGPoint)point;
 - (void)handleMouseUp:(CGPoint)point;
@@ -113,7 +122,7 @@ CGImageRef createImageNamed(NSString *);
     VlcPluginMac *_cppPlugin;
     NSTimeInterval _timeSinceLastMouseMove;
 }
-@property (readwrite) VlcPluginMac * cppPlugin;
+@property (readwrite) VlcPluginMac *cppPlugin;
 
 - (void)hideToolbar;
 
@@ -123,7 +132,7 @@ CGImageRef createImageNamed(NSString *);
     NSRect _initialFrame;
     VLCFullscreenContentView *_customContentView;
 }
-@property (readonly) VLCFullscreenContentView* customContentView;
+@property (readonly) VLCFullscreenContentView *customContentView;
 
 - (id)initWithContentRect:(NSRect)contentRect;
 
@@ -136,6 +145,15 @@ CGImageRef createImageNamed(NSString *);
 @end
 
 @interface VLCPerInstanceStorage : NSObject
+{
+    VlcPluginMac *_cppPlugin;
+    VLCBrowserRootLayer *_browserRootLayer;
+    VLCPlaybackLayer *_playbackLayer;
+    VLCNoMediaLayer *_noMediaLayer;
+    VLCControllerLayer *_controllerLayer;
+    VLCFullscreenWindow *_fullscreenWindow;
+    VLCFullscreenContentView *_fullscreenView;
+}
 
 @property (readwrite, assign) VlcPluginMac *cppPlugin;
 @property (readwrite, retain) VLCBrowserRootLayer *browserRootLayer;
@@ -148,6 +166,8 @@ CGImageRef createImageNamed(NSString *);
 @end
 
 @implementation VLCPerInstanceStorage
+
+@synthesize cppPlugin = _cppPlugin, browserRootLayer = _browserRootLayer, playbackLayer = _playbackLayer, noMediaLayer = _noMediaLayer, controllerLayer = _controllerLayer, fullscreenWindow = _fullscreenWindow, fullscreenView = _fullscreenView;
 
 @end
 
@@ -447,6 +467,8 @@ bool VlcPluginMac::handle_event(void *event)
 
 @implementation VLCBrowserRootLayer
 
+@synthesize cppPlugin = _cppPlugin;
+
 - (id)init
 {
     if (self = [super init]) {
@@ -534,6 +556,8 @@ bool VlcPluginMac::handle_event(void *event)
 @end
 
 @implementation VLCNoMediaLayer
+
+@synthesize cppPlugin = _cppPlugin;
 
 - (id)init
 {
@@ -680,6 +704,8 @@ bool VlcPluginMac::handle_event(void *event)
 @end
 
 @implementation VLCControllerLayer
+
+@synthesize cppPlugin = _cppPlugin, mediaPosition = _mediaPosition, isPlaying = _isPlaying, isFullscreen = _isFullscreen;
 
 - (id)init
 {
@@ -891,6 +917,8 @@ bool VlcPluginMac::handle_event(void *event)
 
 @implementation VLCFullscreenWindow
 
+@synthesize customContentView = _customContentView;
+
 - (id)initWithContentRect:(NSRect)contentRect
 {
     if (self = [super initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO]) {
@@ -925,6 +953,8 @@ bool VlcPluginMac::handle_event(void *event)
 @end
 
 @implementation VLCFullscreenContentView
+
+@synthesize cppPlugin = _cppPlugin;
 
 - (BOOL)acceptsFirstResponder
 {
