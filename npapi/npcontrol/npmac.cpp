@@ -39,23 +39,17 @@
 #include "npfunctions.h"
 #define CALL_NPN(unused, FN, ...) ((*FN)(__VA_ARGS__))
 
-
-
 #pragma mark -
 #pragma mark Globals
 
-NPNetscapeFuncs  *gNetscapeFuncs;    /* Netscape Function table */
-short               gResFile;           // Refnum of the plugin’s resource file
-static inline int getMinorVersion() { return gNetscapeFuncs->version & 0xFF; }
-
+NPNetscapeFuncs   *gNetscapeFuncs;    /* Netscape Function table */
 
 #pragma mark -
 #pragma mark Wrapper Functions
 
-
-void NPN_PluginThreadAsyncCall(NPP instance, void (*func)(void *), void *userData)
+void NPN_PluginThreadAsyncCall(NPP instance, void (*function)(void *), void *userData)
 {
-    CALL_NPN(CallNPN_PluginThreadAsyncCallProc, gNetscapeFuncs->pluginthreadasynccall, instance, func, userData);
+    CALL_NPN(CallNPN_PluginThreadAsyncCallProc, gNetscapeFuncs->pluginthreadasynccall, instance, function, userData);
 }
 
 #pragma mark -
@@ -73,28 +67,21 @@ void NPN_PluginThreadAsyncCall(NPP instance, void (*func)(void *), void *userDat
  ***********************************************************************/
 
 /* Function prototypes */
-NPError Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
+NPError MacSpecific_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
         int16_t argc, char* argn[], char* argv[], NPSavedData* saved);
 
-static bool boolValue(const char *value) {
-    return ( !strcmp(value, "1") ||
-            !strcasecmp(value, "true") ||
-            !strcasecmp(value, "yes") );
-}
-
 /* function implementations */
-NPError
-Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
-        int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
+NPError MacSpecific_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
+                        int16_t argc, char* argn[], char* argv[], NPSavedData* saved)
 {
     /* find out, if the plugin should run in windowless mode.
      * if yes, choose the CoreGraphics drawing model */
     bool windowless = false;
-    for( int i = 0; i < argc; i++ )
-    {
-        if( !strcmp( argn[i], "windowless" ) )
-        {
-            windowless = boolValue(argv[i]);
+    for (int i = 0; i < argc; i++) {
+        if (!strcmp(argn[i], "windowless")) {
+            windowless = (!strcmp(argv[i], "1") ||
+                          !strcasecmp(argv[i], "true") ||
+                          !strcasecmp(argv[i], "yes"));
             break;
         }
     }
@@ -151,26 +138,17 @@ Private_New(NPMIMEType pluginType, NPP instance, uint16_t mode,
 #pragma mark -
 #pragma mark Initialization & Run
 
-/*
-** netscape plugins functions when building Mach-O binary
-*/
-
 extern "C" {
     NPError NP_Initialize(NPNetscapeFuncs* nsTable);
     NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs);
     NPError NP_Shutdown(void);
 }
 
-/*
-** netscape plugins functions when using Mach-O binary
-*/
-
-NPError
-NP_Initialize(NPNetscapeFuncs* nsTable)
+NPError NP_Initialize(NPNetscapeFuncs* browserFuncs)
 {
     /* validate input parameters */
 
-    if (NULL == nsTable) {
+    if (NULL == browserFuncs) {
         fprintf(stderr, "NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table is null\n");
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
@@ -184,34 +162,27 @@ NP_Initialize(NPNetscapeFuncs* nsTable)
      *
      */
 
-    if ((nsTable->version >> 8) > NP_VERSION_MAJOR) {
+    if ((browserFuncs->version >> 8) > NP_VERSION_MAJOR) {
         fprintf(stderr, "NP_Initialize error: NPERR_INCOMPATIBLE_VERSION_ERROR\n");
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
     }
 
-
-    // We use all functions of the nsTable up to and including pluginthreadasynccall. We therefore check that
-    // reaches at least till that function.
-    if (nsTable->size < (offsetof(NPNetscapeFuncs, pluginthreadasynccall) + sizeof(NPN_PluginThreadAsyncCallProcPtr))) {
+    /* We use all functions of the nsTable up to and including pluginthreadasynccall. We therefore check that
+     * reaches at least until that function. */
+    if (browserFuncs->size < (offsetof(NPNetscapeFuncs, pluginthreadasynccall) + sizeof(NPN_PluginThreadAsyncCallProcPtr))) {
         fprintf(stderr, "NP_Initialize error: NPERR_INVALID_FUNCTABLE_ERROR: table too small\n");
         return NPERR_INVALID_FUNCTABLE_ERROR;
     }
 
-    gNetscapeFuncs = nsTable;
+    gNetscapeFuncs = browserFuncs;
 
     return NPP_Initialize();
 }
 
-NPError
-NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
+NPError NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
 {
-    int minor = getMinorVersion();
-
     if (pluginFuncs == NULL)
         return NPERR_INVALID_FUNCTABLE_ERROR;
-
-    /*if (pluginFuncs->size < sizeof(NPPluginFuncs))
-    return NPERR_INVALID_FUNCTABLE_ERROR;*/
 
     /*
      * Set up the plugin function table that Netscape will use to
@@ -220,30 +191,29 @@ NP_GetEntryPoints(NPPluginFuncs* pluginFuncs)
      * implement.
      */
 
-    pluginFuncs->version       = (NP_VERSION_MAJOR << 8) | NP_VERSION_MINOR;
-    pluginFuncs->newp          = (NPP_NewProcPtr)(Private_New);
-    pluginFuncs->destroy       = NPP_Destroy;
-    pluginFuncs->setwindow     = NPP_SetWindow;
-    pluginFuncs->newstream     = NPP_NewStream;
-    pluginFuncs->destroystream = NPP_DestroyStream;
-    pluginFuncs->asfile        = NPP_StreamAsFile;
-    pluginFuncs->writeready    = NPP_WriteReady;
-    pluginFuncs->write         = NPP_Write;
-    pluginFuncs->print         = NPP_Print;
-    pluginFuncs->event         = NPP_HandleEvent;
-    pluginFuncs->getvalue      = NPP_GetValue;
-    pluginFuncs->setvalue      = NPP_SetValue;
-
+    int minor = pluginFuncs->version & 0xFF;
     if (minor >= NPVERS_HAS_NOTIFICATION)
         pluginFuncs->urlnotify = NPP_URLNotify;
 
-    pluginFuncs->javaClass = NULL;
+    pluginFuncs->version        = (NP_VERSION_MAJOR << 8) | NP_VERSION_MINOR;
+    pluginFuncs->size           = sizeof(pluginFuncs);
+    pluginFuncs->newp           = (NPP_NewProcPtr)(MacSpecific_New);
+    pluginFuncs->destroy        = NPP_Destroy;
+    pluginFuncs->setwindow      = NPP_SetWindow;
+    pluginFuncs->newstream      = NPP_NewStream;
+    pluginFuncs->destroystream  = NPP_DestroyStream;
+    pluginFuncs->asfile         = NPP_StreamAsFile;
+    pluginFuncs->writeready     = NPP_WriteReady;
+    pluginFuncs->write          = (NPP_WriteProcPtr)NPP_Write;
+    pluginFuncs->print          = NPP_Print;
+    pluginFuncs->event          = NPP_HandleEvent;
+    pluginFuncs->getvalue       = NPP_GetValue;
+    pluginFuncs->setvalue       = NPP_SetValue;
 
     return NPERR_NO_ERROR;
 }
 
-NPError
-NP_Shutdown(void)
+NPError NP_Shutdown(void)
 {
     PLUGINDEBUGSTR("NP_Shutdown");
     NPP_Shutdown();
