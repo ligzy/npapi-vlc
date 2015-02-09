@@ -115,6 +115,8 @@ CGImageRef createImageNamed(NSString *);
 }
 @property (readwrite) VlcPluginMac * cppPlugin;
 
+- (void)hideToolbar;
+
 @end
 
 @interface VLCFullscreenWindow : NSWindow {
@@ -204,6 +206,8 @@ void VlcPluginMac::toggle_fullscreen()
         [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView].layer setNeedsDisplay];
 
         [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow].contentView enterFullScreenMode: [NSScreen mainScreen] withOptions: [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithInt: 0], NSFullScreenModeAllScreens, nil]];
+
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView] performSelector:@selector(hideToolbar) withObject:nil afterDelay: 4.1];
     } else {
         if (![(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow])
             return;
@@ -1023,7 +1027,7 @@ bool VlcPluginMac::handle_event(void *event)
 {
     self.cppPlugin->set_toolbar_visible(true);
     _timeSinceLastMouseMove = [NSDate timeIntervalSinceReferenceDate];
-    [self performSelector:@selector(hideToolbar) withObject:nil afterDelay: 4.1];
+    [self performSelector:@selector(_hideToolbar) withObject:nil afterDelay: 4.1];
 
     if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] != nil) {
         if ([[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseMovedToX:Y:)]) {
@@ -1035,12 +1039,16 @@ bool VlcPluginMac::handle_event(void *event)
     [super mouseMoved: theEvent];
 }
 
+- (void)_hideToolbar
+{
+    if ([NSDate timeIntervalSinceReferenceDate] - _timeSinceLastMouseMove >= 4)
+        [self hideToolbar];
+}
+
 - (void)hideToolbar
 {
-    if ([NSDate timeIntervalSinceReferenceDate] - _timeSinceLastMouseMove >= 4) {
-        self.cppPlugin->set_toolbar_visible(false);
-        [NSCursor setHiddenUntilMouseMoves:YES];
-    }
+    self.cppPlugin->set_toolbar_visible(false);
+    [NSCursor setHiddenUntilMouseMoves:YES];
 }
 
 @end
