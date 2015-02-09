@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcplugin_mac.cpp: a VLC plugin for Mozilla (Mac interface)
  *****************************************************************************
- * Copyright (C) 2011-2014 VLC Authors and VideoLAN
+ * Copyright (C) 2011-2015 VLC Authors and VideoLAN
  * $Id$
  *
  * Authors: Felix Paul Kühne <fkuehne # videolan # org>
@@ -26,12 +26,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston MA 02110-1301, USA.
  *****************************************************************************/
 
-#include "vlcplugin_mac.h"
+#pragma mark includes and fix-ups
 
-#include <npapi.h>
+#import "vlcplugin_mac.h"
+#import <npapi.h>
 
-#include <QuartzCore/QuartzCore.h>
-#include <AppKit/AppKit.h>
+#import <QuartzCore/QuartzCore.h>
+#import <AppKit/AppKit.h>
 
 /* compilation support for 10.6 */
 #define OSX_LION NSAppKitVersionNumber >= 1115.2
@@ -43,18 +44,22 @@
 
 #endif
 
-@interface VLCNoMediaLayer : CALayer {
-    VlcPluginMac *_cppPlugin;
-}
+#pragma mark - prototypes
+
+CGImageRef createImageNamed(NSString *);
+
+#pragma mark - objc class interfaces
+
+@interface VLCNoMediaLayer : CALayer
+
 @property (readwrite) VlcPluginMac * cppPlugin;
 
 @end
 
-@interface VLCBrowserRootLayer : CALayer
-{
+@interface VLCBrowserRootLayer : CALayer {
     NSTimer *_interfaceUpdateTimer;
-    VlcPluginMac *_cppPlugin;
 }
+
 @property (readwrite) VlcPluginMac * cppPlugin;
 
 - (void)startUIUpdateTimer;
@@ -80,12 +85,6 @@
     BOOL _wasPlayingBeforeMouseDown;
     BOOL _isScrubbing;
     CGFloat _mouseDownXDelta;
-
-    double _position;
-    BOOL _isPlaying;
-    BOOL _isFullscreen;
-
-    VlcPluginMac *_cppPlugin;
 }
 @property (readwrite) double mediaPosition;
 @property (readwrite) BOOL isPlaying;
@@ -134,62 +133,40 @@
 - (CGDirectDisplayID)displayID;
 @end
 
-VLCBrowserRootLayer * browserRootLayer;
-VLCPlaybackLayer * playbackLayer;
-VLCNoMediaLayer * noMediaLayer;
-VLCControllerLayer * controllerLayer;
-VLCFullscreenWindow * fullscreenWindow;
-VLCFullscreenContentView * fullscreenView;
-CGImageRef createImageNamed(NSString *);
+@interface VLCPerInstanceStorage : NSObject
 
-CGImageRef createImageNamed(NSString *name)
-{
-    CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("org.videolan.vlc-npapi-plugin")), (CFStringRef)name, CFSTR("png"), NULL);
+@property (readwrite, assign) VlcPluginMac *cppPlugin;
+@property (readwrite, retain) VLCBrowserRootLayer *browserRootLayer;
+@property (readwrite, retain) VLCPlaybackLayer *playbackLayer;
+@property (readwrite, retain) VLCNoMediaLayer *noMediaLayer;
+@property (readwrite, retain) VLCControllerLayer *controllerLayer;
+@property (readwrite, retain) VLCFullscreenWindow *fullscreenWindow;
+@property (readwrite, retain) VLCFullscreenContentView *fullscreenView;
 
-    if (!url)
-        return NULL;
+@end
 
-    CGImageSourceRef imageSource = CGImageSourceCreateWithURL(url, NULL);
-    if (!imageSource)
-        return NULL;
+@implementation VLCPerInstanceStorage
 
-    CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
-    CFRelease(imageSource);
+@end
 
-    return image;
-}
+#pragma mark - handling of c++ bindings
 
 VlcPluginMac::VlcPluginMac(NPP instance, NPuint16_t mode) :
     VlcPluginBase(instance, mode)
 {
-    browserRootLayer = [[VLCBrowserRootLayer alloc] init];
-    [browserRootLayer setCppPlugin:this];
-
-    const char *userAgent = NPN_UserAgent(this->getBrowser());
-    if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
-        NSLog(@"Safari 5 detected, deploying UI update timer");
-        [browserRootLayer performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
-    }
+    _perInstanceStorage = [[VLCPerInstanceStorage alloc] init];
+    [(VLCPerInstanceStorage *)_perInstanceStorage setCppPlugin: this];
 }
 
 VlcPluginMac::~VlcPluginMac()
 {
-    if (fullscreenWindow != NULL)
-        [fullscreenWindow release];
-    if (playbackLayer != NULL)
-        [playbackLayer release];
-    if (noMediaLayer != NULL)
-        [noMediaLayer release];
-    if (controllerLayer != NULL)
-        [controllerLayer release];
-    if (browserRootLayer != NULL)
-        [browserRootLayer release];
+    [(VLCPerInstanceStorage *)_perInstanceStorage release];
 }
 
 void VlcPluginMac::set_player_window()
 {
     /* pass base layer to libvlc to pass it on to the vout */
-    libvlc_media_player_set_nsobject(getMD(), browserRootLayer);
+    libvlc_media_player_set_nsobject(getMD(), [(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer]);
 }
 
 void VlcPluginMac::toggle_fullscreen()
@@ -202,47 +179,47 @@ void VlcPluginMac::toggle_fullscreen()
     if (get_fullscreen() != 0) {
         /* this window is kind of useless. however, we need to support 10.5, since enterFullScreenMode depends on the
          * existance of a parent window. This is solved in 10.6 and we should remove the window once we require it. */
-        fullscreenWindow = [[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(0., 0., npwindow.width, npwindow.height)];
-        [fullscreenWindow setLevel: CGShieldingWindowLevel()];
-        fullscreenView = [fullscreenWindow customContentView];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage setFullscreenWindow:[[VLCFullscreenWindow alloc] initWithContentRect: NSMakeRect(0., 0., npwindow.width, npwindow.height)]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow] setLevel:CGShieldingWindowLevel()];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage setFullscreenView:[[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow] customContentView]];
 
         /* CAVE: the order of these methods is important, since we want a layer-hosting view instead of
          * a layer-backed view, which you'd get if you do it the other way around */
-        [fullscreenView setLayer: [CALayer layer]];
-        [fullscreenView setWantsLayer:YES];
-        [fullscreenView setCppPlugin: this];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView] setLayer:[CALayer layer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView] setWantsLayer:YES];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView] setCppPlugin:this];
 
-        [noMediaLayer removeFromSuperlayer];
-        [playbackLayer removeFromSuperlayer];
-        [controllerLayer removeFromSuperlayer];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer] removeFromSuperlayer];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] removeFromSuperlayer];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] removeFromSuperlayer];
 
-        if (!fullscreenView)
+        if ([(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView] == nil)
             return;
-        if (![fullscreenView layer])
+        if ([(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView].layer == nil)
             return;
 
-        [[fullscreenView layer] addSublayer: noMediaLayer];
-        [[fullscreenView layer] addSublayer: playbackLayer];
-        [[fullscreenView layer] addSublayer: controllerLayer];
-        [[fullscreenView layer] setNeedsDisplay];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView].layer addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView].layer addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView].layer addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenView].layer setNeedsDisplay];
 
-        [[fullscreenWindow contentView] enterFullScreenMode: [NSScreen mainScreen] withOptions: [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithInt: 0], NSFullScreenModeAllScreens, nil]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow].contentView enterFullScreenMode: [NSScreen mainScreen] withOptions: [NSDictionary dictionaryWithObjectsAndKeys: [NSNumber numberWithInt: 0], NSFullScreenModeAllScreens, nil]];
     } else {
-        if (!fullscreenWindow)
+        if (![(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow])
             return;
-        if (!fullscreenWindow.contentView)
+        if (![(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow].contentView)
             return;
 
-        [[fullscreenWindow contentView] exitFullScreenModeWithOptions: nil];
-        [noMediaLayer removeFromSuperlayer];
-        [playbackLayer removeFromSuperlayer];
-        [controllerLayer removeFromSuperlayer];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow].contentView exitFullScreenModeWithOptions: nil];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer] removeFromSuperlayer];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] removeFromSuperlayer];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] removeFromSuperlayer];
 
-        [browserRootLayer addSublayer: noMediaLayer];
-        [browserRootLayer addSublayer: playbackLayer];
-        [browserRootLayer addSublayer: controllerLayer];
-        [fullscreenWindow orderOut: nil];
-        [fullscreenWindow release];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage fullscreenWindow] orderOut: nil];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage setFullscreenWindow: nil];
     }
 }
 
@@ -262,33 +239,33 @@ int  VlcPluginMac::get_fullscreen()
 void VlcPluginMac::set_toolbar_visible(bool b_value)
 {
     if (!get_options().get_show_toolbar()) {
-        [controllerLayer setHidden: YES];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer].hidden = YES;
         return;
     }
-    [controllerLayer setHidden: !b_value];
+    [(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer].hidden = !b_value;
 }
 
 bool VlcPluginMac::get_toolbar_visible()
 {
-    return controllerLayer.isHidden;
+    return [(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer].isHidden;
 }
 
 void VlcPluginMac::update_controls()
 {
     libvlc_state_t currentstate = libvlc_media_player_get_state(getMD());
     if (currentstate == libvlc_Playing || currentstate == libvlc_Paused || currentstate == libvlc_Opening) {
-        [noMediaLayer setHidden: YES];
-        [playbackLayer setHidden: NO];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer].hidden = YES;
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer].hidden = NO;
     } else {
-        [noMediaLayer setHidden: NO];
-        [playbackLayer setHidden: YES];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer].hidden = NO;
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer].hidden = YES;
     }
 
-    if (controllerLayer) {
-        [controllerLayer setMediaPosition: libvlc_media_player_get_position(getMD())];
-        [controllerLayer setIsPlaying: playlist_isplaying()];
-        [controllerLayer setIsFullscreen:this->get_fullscreen()];
-        [controllerLayer setNeedsDisplay];
+    if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil) {
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setMediaPosition: libvlc_media_player_get_position(getMD())];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setIsPlaying: playlist_isplaying()];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setIsFullscreen:this->get_fullscreen()];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setNeedsDisplay];
     }
 }
 
@@ -310,18 +287,29 @@ bool VlcPluginMac::destroy_windows()
 
 NPError VlcPluginMac::get_root_layer(void *value)
 {
-    noMediaLayer = [[VLCNoMediaLayer alloc] init];
-    noMediaLayer.opaque = 1.;
-    [noMediaLayer setCppPlugin: this];
-    [browserRootLayer addSublayer: noMediaLayer];
+    if ([(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] == nil) {
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage setBrowserRootLayer:[[VLCBrowserRootLayer alloc] init]];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer].cppPlugin = this;
 
-    controllerLayer = [[VLCControllerLayer alloc] init];
-    [browserRootLayer addSublayer: controllerLayer];
-    [controllerLayer setCppPlugin: this];
+        const char *userAgent = NPN_UserAgent(this->getBrowser());
+        if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
+            NSLog(@"Safari 5 detected, deploying UI update timer");
+            [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
+        }
 
-    [browserRootLayer setNeedsDisplay];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage setNoMediaLayer:[[VLCNoMediaLayer alloc] init]];
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer].opaque = 1.;
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer] setCppPlugin: this];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer]];
 
-    *(CALayer **)value = browserRootLayer;
+        [(VLCPerInstanceStorage *)this->_perInstanceStorage setControllerLayer:[[VLCControllerLayer alloc] init]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setCppPlugin: this];
+
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] setNeedsDisplay];
+    }
+
+    *(CALayer **)value = [(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer];
     return NPERR_NO_ERROR;
 }
 
@@ -337,41 +325,41 @@ bool VlcPluginMac::handle_event(void *event)
     switch (eventType) {
         case NPCocoaEventMouseDown:
         {
-            if (playbackLayer) {
-                if ([playbackLayer respondsToSelector:@selector(mouseButtonDown:)])
-                    [playbackLayer mouseButtonDown:cocoaEvent->data.mouse.buttonNumber];
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] != nil) {
+                if ([[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseButtonDown:)])
+                    [[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] mouseButtonDown:cocoaEvent->data.mouse.buttonNumber];
             }
             if (cocoaEvent->data.mouse.clickCount >= 2)
-                VlcPluginMac::toggle_fullscreen();
+                this->toggle_fullscreen();
 
             CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
-            if (controllerLayer)
-                [controllerLayer handleMouseDown:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil)
+                [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] handleMouseDown:[[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] convertPoint:point toLayer:[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]]];
 
             return true;
         }
         case NPCocoaEventMouseUp:
         {
-            if (playbackLayer) {
-                if ([playbackLayer respondsToSelector:@selector(mouseButtonUp:)])
-                    [playbackLayer mouseButtonUp:cocoaEvent->data.mouse.buttonNumber];
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] != nil) {
+                if ([[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseButtonUp:)])
+                    [[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] mouseButtonUp:cocoaEvent->data.mouse.buttonNumber];
             }
             CGPoint point = CGPointMake(cocoaEvent->data.mouse.pluginX,
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
 
-            if (controllerLayer)
-                [controllerLayer handleMouseUp:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil)
+                [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] handleMouseUp:[[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] convertPoint:point toLayer:[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]]];
 
             return true;
         }
         case NPCocoaEventMouseMoved:
         {
-            if (playbackLayer) {
-                if ([playbackLayer respondsToSelector:@selector(mouseMovedToX:Y:)])
-                    [playbackLayer mouseMovedToX:cocoaEvent->data.mouse.pluginX Y:cocoaEvent->data.mouse.pluginY];
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] != nil) {
+                if ([[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseMovedToX:Y:)])
+                    [[(VLCPerInstanceStorage *)this->_perInstanceStorage playbackLayer] mouseMovedToX:cocoaEvent->data.mouse.pluginX Y:cocoaEvent->data.mouse.pluginY];
             }
         }
         case NPCocoaEventMouseDragged:
@@ -380,19 +368,19 @@ bool VlcPluginMac::handle_event(void *event)
                                         // Flip the y coordinate
                                         npwindow.height - cocoaEvent->data.mouse.pluginY);
 
-            if (controllerLayer)
-                [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:point toLayer:controllerLayer]];
+            if ([(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] != nil)
+                [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] handleMouseDragged:[[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] convertPoint:point toLayer:[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]]];
 
             return true;
         }
         case NPCocoaEventMouseEntered:
         {
-            set_toolbar_visible(true);
+            this->set_toolbar_visible(true);
             return true;
         }
         case NPCocoaEventMouseExited:
         {
-            set_toolbar_visible(false);
+            this->set_toolbar_visible(false);
             return true;
         }
         case NPCocoaEventKeyDown:
@@ -450,8 +438,9 @@ bool VlcPluginMac::handle_event(void *event)
     return VlcPluginBase::handle_event(event);
 }
 
+#pragma mark - objc class implementations
+
 @implementation VLCBrowserRootLayer
-@synthesize cppPlugin = _cppPlugin;
 
 - (id)init
 {
@@ -489,34 +478,36 @@ bool VlcPluginMac::handle_event(void *event)
 - (void)addVoutLayer:(CALayer *)aLayer
 {
     [CATransaction begin];
-    playbackLayer = (VLCPlaybackLayer *)[aLayer retain];
+    VLCPlaybackLayer *playbackLayer = (VLCPlaybackLayer *)[aLayer retain];
     playbackLayer.opaque = 1.;
     playbackLayer.hidden = NO;
 
     if (libvlc_get_fullscreen(_cppPlugin->getMD()) != 0) {
         /* work-around a 32bit runtime limitation where we can't cast
          * NSRect to CGRect */
-        NSRect fullscreenViewFrame = fullscreenView.frame;
+        NSRect fullscreenViewFrame = [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage fullscreenView].frame;
         playbackLayer.bounds = CGRectMake(fullscreenViewFrame.origin.x,
                                           fullscreenViewFrame.origin.y,
                                           fullscreenViewFrame.size.width,
                                           fullscreenViewFrame.size.height);
         playbackLayer.autoresizingMask = kCALayerWidthSizable | kCALayerHeightSizable;
+        [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage setPlaybackLayer: playbackLayer];
 
-        [controllerLayer removeFromSuperlayer];
-        [[fullscreenView layer] addSublayer: playbackLayer];
-        [[fullscreenView layer] addSublayer: controllerLayer];
-        [[fullscreenView layer] setNeedsDisplay];
+        [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] removeFromSuperlayer];
+        [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage fullscreenView].layer addSublayer: [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer]];
+        [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage fullscreenView].layer addSublayer: [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]];
+        [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage fullscreenView].layer setNeedsDisplay];
     } else {
-        playbackLayer.bounds = noMediaLayer.bounds;
-        [self insertSublayer:playbackLayer below:controllerLayer];
+        [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage setPlaybackLayer: playbackLayer];
+        [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer].bounds = [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage noMediaLayer].bounds;
+        [self insertSublayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] below:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]];
     }
     [self setNeedsDisplay];
-    [playbackLayer setNeedsDisplay];
-    CGRect frame = playbackLayer.bounds;
+    [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] setNeedsDisplay];
+    CGRect frame = [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer].bounds;
     frame.origin.x = 0.;
     frame.origin.y = 0.;
-    playbackLayer.frame = frame;
+    [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer].frame = frame;
     [CATransaction commit];
 }
 
@@ -526,21 +517,18 @@ bool VlcPluginMac::handle_event(void *event)
     [aLayer removeFromSuperlayer];
     [CATransaction commit];
 
-    if (playbackLayer == aLayer) {
-        [playbackLayer release];
-        playbackLayer = nil;
-    }
+    if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] == aLayer)
+        [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage setPlaybackLayer:nil];
 }
 
 - (CGSize)currentOutputSize
 {
-    return [browserRootLayer visibleRect].size;
+    return [(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer].visibleRect.size;
 }
 
 @end
 
 @implementation VLCNoMediaLayer
-@synthesize cppPlugin = _cppPlugin;
 
 - (id)init
 {
@@ -688,11 +676,6 @@ bool VlcPluginMac::handle_event(void *event)
 
 @implementation VLCControllerLayer
 
-@synthesize mediaPosition = _position;
-@synthesize isPlaying = _isPlaying;
-@synthesize isFullscreen = _isFullscreen;
-@synthesize cppPlugin = _cppPlugin;
-
 - (id)init
 {
     if (self = [super init]) {
@@ -731,9 +714,6 @@ bool VlcPluginMac::handle_event(void *event)
 
     [super dealloc];
 }
-
-#pragma mark -
-#pragma mark drawing
 
 - (CGRect)_playPauseButtonRect
 {
@@ -813,9 +793,6 @@ bool VlcPluginMac::handle_event(void *event)
     [self _drawPlayPauseButtonInContext:cgContext];
     [self _drawSliderInContext:cgContext];
 }
-
-#pragma mark -
-#pragma mark event handling
 
 - (void)_setNewTimeForThumbCenterX:(CGFloat)centerX
 {
@@ -909,11 +886,9 @@ bool VlcPluginMac::handle_event(void *event)
 
 @implementation VLCFullscreenWindow
 
-@synthesize customContentView = _customContentView;
-
 - (id)initWithContentRect:(NSRect)contentRect
 {
-    if( self = [super initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO]) {
+    if (self = [super initWithContentRect:contentRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO]) {
         _initialFrame = contentRect;
         [self setBackgroundColor:[NSColor blackColor]];
         [self setAcceptsMouseMovedEvents: YES];
@@ -945,7 +920,6 @@ bool VlcPluginMac::handle_event(void *event)
 @end
 
 @implementation VLCFullscreenContentView
-@synthesize cppPlugin = _cppPlugin;
 
 - (BOOL)acceptsFirstResponder
 {
@@ -967,10 +941,10 @@ bool VlcPluginMac::handle_event(void *event)
         if (key) {
             /* Escape should always get you out of fullscreen */
             if (key == (unichar) 0x1b) {
-                self.cppPlugin->toggle_fullscreen();
+                _cppPlugin->toggle_fullscreen();
                 return;
             } else if (key == ' ') {
-                self.cppPlugin->playlist_togglePause();
+                _cppPlugin->playlist_togglePause();
                 return;
             }
         }
@@ -984,21 +958,20 @@ bool VlcPluginMac::handle_event(void *event)
 
     if (eventType == NSLeftMouseDown && !([theEvent modifierFlags] & NSControlKeyMask)) {
         if ([theEvent clickCount] >= 2)
-            self.cppPlugin->toggle_fullscreen();
+            _cppPlugin->toggle_fullscreen();
         else {
             NSPoint point = [NSEvent mouseLocation];
-
-            [controllerLayer handleMouseDown:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
+            [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseDown:[[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer] convertPoint:CGPointMake(point.x, point.y) toLayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]]];
         }
     }
-    if (playbackLayer) {
-        if ([playbackLayer respondsToSelector:@selector(mouseButtonDown:)]) {
+    if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] != nil) {
+        if ([[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseButtonDown:)]) {
             if (eventType == NSLeftMouseDown)
-                [playbackLayer mouseButtonDown:0];
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] mouseButtonDown:0];
             else if (eventType == NSRightMouseDown)
-                [playbackLayer mouseButtonDown:1];
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] mouseButtonDown:1];
             else
-                [playbackLayer mouseButtonDown:2];
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] mouseButtonDown:2];
         }
     }
 
@@ -1010,16 +983,16 @@ bool VlcPluginMac::handle_event(void *event)
     NSPoint point = [NSEvent mouseLocation];
     NSEventType eventType = [theEvent type];
 
-    [controllerLayer handleMouseUp:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
+    [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseUp:[[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer] convertPoint:CGPointMake(point.x, point.y) toLayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]]];
 
-    if (playbackLayer) {
-        if ([playbackLayer respondsToSelector:@selector(mouseButtonUp:)]) {
+    if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] != nil) {
+        if ([[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseButtonUp:)]) {
             if (eventType == NSLeftMouseUp)
-                [playbackLayer mouseButtonUp:0];
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] mouseButtonUp:0];
             else if (eventType == NSRightMouseUp)
-                [playbackLayer mouseButtonUp:1];
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] mouseButtonUp:1];
             else
-                [playbackLayer mouseButtonUp:2];
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] mouseButtonUp:2];
         }
     }
 
@@ -1030,7 +1003,7 @@ bool VlcPluginMac::handle_event(void *event)
 {
     NSPoint point = [NSEvent mouseLocation];
 
-    [controllerLayer handleMouseDragged:[browserRootLayer convertPoint:CGPointMake(point.x, point.y) toLayer:controllerLayer]];
+    [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseDragged:[[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer] convertPoint:CGPointMake(point.x, point.y) toLayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]]];
 
     [super mouseDragged: theEvent];
 }
@@ -1041,10 +1014,10 @@ bool VlcPluginMac::handle_event(void *event)
     _timeSinceLastMouseMove = [NSDate timeIntervalSinceReferenceDate];
     [self performSelector:@selector(hideToolbar) withObject:nil afterDelay: 4.1];
 
-    if (playbackLayer) {
-        if ([playbackLayer respondsToSelector:@selector(mouseMovedToX:Y:)]) {
+    if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] != nil) {
+        if ([[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseMovedToX:Y:)]) {
             NSPoint ml = [theEvent locationInWindow];
-            [playbackLayer mouseMovedToX:ml.x Y:([self.window frame].size.height - ml.y)];
+            [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] mouseMovedToX:ml.x Y:([self.window frame].size.height - ml.y)];
         }
     }
 
@@ -1061,3 +1034,21 @@ bool VlcPluginMac::handle_event(void *event)
 
 @end
 
+#pragma mark - helpers
+
+CGImageRef createImageNamed(NSString *name)
+{
+    CFURLRef url = CFBundleCopyResourceURL(CFBundleGetBundleWithIdentifier(CFSTR("org.videolan.vlc-npapi-plugin")), (CFStringRef)name, CFSTR("png"), NULL);
+
+    if (!url)
+        return NULL;
+
+    CGImageSourceRef imageSource = CGImageSourceCreateWithURL(url, NULL);
+    if (!imageSource)
+        return NULL;
+
+    CGImageRef image = CGImageSourceCreateImageAtIndex(imageSource, 0, NULL);
+    CFRelease(imageSource);
+
+    return image;
+}

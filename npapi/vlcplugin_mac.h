@@ -1,7 +1,7 @@
 /*****************************************************************************
  * vlcplugin_mac.h: a VLC plugin for Mozilla (Mac interface)
  *****************************************************************************
- * Copyright (C) 2011-2014 VLC authors and VideoLAN
+ * Copyright (C) 2011-2015 VLC authors and VideoLAN
  * $Id$
  *
  * Authors: Felix Paul Kühne <fkuehne # videolan # org>
@@ -27,6 +27,8 @@
 #define __VLCPLUGIN_MAC_H__
 
 #include "vlcplugin_base.h"
+
+//@class VLCPerInstanceStorage;
 
 class VlcPluginMac : public VlcPluginBase
 {
@@ -54,7 +56,10 @@ public:
     float m_media_width;
     float m_media_height;
 
+    void *_perInstanceStorage;
+
 private:
+
     void set_player_window();
 };
 
