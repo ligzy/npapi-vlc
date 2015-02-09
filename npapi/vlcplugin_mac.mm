@@ -295,16 +295,17 @@ NPError VlcPluginMac::get_root_layer(void *value)
         if (strstr(userAgent, "Safari") && strstr(userAgent, "Version/5")) {
             NSLog(@"Safari 5 detected, deploying UI update timer");
             [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] performSelector:@selector(startUIUpdateTimer) withObject:nil afterDelay:1.];
-        }
+        } else if (strstr(userAgent, "Firefox"))
+            this->runningWithinFirefox = true;
 
         [(VLCPerInstanceStorage *)this->_perInstanceStorage setNoMediaLayer:[[VLCNoMediaLayer alloc] init]];
         [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer].opaque = 1.;
-        [[(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer] setCppPlugin: this];
-        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer] setCppPlugin:this];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer:[(VLCPerInstanceStorage *)this->_perInstanceStorage noMediaLayer]];
 
         [(VLCPerInstanceStorage *)this->_perInstanceStorage setControllerLayer:[[VLCControllerLayer alloc] init]];
-        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer: [(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]];
-        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setCppPlugin: this];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] addSublayer:[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer]];
+        [[(VLCPerInstanceStorage *)this->_perInstanceStorage controllerLayer] setCppPlugin:this];
 
         [[(VLCPerInstanceStorage *)this->_perInstanceStorage browserRootLayer] setNeedsDisplay];
     }
@@ -961,7 +962,12 @@ bool VlcPluginMac::handle_event(void *event)
             _cppPlugin->toggle_fullscreen();
         else {
             NSPoint point = [NSEvent mouseLocation];
-            [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseDown:[[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer] convertPoint:CGPointMake(point.x, point.y) toLayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]]];
+            /* for Firefox, retina doesn't exist yet so it will return pixels instead of points when doing the conversation
+             * so don't convert for Firefox */
+            if (!_cppPlugin->runningWithinFirefox)
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseDown:[[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer] convertPoint:CGPointMake(point.x, point.y) toLayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]]];
+            else
+                [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseDown:CGPointMake(point.x, point.y)];
         }
     }
     if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] != nil) {
@@ -983,7 +989,12 @@ bool VlcPluginMac::handle_event(void *event)
     NSPoint point = [NSEvent mouseLocation];
     NSEventType eventType = [theEvent type];
 
-    [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseUp:[[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer] convertPoint:CGPointMake(point.x, point.y) toLayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]]];
+    /* for Firefox, retina doesn't exist yet so it will return pixels instead of points when doing the conversation
+     * so don't convert for Firefox */
+    if (!_cppPlugin->runningWithinFirefox)
+        [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseUp:[[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage browserRootLayer] convertPoint:CGPointMake(point.x, point.y) toLayer:[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer]]];
+    else
+        [[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage controllerLayer] handleMouseUp:CGPointMake(point.x, point.y)];
 
     if ([(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] != nil) {
         if ([[(VLCPerInstanceStorage *)_cppPlugin->_perInstanceStorage playbackLayer] respondsToSelector:@selector(mouseButtonUp:)]) {

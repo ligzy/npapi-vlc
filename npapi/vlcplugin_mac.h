@@ -57,6 +57,7 @@ public:
     float m_media_height;
 
     void *_perInstanceStorage;
+    bool runningWithinFirefox;
 
 private:
 
