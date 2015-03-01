@@ -1,3 +1,10 @@
+Changes between VLC plugins 2.2.0 and 2.2.1:
+--------------------------------------------
+
+ActiveX:
+ * Fix vlc.*.track indexes
+
+
 Changes between VLC plugins 2.1.0 and 2.2.0:
 --------------------------------------------
 
