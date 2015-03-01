@@ -21,3 +21,4 @@ npapi/npvlc.rsrc
 extras/macosx/vlc
 x86_64-build
 i686-build
+build-*
