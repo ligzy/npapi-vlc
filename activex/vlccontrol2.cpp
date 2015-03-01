@@ -127,16 +127,76 @@ STDMETHODIMP VLCAudio::get_track(long* track)
     if( NULL == track )
         return E_POINTER;
 
-    *track = Instance()->get_player().get_track();
+    libvlc_media_player_t* p_md;
 
-    return S_OK;
+    HRESULT hr = getMD(&p_md);
+    if( SUCCEEDED(hr) )
+    {
+        // get the current internal audio track ID
+        int i_actualTrack = libvlc_audio_get_track(p_md);
+
+        //get the number of available track
+        int i_audioTrackCount = libvlc_audio_get_track_count(p_md);
+        if( i_audioTrackCount < 0 )
+        {
+            *track = i_actualTrack;
+            return S_OK;
+        }
+
+        // get tracks description
+        libvlc_track_description_t *p_currentTrack = libvlc_audio_get_track_description(p_md);
+        if( !p_currentTrack )
+            return E_FAIL;
+
+        int i_fakeTrackIndex = 0;
+        while( p_currentTrack )
+        {
+            if (i_actualTrack == p_currentTrack->i_id)
+                break;
+
+            p_currentTrack = p_currentTrack->p_next;
+            i_fakeTrackIndex++;
+        }
+        libvlc_track_description_list_release(p_currentTrack);
+
+        *track = i_fakeTrackIndex;
+    }
+    return hr;
 };
 
 STDMETHODIMP VLCAudio::put_track(long track)
 {
-    Instance()->get_player().set_track(track);
+    libvlc_media_player_t* p_md;
 
-    return S_OK;
+    HRESULT hr = getMD(&p_md);
+    if( SUCCEEDED(hr) )
+    {
+        // bounds checking
+        int i_count = libvlc_audio_get_track_count(p_md);
+        if (track >= i_count || i_count == 0)
+            return E_INVALIDARG;
+
+        libvlc_track_description_t *p_currentTrack = libvlc_audio_get_track_description(p_md);
+
+        for ( int x = 0; x < track+1; x++ )
+        {
+            if (x == track)
+                break;
+
+            if (p_currentTrack->p_next)
+                p_currentTrack = p_currentTrack->p_next;
+            else
+            {
+                libvlc_track_description_list_release(p_currentTrack);
+                return E_INVALIDARG;
+            }
+        }
+        int actualTrack = p_currentTrack->i_id;
+        libvlc_track_description_list_release(p_currentTrack);
+
+        libvlc_audio_set_track(p_md, actualTrack);
+    }
+    return hr;
 };
 
 STDMETHODIMP VLCAudio::get_count(long* trackNumber)
@@ -166,16 +226,25 @@ STDMETHODIMP VLCAudio::description(long trackID, BSTR* name)
         // get tracks description
         p_trackDesc = libvlc_audio_get_track_description(p_md);
         if( !p_trackDesc )
+        {
+            libvlc_track_description_list_release(p_trackDesc);
             return E_FAIL;
+        }
 
         //get the number of available track
         i_limit = libvlc_audio_get_track_count(p_md);
         if( i_limit < 0 )
+        {
+            libvlc_track_description_list_release(p_trackDesc);
             return E_FAIL;
+        }
 
         // check if the number given is a good one
         if ( ( trackID > ( i_limit -1 ) ) || ( trackID < 0 ) )
-                return E_FAIL;
+        {
+            libvlc_track_description_list_release(p_trackDesc);
+            return E_INVALIDARG;
+        }
 
         // get the good trackDesc
         for( i = 0 ; i < trackID ; i++ )
@@ -184,6 +253,7 @@ STDMETHODIMP VLCAudio::description(long trackID, BSTR* name)
         }
         // get the track name
         psz_name = p_trackDesc->psz_name;
+        libvlc_track_description_list_release(p_trackDesc);
 
         // return it
         if( psz_name != NULL )
@@ -630,22 +700,74 @@ STDMETHODIMP VLCSubtitle::get_track(long* spu)
     if( NULL == spu )
         return E_POINTER;
 
-    libvlc_media_player_t *p_md;
+    libvlc_media_player_t* p_md;
+
     HRESULT hr = getMD(&p_md);
     if( SUCCEEDED(hr) )
     {
-        *spu = libvlc_video_get_spu(p_md);
+        // get the current internal subtitles track ID
+        int i_actualTrack = libvlc_video_get_spu(p_md);
+
+        //get the number of available track
+        int i_spuTrackCount = libvlc_video_get_spu_count(p_md);
+        if( i_spuTrackCount < 0 )
+        {
+            *spu = i_actualTrack;
+            return S_OK;
+        }
+
+        // get tracks description
+        libvlc_track_description_t *p_currentTrack = libvlc_video_get_spu_description(p_md);
+        if( !p_currentTrack )
+            return E_FAIL;
+
+        int i_fakeTrackIndex = 0;
+        while( p_currentTrack )
+        {
+            if (i_actualTrack == p_currentTrack->i_id)
+                break;
+
+            p_currentTrack = p_currentTrack->p_next;
+            i_fakeTrackIndex++;
+        }
+        libvlc_track_description_list_release(p_currentTrack);
+
+        *spu = i_fakeTrackIndex;
     }
     return hr;
 };
 
 STDMETHODIMP VLCSubtitle::put_track(long spu)
 {
-    libvlc_media_player_t *p_md;
+    libvlc_media_player_t* p_md;
+
     HRESULT hr = getMD(&p_md);
     if( SUCCEEDED(hr) )
     {
-        libvlc_video_set_spu(p_md, spu);
+        // bounds checking
+        int i_count = libvlc_video_get_spu_count(p_md);
+        if (spu >= i_count || i_count == 0)
+            return E_INVALIDARG;
+
+        libvlc_track_description_t *p_currentTrack = libvlc_video_get_spu_description(p_md);
+
+        for ( int x = 0; x < spu+1; x++ )
+        {
+            if (x == spu)
+                break;
+
+            if (p_currentTrack->p_next)
+                p_currentTrack = p_currentTrack->p_next;
+            else
+            {
+                libvlc_track_description_list_release(p_currentTrack);
+                return E_INVALIDARG;
+            }
+        }
+        int i_actualTrack = p_currentTrack->i_id;
+        libvlc_track_description_list_release(p_currentTrack);
+
+        libvlc_video_set_spu(p_md, i_actualTrack);
     }
     return hr;
 };
@@ -683,16 +805,25 @@ STDMETHODIMP VLCSubtitle::description(long nameID, BSTR* name)
         // get subtitles description
         p_spuDesc = libvlc_video_get_spu_description(p_md);
         if( !p_spuDesc )
+        {
+            libvlc_track_description_list_release(p_spuDesc);
             return E_FAIL;
+        }
 
         // get the number of available subtitle
         i_limit = libvlc_video_get_spu_count(p_md);
         if( i_limit < 0 )
+        {
+            libvlc_track_description_list_release(p_spuDesc);
             return E_FAIL;
+        }
 
         // check if the number given is a good one
         if ( ( nameID > ( i_limit -1 ) ) || ( nameID < 0 ) )
-            return E_FAIL;
+        {
+            libvlc_track_description_list_release(p_spuDesc);
+            return E_INVALIDARG;
+        }
 
         // get the good spuDesc
         for( i = 0 ; i < nameID ; i++ )
@@ -701,6 +832,7 @@ STDMETHODIMP VLCSubtitle::description(long nameID, BSTR* name)
         }
         // get the subtitle name
         psz_name = p_spuDesc->psz_name;
+        libvlc_track_description_list_release(p_spuDesc);
 
         // return it
         if( psz_name != NULL )
