@@ -2,7 +2,19 @@ Changes between VLC plugins 2.1.0 and 2.2.0:
 --------------------------------------------
 
 NPAPI Core:
- * Various fixes and cleanups
+ * Support vlc.playlist.currentItem
+ * Various fixes and large cleanups
+ * Listen to MediaPlayerMediaChanged event
+ * More lax acceptance of parameters style
+
+ActiveX:
+ * Match support to NPAPI
+ * Fix compilation for 64bits
+ * Support "type" attribute
+ * Fix registration in IE10
+ * Implement versionInfo()
+ * Fix position event
+ * Add MediaPlayerMediaChanged, MediaPlayerTitleChanged and MediaPlayerTitleChanged
 
 Mac:
  * New MacOS video output based on CoreAnimation
@@ -11,6 +23,7 @@ Mac:
  * Fix support for Safari 5 on OS X 10.6 and later
  * Fix compilation with clang++
  * Fix compilation with Xcode5 and Mavericks
+ * Add support for 'bgcolor', 'branding' and 'toolbar'
 
 
 Changes between VLC plugins 2.0.6 and 2.1.0:
